@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Brand Kit Generator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f0f0; color: #111; min-height: 100vh; padding: 2rem; }
+  .container { max-width: 920px; margin: 0 auto; }
+  .header { display: flex; align-items: center; gap: 14px; margin-bottom: 2rem; }
+  .logo-box { width: 44px; height: 44px; background: #D92526; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  h1 { font-size: 22px; font-weight: 700; }
+  .subline { font-size: 13px; color: #888; margin-top: 3px; }
+  .tabs { display: flex; margin-bottom: 1.5rem; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .tab { flex: 1; padding: 12px; font-size: 13px; font-weight: 600; text-align: center; cursor: pointer; color: #888; border: none; background: none; font-family: inherit; transition: all 0.15s; border-bottom: 2px solid transparent; }
+  .tab.active { color: #D92526; border-bottom-color: #D92526; background: #fff8f8; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .card { background: #fff; border-radius: 16px; padding: 1.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 1.25rem; }
+  .card-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #bbb; margin-bottom: 1.25rem; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .full { grid-column: 1 / -1; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 13px; font-weight: 600; color: #333; }
+  .hint { font-size: 11px; color: #aaa; }
+  input[type=text], textarea {
+    font-family: inherit; font-size: 14px; padding: 10px 13px;
+    border: 1.5px solid #e8e8e8; border-radius: 9px;
+    background: #fafafa; color: #111; width: 100%; transition: border-color 0.15s;
+  }
+  input:focus, textarea:focus { outline: none; border-color: #D92526; background: #fff; }
+  textarea { resize: vertical; line-height: 1.5; }
+  textarea.prompt-area { min-height: 110px; font-size: 13px; }
+  .color-row { display: flex; gap: 8px; align-items: center; }
+  .color-row input[type=color] { width: 46px; height: 42px; padding: 3px; border: 1.5px solid #e8e8e8; border-radius: 9px; cursor: pointer; flex-shrink: 0; }
+  .color-row input[type=text] { flex: 1; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-primary { flex: 1; padding: 14px; background: #D92526; color: white; border: none; border-radius: 11px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-secondary { padding: 14px 20px; background: #fff; color: #333; border: 1.5px solid #ddd; border-radius: 11px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+  .btn-secondary:hover { border-color: #D92526; color: #D92526; }
+  .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-dark { width: 100%; padding: 14px; background: #111; color: white; border: none; border-radius: 11px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.15s; margin-top: 1.25rem; }
+  .btn-dark:hover { opacity: 0.85; }
+  .btn-dark:disabled { opacity: 0.35; cursor: not-allowed; }
+  .status { margin-top: 1rem; padding: 12px 16px; border-radius: 10px; font-size: 13px; display: none; line-height: 1.5; }
+  .status.info { background: #eef3ff; color: #2c5fe6; display: block; border: 1px solid #c7d7ff; }
+  .status.error { background: #fff0f0; color: #c81e1e; display: block; border: 1px solid #ffc5c5; }
+  .status.success { background: #f0fdf4; color: #166534; display: block; border: 1px solid #bbf7d0; }
+  .pipeline { display: none; align-items: center; margin-top: 1.25rem; padding: 1rem 1.25rem; background: #fff; border-radius: 12px; border: 1px solid #eee; gap: 4px; flex-wrap: wrap; }
+  .pipeline.visible { display: flex; }
+  .pipe-step { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #ccc; flex: 1; min-width: 60px; }
+  .pipe-step.active { color: #2c5fe6; }
+  .pipe-step.done { color: #166534; }
+  .pipe-step.error { color: #c81e1e; }
+  .pipe-dot { width: 24px; height: 24px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; color: #ccc; }
+  .pipe-step.active .pipe-dot { background: #eef3ff; color: #2c5fe6; }
+  .pipe-step.done .pipe-dot { background: #f0fdf4; color: #166534; }
+  .pipe-step.error .pipe-dot { background: #fff0f0; color: #c81e1e; }
+  .pipe-arrow { color: #ddd; margin: 0 2px; font-size: 13px; flex-shrink: 0; }
+  .prompt-panel { display: none; background: #fff; border-radius: 16px; padding: 1.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 1.25rem; border: 2px solid #eef3ff; }
+  .prompt-panel.visible { display: block; }
+  .prompt-panel-title { font-size: 14px; font-weight: 700; color: #2c5fe6; margin-bottom: 4px; }
+  .prompt-panel-sub { font-size: 12px; color: #888; margin-bottom: 1.25rem; }
+  .prompt-fields { display: flex; flex-direction: column; gap: 14px; }
+  .prompt-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #D92526; margin-bottom: 5px; }
+  .assets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 1.25rem; }
+  .asset-card { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #eee; }
+  .asset-card.banner { grid-column: 1 / -1; }
+  .asset-head { padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; gap: 8px; flex-wrap: wrap; }
+  .asset-name { font-size: 12px; font-weight: 700; color: #444; flex: 1; }
+  .asset-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-sm { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; border: 1.5px solid #ddd; background: #fff; color: #555; }
+  .btn-sm:hover { border-color: #D92526; color: #D92526; }
+  .btn-sm.dl { border-color: #D92526; color: #D92526; }
+  .btn-sm.dl:hover { background: #D92526; color: white; }
+  .asset-body { background: #e8e8e8; min-height: 150px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .asset-body img { width: 100%; display: block; }
+  .asset-body.square { padding: 16px; background: #f5f5f5; }
+  .asset-body.square img { max-height: 230px; width: auto; margin: 0 auto; display: block; }
+  .spinner { width: 30px; height: 30px; border: 2.5px solid #ddd; border-top-color: #D92526; border-radius: 50%; animation: spin 0.75s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .fail-msg { font-size: 12px; color: #c81e1e; padding: 1.25rem; text-align: center; line-height: 1.6; }
+  .history-empty { text-align: center; padding: 3rem; color: #aaa; font-size: 14px; }
+  .history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .history-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #eee; }
+  .history-thumb { width: 100%; height: 130px; object-fit: cover; display: block; background: #f0f0f0; }
+  .history-info { padding: 12px 14px; }
+  .history-brand { font-size: 14px; font-weight: 700; }
+  .history-date { font-size: 11px; color: #aaa; margin-top: 2px; }
+  .history-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  @media (max-width: 620px) { .grid, .assets-grid { grid-template-columns: 1fr; } .asset-card.banner { grid-column: 1; } .btn-row { flex-direction: column; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="logo-box">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Brand Kit Generator</h1>
+      <div class="subline">Claude prompts · Nano Banana Pro 2K · Exact exports · Full PDF brand kit</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('generate')">Generate</button>
+    <button class="tab" onclick="switchTab('history')">History</button>
+  </div>
+
+  <div class="tab-content active" id="tab-generate">
+
+    <div class="card">
+      <div class="card-title">Brand Details</div>
+      <div class="grid">
+        <div class="field">
+          <label>Brand name</label>
+          <input type="text" id="brand" placeholder="e.g. Bookkeeping Pipeline" />
+        </div>
+        <div class="field">
+          <label>Tagline</label>
+          <input type="text" id="tagline" placeholder="e.g. More Books, Less Work" />
+        </div>
+        <div class="field">
+          <label>Primary color</label>
+          <div class="color-row">
+            <input type="color" id="c1p" value="#D92526" />
+            <input type="text" id="c1t" value="#D92526" maxlength="7" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Secondary color</label>
+          <div class="color-row">
+            <input type="color" id="c2p" value="#4A4C4D" />
+            <input type="text" id="c2t" value="#4A4C4D" maxlength="7" />
+          </div>
+        </div>
+        <div class="field full">
+          <label>Niche / Industry</label>
+          <input type="text" id="niche" placeholder="e.g. Bookkeeping services for small business owners" />
+        </div>
+        <div class="field full">
+          <label>Brand personality</label>
+          <input type="text" id="personality" placeholder="e.g. Trustworthy, clean, professional, approachable" />
+        </div>
+        <div class="field full">
+          <label>What the brand does</label>
+          <textarea id="description" style="min-height:70px" placeholder="e.g. We handle bookkeeping for small business owners so they can focus on running their business."></textarea>
+        </div>
+        <div class="field full">
+          <label>Logo icon concept <span style="font-weight:400;color:#aaa">(optional)</span></label>
+          <input type="text" id="icon-concept" placeholder="e.g. Open book with upward arrow. Leave blank for AI." />
+        </div>
+        <div class="field full">
+          <label>Hard rules <span style="font-weight:400;color:#aaa">(optional)</span></label>
+          <input type="text" id="rules" placeholder="e.g. No human faces. Clean and minimal only." />
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-secondary" id="promptbtn" onclick="writePrompts()">1. Write Prompts</button>
+      <button class="btn-primary" id="genbtn" onclick="generateAll()" disabled>2. Generate Kit</button>
+    </div>
+    <div class="status" id="status"></div>
+
+    <div class="prompt-panel" id="prompt-panel">
+      <div class="prompt-panel-title">Review &amp; edit prompts</div>
+      <div class="prompt-panel-sub">Claude wrote these. Edit anything, then hit Generate Kit.</div>
+      <div class="prompt-fields">
+        <div class="field">
+          <div class="prompt-label">Logo prompt</div>
+          <textarea class="prompt-area" id="prompt-logo"></textarea>
+        </div>
+        <div class="field">
+          <div class="prompt-label">Cover prompt (FB + LinkedIn)</div>
+          <textarea class="prompt-area" id="prompt-cover"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline" id="pipeline">
+      <div class="pipe-step" id="step-1"><div class="pipe-dot">1</div>Logo</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step" id="step-2"><div class="pipe-dot">2</div>Upload</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step" id="step-3"><div class="pipe-dot">3</div>Covers</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step" id="step-4"><div class="pipe-dot">4</div>Done</div>
+    </div>
+
+    <div class="assets-grid" id="assets"></div>
+
+    <div id="pdf-wrap" style="display:none; margin-top:1.25rem;">
+      <button class="btn-dark" id="pdf-btn" onclick="exportPDF()">⬇ Export Brand Kit PDF</button>
+      <div style="font-size:11px;color:#aaa;margin-top:8px;text-align:center">5-page PDF built server-side — all images included at full quality</div>
+    </div>
+
+  </div>
+
+  <div class="tab-content" id="tab-history">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <div class="card-title" style="margin:0">Generation history</div>
+        <button class="btn-sm" onclick="clearHistory()">Clear all</button>
+      </div>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const S = { logoUrl: null, logoFalUrl: null, fbUrl: null, liUrl: null, brand: {} };
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['generate','history'][i] === name));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  $('tab-' + name).classList.add('active');
+  if (name === 'history') renderHistory();
+}
+
+function syncColor(pid, tid) {
+  const p = $(pid), t = $(tid);
+  p.addEventListener('input', () => t.value = p.value);
+  t.addEventListener('input', () => { if (/^#[0-9A-Fa-f]{6}$/.test(t.value)) p.value = t.value; });
+}
+syncColor('c1p','c1t'); syncColor('c2p','c2t');
+
+function setStatus(msg, type) { const s=$('status'); s.textContent=msg; s.className='status '+type; }
+function setStep(n, st) { const el=$('step-'+n); if(el) el.className='pipe-step '+st; }
+
+function getBrand() {
+  return {
+    brandName: $('brand').value.trim(),
+    tagline: $('tagline').value.trim(),
+    niche: $('niche').value.trim(),
+    personality: $('personality').value.trim(),
+    description: $('description').value.trim(),
+    iconConcept: $('icon-concept').value.trim(),
+    rules: $('rules').value.trim(),
+    c1: $('c1t').value.trim(),
+    c2: $('c2t').value.trim()
+  };
+}
+
+function mkCard(id, label, isBanner) {
+  const ex = $('card-'+id); if(ex) ex.remove();
+  const d = document.createElement('div');
+  d.className = 'asset-card' + (isBanner ? ' banner' : '');
+  d.id = 'card-' + id;
+  d.innerHTML = `
+    <div class="asset-head">
+      <span class="asset-name">${label}</span>
+      <div class="asset-actions" id="act-${id}"></div>
+    </div>
+    <div class="asset-body${id==='logo'?' square':''}" id="body-${id}">
+      <div class="spinner"></div>
+    </div>`;
+  $('assets').appendChild(d);
+}
+
+function setBodyImg(id, url) {
+  const b=$('body-'+id); if(!b) return;
+  b.innerHTML='';
+  const img=document.createElement('img');
+  img.src=url; img.style.maxWidth='100%'; img.style.display='block';
+  b.appendChild(img);
+}
+function setSpinner(id){ const b=$('body-'+id); if(b) b.innerHTML='<div class="spinner"></div>'; }
+function setFail(id,msg){ const b=$('body-'+id); if(b) b.innerHTML=`<div class="fail-msg">${msg}</div>`; }
+
+function setActions(id, btns) {
+  const el=$('act-'+id); if(!el) return; el.innerHTML='';
+  btns.forEach(({label,cls,fn})=>{
+    const b=document.createElement('button');
+    b.className='btn-sm'+(cls?' '+cls:'');
+    b.textContent=label; b.onclick=fn; el.appendChild(b);
+  });
+}
+
+// Export: scale-to-fill, no white bars
+function exportImage(url, tw, th, filename) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = tw; c.height = th;
+    const ctx = c.getContext('2d');
+    const scale = Math.max(tw/img.naturalWidth, th/img.naturalHeight);
+    const dw = img.naturalWidth*scale, dh = img.naturalHeight*scale;
+    ctx.drawImage(img, (tw-dw)/2, (th-dh)/2, dw, dh);
+    const a = document.createElement('a');
+    a.href = c.toDataURL('image/png'); a.download = filename; a.click();
+  };
+  img.onerror = () => { window.open(url,'_blank'); };
+  img.src = url;
+}
+
+async function post(path, body) {
+  const r = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || r.statusText);
+  return data;
+}
+
+async function writePrompts() {
+  const brand = getBrand();
+  if (!brand.brandName || !brand.niche) { setStatus('Brand name and niche required.', 'error'); return; }
+  S.brand = brand;
+  const btn = $('promptbtn');
+  btn.disabled = true; btn.textContent = 'Writing...';
+  setStatus('Claude is writing prompts...', 'info');
+  try {
+    const { prompts } = await post('/api/prompts', { brand });
+    $('prompt-logo').value = prompts.logo;
+    $('prompt-cover').value = prompts.cover;
+    $('prompt-panel').className = 'prompt-panel visible';
+    $('genbtn').disabled = false;
+    setStatus('Prompts ready. Edit if needed, then Generate Kit.', 'info');
+  } catch(e) { setStatus('Error: ' + e.message, 'error'); }
+  btn.disabled = false; btn.textContent = '↺ Re-write Prompts';
+}
+
+async function regenCover(id) {
+  if (!S.logoFalUrl) return;
+  setSpinner(id); setActions(id, []);
+  const prompt = $('prompt-cover').value.trim();
+  const type = id === 'fb' ? 'cover-fb' : 'cover-li';
+  try {
+    const { url } = await post('/api/generate', { type, prompt, logoFalUrl: S.logoFalUrl });
+    if (id === 'fb') S.fbUrl = url; else S.liUrl = url;
+    setBodyImg(id, url);
+    const dims = id==='fb' ? [820,312] : [1584,396];
+    const fname = id==='fb' ? 'facebook-cover.png' : 'linkedin-cover.png';
+    setActions(id, [
+      { label: '↺ Regen', fn: () => regenCover(id) },
+      { label: `Export ${dims[0]}×${dims[1]}`, cls:'dl', fn: () => exportImage(url, dims[0], dims[1], fname) }
+    ]);
+  } catch(e) {
+    setFail(id, e.message);
+    setActions(id, [{ label:'↺ Try again', fn:()=>regenCover(id) }]);
+  }
+}
+
+async function regenLogo() {
+  setSpinner('logo'); setActions('logo', []);
+  const prompt = $('prompt-logo').value.trim();
+  try {
+    const { url, falUrl } = await post('/api/generate', { type:'logo', prompt });
+    S.logoUrl = url; S.logoFalUrl = falUrl;
+    setBodyImg('logo', url);
+    setActions('logo', [
+      { label:'↺ Regen', fn: regenLogo },
+      { label:'Export 800×800', cls:'dl', fn:()=>exportImage(url, 800, 800, 'logo.png') }
+    ]);
+  } catch(e) {
+    setFail('logo', e.message);
+    setActions('logo', [{ label:'↺ Try again', fn:regenLogo }]);
+  }
+}
+
+async function generateAll() {
+  const logoPrompt = $('prompt-logo').value.trim();
+  const coverPrompt = $('prompt-cover').value.trim();
+  if (!logoPrompt || !coverPrompt) { setStatus('Write prompts first.', 'error'); return; }
+
+  S.brand = getBrand();
+  S.logoUrl = null; S.logoFalUrl = null; S.fbUrl = null; S.liUrl = null;
+
+  const btn = $('genbtn');
+  btn.disabled = true; btn.textContent = 'Generating...';
+  $('pipeline').className = 'pipeline visible';
+  $('pdf-wrap').style.display = 'none';
+  $('assets').innerHTML = '';
+  [1,2,3,4].forEach(n => setStep(n,''));
+
+  mkCard('logo', 'Logo — export at 800×800px', false);
+  mkCard('fb', 'Facebook Cover — export at 820×312px', true);
+  mkCard('li', 'LinkedIn Cover — export at 1584×396px', true);
+
+  // Logo
+  setStep(1,'active');
+  setStatus('Generating logo at 2K...', 'info');
+  try {
+    const { url, falUrl } = await post('/api/generate', { type:'logo', prompt:logoPrompt });
+    S.logoUrl = url; S.logoFalUrl = falUrl;
+    setBodyImg('logo', url);
+    setActions('logo', [
+      { label:'↺ Regen', fn:regenLogo },
+      { label:'Export 800×800', cls:'dl', fn:()=>exportImage(url,800,800,'logo.png') }
+    ]);
+    setStep(1,'done'); setStep(2,'done');
+  } catch(e) {
+    setStep(1,'error');
+    ['logo','fb','li'].forEach(id=>setFail(id,'Logo failed: '+e.message));
+    setStatus('Logo failed: '+e.message,'error');
+    btn.disabled=false; btn.textContent='2. Generate Kit'; return;
+  }
+
+  // Covers in parallel
+  setStep(3,'active');
+  setStatus('Generating covers with logo reference at 2K...', 'info');
+  const errs = [];
+
+  await Promise.all([
+    (async()=>{
+      try {
+        const { url } = await post('/api/generate', { type:'cover-fb', prompt:coverPrompt, logoFalUrl:S.logoFalUrl });
+        S.fbUrl = url;
+        setBodyImg('fb', url);
+        setActions('fb', [
+          { label:'↺ Regen', fn:()=>regenCover('fb') },
+          { label:'Export 820×312', cls:'dl', fn:()=>exportImage(url,820,312,'facebook-cover.png') }
+        ]);
+      } catch(e) {
+        errs.push('Facebook'); setFail('fb',e.message);
+        setActions('fb', [{ label:'↺ Try again', fn:()=>regenCover('fb') }]);
+      }
+    })(),
+    (async()=>{
+      try {
+        const { url } = await post('/api/generate', { type:'cover-li', prompt:coverPrompt, logoFalUrl:S.logoFalUrl });
+        S.liUrl = url;
+        setBodyImg('li', url);
+        setActions('li', [
+          { label:'↺ Regen', fn:()=>regenCover('li') },
+          { label:'Export 1584×396', cls:'dl', fn:()=>exportImage(url,1584,396,'linkedin-cover.png') }
+        ]);
+      } catch(e) {
+        errs.push('LinkedIn'); setFail('li',e.message);
+        setActions('li', [{ label:'↺ Try again', fn:()=>regenCover('li') }]);
+      }
+    })()
+  ]);
+
+  if(errs.length) setStep(3,'error'); else setStep(3,'done');
+  setStep(4,'done');
+  btn.disabled=false; btn.textContent='2. Generate Kit';
+  $('pdf-wrap').style.display='block';
+  saveToHistory(S.brand, S.logoUrl, S.fbUrl, S.liUrl);
+  setStatus(errs.length ? `Done — ${errs.join(' and ')} failed. Hit Regenerate.` : 'Brand kit ready. PDF available below.', errs.length?'error':'success');
+}
+
+async function exportPDF() {
+  const btn = $('pdf-btn');
+  btn.disabled=true; btn.textContent='Building PDF...';
+  try {
+    const r = await fetch('/api/pdf', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ brand:S.brand, logoUrl:S.logoUrl, fbUrl:S.fbUrl, liUrl:S.liUrl })
+    });
+    if(!r.ok) { const e=await r.json(); throw new Error(e.error); }
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download=`${(S.brand.brandName||'brand').replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`;
+    a.click(); URL.revokeObjectURL(url);
+  } catch(e) { alert('PDF error: '+e.message); }
+  btn.disabled=false; btn.textContent='⬇ Export Brand Kit PDF';
+}
+
+function saveToHistory(brand, logoUrl, fbUrl, liUrl) {
+  const h=JSON.parse(localStorage.getItem('bkg_h')||'[]');
+  h.unshift({ id:Date.now(), brand:brand.brandName, tagline:brand.tagline, date:new Date().toLocaleString(), logoUrl, fbUrl, liUrl });
+  localStorage.setItem('bkg_h', JSON.stringify(h.slice(0,20)));
+}
+
+function renderHistory() {
+  const list=$('history-list');
+  const h=JSON.parse(localStorage.getItem('bkg_h')||'[]');
+  if(!h.length){list.innerHTML='<div class="history-empty">No generations yet.</div>';return;}
+  list.innerHTML='';
+  const grid=document.createElement('div'); grid.className='history-grid';
+  h.forEach(item=>{
+    const c=document.createElement('div'); c.className='history-card';
+    c.innerHTML=`
+      ${item.fbUrl?`<img class="history-thumb" src="${item.fbUrl}" />`:'<div class="history-thumb" style="background:#eee;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:12px">No cover</div>'}
+      <div class="history-info">
+        <div class="history-brand">${item.brand||'—'}</div>
+        ${item.tagline?`<div style="font-size:12px;color:#666;margin-top:2px">${item.tagline}</div>`:''}
+        <div class="history-date">${item.date}</div>
+        <div class="history-actions">
+          ${item.logoUrl?`<button class="btn-sm dl" onclick="window.open('${item.logoUrl}','_blank')">Logo</button>`:''}
+          ${item.fbUrl?`<button class="btn-sm dl" onclick="window.open('${item.fbUrl}','_blank')">FB</button>`:''}
+          ${item.liUrl?`<button class="btn-sm dl" onclick="window.open('${item.liUrl}','_blank')">LinkedIn</button>`:''}
+        </div>
+      </div>`;
+    grid.appendChild(c);
+  });
+  list.appendChild(grid);
+}
+
+function clearHistory() {
+  if(confirm('Clear all history?')){ localStorage.removeItem('bkg_h'); renderHistory(); }
+}
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { PDFDocument, rgb, StandardFonts, degrees } = require('pdf-lib');
+const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,33 +11,33 @@ module.exports = async (req, res) => {
   const { brand, logoUrl, fbUrl, liUrl } = req.body;
   if (!brand) return res.status(400).json({ error: 'Missing brand data' });
 
+  // Sanitise string — strip anything outside printable ASCII for pdf-lib standard fonts
+  function s(str, max) {
+    if (!str) return '';
+    return String(str).replace(/[^\x20-\x7E]/g, '').slice(0, max || 300);
+  }
+
   function hexToRgb(hex) {
     const c = (hex || '#000000').replace('#', '');
     return {
-      r: parseInt(c.slice(0,2),16)/255,
-      g: parseInt(c.slice(2,4),16)/255,
-      b: parseInt(c.slice(4,6),16)/255
+      r: parseInt(c.slice(0,2), 16) / 255,
+      g: parseInt(c.slice(2,4), 16) / 255,
+      b: parseInt(c.slice(4,6), 16) / 255
     };
   }
 
   function toCmyk(r, g, b) {
-    const k = 1 - Math.max(r,g,b);
-    if (k >= 1) return { c:0, m:0, y:0, k:100 };
+    const k = 1 - Math.max(r, g, b);
+    if (k >= 1) return { c: 0, m: 0, y: 0, k: 100 };
     return {
       c: Math.round(((1-r-k)/(1-k))*100),
       m: Math.round(((1-g-k)/(1-k))*100),
       y: Math.round(((1-b-k)/(1-k))*100),
-      k: Math.round(k*100)
+      k: Math.round(k * 100)
     };
   }
 
-  function safeText(str, maxLen) {
-    if (!str) return '';
-    // Remove any non-latin1 chars that confuse pdf-lib standard fonts
-    return str.replace(/[^\x20-\x7E]/g, '').slice(0, maxLen || 200);
-  }
-
-  async function fetchImageBuffer(url) {
+  async function fetchBuf(url) {
     if (!url) return null;
     try {
       const r = await fetch(url, { timeout: 15000 });
@@ -47,45 +47,40 @@ module.exports = async (req, res) => {
   }
 
   async function embedImg(doc, url) {
-    const buf = await fetchImageBuffer(url);
+    const buf = await fetchBuf(url);
     if (!buf) return null;
-    try { return await doc.embedPng(buf); } catch(e) {}
-    try { return await doc.embedJpg(buf); } catch(e) {}
+    try { return await doc.embedPng(buf); } catch (e) {}
+    try { return await doc.embedJpg(buf); } catch (e) {}
     return null;
   }
 
-  // Draw a rounded rectangle using lines and arcs (pdf-lib doesn't have native rounded rects with fill+stroke)
-  function drawRoundedRect(page, x, y, w, h, r, fillColor, strokeColor, strokeWidth) {
-    if (fillColor) {
-      page.drawRectangle({ x, y, width: w, height: h, color: fillColor, borderRadius: r });
-    }
-  }
-
   try {
-    const c1str = brand.c1 || '#1A56DB';
-    const c2str = brand.c2 || '#374151';
-    const rgb1 = hexToRgb(c1str);
-    const rgb2 = hexToRgb(c2str);
-    const col1 = rgb(rgb1.r, rgb1.g, rgb1.b);
-    const col2 = rgb(rgb2.r, rgb2.g, rgb2.b);
-    const white = rgb(1,1,1);
-    const offWhite = rgb(0.97,0.97,0.97);
-    const veryLightGray = rgb(0.93,0.93,0.93);
-    const lightGray = rgb(0.85,0.85,0.85);
-    const midGray = rgb(0.55,0.55,0.55);
-    const darkGray = rgb(0.18,0.18,0.18);
-    const nearBlack = rgb(0.08,0.08,0.08);
+    const c1s = brand.c1 || '#1A56DB';
+    const c2s = brand.c2 || '#374151';
+    const r1 = hexToRgb(c1s), r2 = hexToRgb(c2s);
+    const col1 = rgb(r1.r, r1.g, r1.b);
+    const col2 = rgb(r2.r, r2.g, r2.b);
+    const white = rgb(1, 1, 1);
+    const nearBlack = rgb(0.06, 0.07, 0.09);
+    const darkBg = rgb(0.1, 0.12, 0.16);
+    const surfaceBg = rgb(0.94, 0.95, 0.97);
+    const lightBorder = rgb(0.88, 0.90, 0.93);
+    const midGray = rgb(0.50, 0.54, 0.60);
+    const darkText = rgb(0.12, 0.14, 0.18);
+    const mutedText = rgb(0.38, 0.42, 0.50);
 
-    const cmyk1 = toCmyk(rgb1.r, rgb1.g, rgb1.b);
-    const cmyk2 = toCmyk(rgb2.r, rgb2.g, rgb2.b);
+    const cmyk1 = toCmyk(r1.r, r1.g, r1.b);
+    const cmyk2 = toCmyk(r2.r, r2.g, r2.b);
 
     const doc = await PDFDocument.create();
+
+    // Use Helvetica — reliable, clean, no runtime fetch needed
+    // We'll use it well rather than fighting custom fonts
     const bold = await doc.embedFont(StandardFonts.HelveticaBold);
     const reg = await doc.embedFont(StandardFonts.Helvetica);
-    const oblique = await doc.embedFont(StandardFonts.HelveticaOblique);
+    const it = await doc.embedFont(StandardFonts.HelveticaOblique);
 
-    const W = 841.89, H = 595.28;
-    const M = 36;
+    const W = 841.89, H = 595.28, M = 40;
 
     const [logoImg, fbImg, liImg] = await Promise.all([
       embedImg(doc, logoUrl),
@@ -93,396 +88,363 @@ module.exports = async (req, res) => {
       embedImg(doc, liUrl)
     ]);
 
-    const brandName = safeText(brand.brandName, 60);
-    const tagline = safeText(brand.tagline, 80);
-    const niche = safeText(brand.niche, 100);
-    const personality = safeText(brand.personality, 120);
-    const description = safeText(brand.description, 300);
+    const brandName = s(brand.brandName, 50);
+    const tagline = s(brand.tagline, 70);
+    const niche = s(brand.niche, 90);
+    const personality = s(brand.personality, 100);
+    const description = s(brand.description, 280);
 
-    // ── Shared footer ──────────────────────────────────────────────────────
-    function addFooter(page, pageNum) {
-      // Bottom bar
-      page.drawRectangle({ x:0, y:0, width:W, height:22, color:nearBlack });
-      // Left accent line
-      page.drawRectangle({ x:0, y:0, width:4, height:22, color:col1 });
-      page.drawText(brandName, { x:14, y:7, font:reg, size:8, color:midGray });
-      page.drawText(`${String(pageNum).padStart(2,'0')} / 05`, { x:W-M-20, y:7, font:reg, size:8, color:midGray });
+    // ── Footer helper ──────────────────────────────────────────────────────
+    function footer(page, n) {
+      page.drawRectangle({ x:0, y:0, width:W, height:20, color:nearBlack });
+      page.drawRectangle({ x:0, y:0, width:3, height:20, color:col1 });
+      page.drawText(brandName, { x:12, y:6, font:reg, size:8, color:mutedText });
+      page.drawText(`0${n}`, { x:W-M, y:6, font:bold, size:8, color:midGray });
     }
 
-    // ── Shared section label ───────────────────────────────────────────────
-    function sectionLabel(page, text, x, y) {
-      page.drawText(text, { x, y, font:bold, size:7.5, color:col1 });
-      page.drawRectangle({ x, y:y-4, width:bold.widthOfTextAtSize(text, 7.5), height:1, color:col1 });
+    // ── Wrap text helper ───────────────────────────────────────────────────
+    function drawWrapped(page, text, x, y, font, size, color, maxW, lineH) {
+      const words = text.split(' ');
+      let line = '', curY = y;
+      words.forEach(word => {
+        const test = line ? line + ' ' + word : word;
+        if (font.widthOfTextAtSize(test, size) > maxW) {
+          if (curY > 30) { page.drawText(line, { x, y:curY, font, size, color }); }
+          line = word; curY -= lineH;
+        } else { line = test; }
+      });
+      if (line && curY > 30) page.drawText(line, { x, y:curY, font, size, color });
+      return curY;
     }
 
-    // ── PAGE 1: Cover ─────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────
+    // PAGE 1 — COVER
+    // ─────────────────────────────────────────────────────────────────────
     const p1 = doc.addPage([W, H]);
 
-    // Full bleed dark background
+    // Full dark background
     p1.drawRectangle({ x:0, y:0, width:W, height:H, color:nearBlack });
 
-    // Left color panel
-    p1.drawRectangle({ x:0, y:0, width:W*0.38, height:H, color:col1 });
+    // Left accent panel
+    p1.drawRectangle({ x:0, y:0, width:W*0.40, height:H, color:col1 });
 
-    // Diagonal slice — overlay triangle to create diagonal edge
-    // Draw a series of vertical lines to create a smooth diagonal fade
-    for (let i = 0; i <= 60; i++) {
-      const sliceX = W*0.38 + (i/60)*80;
-      const sliceH = H - (i/60)*H;
-      p1.drawRectangle({ x:sliceX, y:H-sliceH, width:1.5, height:sliceH, color:col1,
-        opacity: 1 - (i/60) });
+    // Subtle dot grid on left panel
+    for (let gx = 24; gx < W*0.38; gx += 22) {
+      for (let gy = 24; gy < H; gy += 22) {
+        p1.drawCircle({ x:gx, y:gy, size:1, color:rgb(1,1,1), opacity:0.08 });
+      }
     }
 
-    // Subtle grid pattern on dark side
-    for (let gx = W*0.44; gx < W; gx += 40) {
-      p1.drawLine({ start:{x:gx,y:0}, end:{x:gx,y:H}, thickness:0.3, color:rgb(1,1,1), opacity:0.04 });
-    }
-    for (let gy = 0; gy < H; gy += 40) {
-      p1.drawLine({ start:{x:W*0.44,y:gy}, end:{x:W,y:gy}, thickness:0.3, color:rgb(1,1,1), opacity:0.04 });
-    }
+    // Diagonal cut on right edge of left panel
+    p1.drawRectangle({ x:W*0.40, y:0, width:3, height:H, color:rgb(1,1,1), opacity:0.06 });
 
-    // Logo on left panel
+    // Logo centered in left panel
     if (logoImg) {
-      const ld = logoImg.scaleToFit(W*0.28, H*0.38);
+      const ld = logoImg.scaleToFit(W*0.28, H*0.40);
       p1.drawImage(logoImg, {
-        x: (W*0.38 - ld.width)/2,
+        x: (W*0.40 - ld.width) / 2,
         y: H/2 - ld.height/2,
         width: ld.width, height: ld.height
       });
     }
 
-    // Horizontal rule on left panel
-    p1.drawRectangle({ x:M, y:H/2-ld_h(logoImg, W*0.28, H*0.38)/2-24, width:W*0.38-M*2, height:0.5, color:white, opacity:0.3 });
+    // Horizontal line below logo
+    p1.drawRectangle({ x:M, y:H/2 - (logoImg ? logoImg.scaleToFit(W*0.28,H*0.40).height/2 : 60) - 20, width:W*0.32, height:0.5, color:rgb(1,1,1), opacity:0.2 });
 
-    // Brand name — right side
-    const bnFontSize = brandName.length > 18 ? 42 : 52;
-    p1.drawText(brandName, {
-      x: W*0.44, y: H*0.56,
-      font: bold, size: bnFontSize, color: white
-    });
+    // Right side — brand name + tagline
+    const nameSize = brandName.length > 20 ? 38 : brandName.length > 14 ? 46 : 56;
+    p1.drawText(brandName, { x:W*0.44, y:H*0.57, font:bold, size:nameSize, color:white });
 
-    // Accent bar under brand name
-    p1.drawRectangle({ x:W*0.44, y:H*0.56-8, width:64, height:3, color:col1 });
+    // Colour accent bar under name
+    p1.drawRectangle({ x:W*0.44, y:H*0.57 - 10, width:56, height:3, color:col1 });
 
-    // Tagline
     if (tagline) {
-      p1.drawText(tagline, {
-        x: W*0.44, y: H*0.56 - 28,
-        font: reg, size: 15, color: rgb(0.75,0.75,0.75)
-      });
+      p1.drawText(tagline, { x:W*0.44, y:H*0.57 - 30, font:reg, size:15, color:rgb(0.7,0.74,0.82) });
     }
 
-    // Brand Kit label bottom right
-    p1.drawText('BRAND KIT', {
-      x: W*0.44, y: H*0.18,
-      font: bold, size: 9, color: rgb(0.4,0.4,0.4)
-    });
-    p1.drawText(new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long'}), {
-      x: W*0.44, y: H*0.18-16,
-      font: reg, size: 9, color: rgb(0.35,0.35,0.35)
+    // Brand Kit label
+    p1.drawText('BRAND KIT', { x:W*0.44, y:H*0.20, font:bold, size:8, color:rgb(0.35,0.40,0.50) });
+    p1.drawText(new Date().toLocaleDateString('en-GB', { month:'long', year:'numeric' }), {
+      x:W*0.44, y:H*0.20 - 14, font:reg, size:9, color:rgb(0.30,0.35,0.45)
     });
 
-    // ── PAGE 2: Color Palette ─────────────────────────────────────────────
+    footer(p1, 1);
+
+    // ─────────────────────────────────────────────────────────────────────
+    // PAGE 2 — COLOR PALETTE
+    // ─────────────────────────────────────────────────────────────────────
     const p2 = doc.addPage([W, H]);
-    p2.drawRectangle({ x:0, y:0, width:W, height:H, color:offWhite });
+    p2.drawRectangle({ x:0, y:0, width:W, height:H, color:surfaceBg });
 
-    // Top header bar
-    p2.drawRectangle({ x:0, y:H-52, width:W, height:52, color:nearBlack });
-    p2.drawRectangle({ x:0, y:H-52, width:4, height:52, color:col1 });
-    p2.drawText('COLOR PALETTE', { x:M, y:H-34, font:bold, size:18, color:white });
-    addFooter(p2, 2);
+    // Header
+    p2.drawRectangle({ x:0, y:H-56, width:W, height:56, color:nearBlack });
+    p2.drawRectangle({ x:0, y:H-56, width:4, height:56, color:col1 });
+    p2.drawText('COLOR PALETTE', { x:M, y:H-36, font:bold, size:20, color:white });
 
-    const swY = H - 52 - 20;
-    const swW = 210, swH = 160;
+    footer(p2, 2);
 
-    // Color 1 swatch
-    p2.drawRectangle({ x:M, y:swY-swH, width:swW, height:swH, color:col1, borderRadius:4 });
-    // White label area at bottom of swatch
-    p2.drawRectangle({ x:M, y:swY-swH, width:swW, height:44, color:rgb(0,0,0,0.25), borderRadius:0 });
-    p2.drawText(c1str.toUpperCase(), { x:M+12, y:swY-swH+26, font:bold, size:14, color:white });
-    p2.drawText('Primary', { x:M+12, y:swY-swH+10, font:reg, size:9, color:rgb(0.8,0.8,0.8) });
+    const swY = H - 80, swW = 195, swH = 155;
 
-    // Color 1 specs
-    const spec1Y = swY - swH - 16;
-    p2.drawRectangle({ x:M, y:spec1Y-54, width:swW, height:58, color:white, borderRadius:3 });
-    p2.drawLine({ start:{x:M,y:spec1Y-2}, end:{x:M+swW,y:spec1Y-2}, thickness:0.5, color:veryLightGray });
+    // Primary swatch
+    p2.drawRectangle({ x:M, y:swY-swH, width:swW, height:swH, color:col1, borderRadius:6 });
+    // Dark strip at bottom of swatch
+    p2.drawRectangle({ x:M, y:swY-swH, width:swW, height:48, color:rgb(0,0,0), opacity:0.3 });
+    p2.drawText(c1s.toUpperCase(), { x:M+14, y:swY-swH+28, font:bold, size:16, color:white });
+    p2.drawText('Primary', { x:M+14, y:swY-swH+11, font:reg, size:9, color:rgb(0.85,0.87,0.92) });
 
-    const specRows1 = [
-      ['HEX', c1str.toUpperCase()],
-      ['RGB', `${Math.round(rgb1.r*255)}, ${Math.round(rgb1.g*255)}, ${Math.round(rgb1.b*255)}`],
+    // Primary specs card
+    const specY1 = swY - swH - 14;
+    p2.drawRectangle({ x:M, y:specY1-52, width:swW, height:56, color:white, borderRadius:4,
+      borderColor:lightBorder, borderWidth:0.5 });
+
+    [
+      ['HEX', c1s.toUpperCase()],
+      ['RGB', `${Math.round(r1.r*255)}, ${Math.round(r1.g*255)}, ${Math.round(r1.b*255)}`],
       ['CMYK', `${cmyk1.c}  ${cmyk1.m}  ${cmyk1.y}  ${cmyk1.k}`],
-    ];
-    specRows1.forEach(([label, val], i) => {
-      const ry = spec1Y - 16 - (i*14);
-      p2.drawText(label, { x:M+10, y:ry, font:bold, size:7.5, color:midGray });
-      p2.drawText(val, { x:M+52, y:ry, font:reg, size:7.5, color:darkGray });
+    ].forEach(([lbl, val], i) => {
+      const ry = specY1 - 16 - i*14;
+      p2.drawText(lbl, { x:M+10, y:ry, font:bold, size:7.5, color:mutedText });
+      p2.drawText(val, { x:M+54, y:ry, font:reg, size:7.5, color:darkText });
     });
 
-    // Color 2 swatch
-    const sx2 = M + swW + 24;
-    p2.drawRectangle({ x:sx2, y:swY-swH, width:swW, height:swH, color:col2, borderRadius:4 });
-    p2.drawRectangle({ x:sx2, y:swY-swH, width:swW, height:44, color:rgb(0,0,0,0.3), borderRadius:0 });
-    p2.drawText(c2str.toUpperCase(), { x:sx2+12, y:swY-swH+26, font:bold, size:14, color:white });
-    p2.drawText('Secondary', { x:sx2+12, y:swY-swH+10, font:reg, size:9, color:rgb(0.8,0.8,0.8) });
+    // Secondary swatch
+    const sx2 = M + swW + 20;
+    p2.drawRectangle({ x:sx2, y:swY-swH, width:swW, height:swH, color:col2, borderRadius:6 });
+    p2.drawRectangle({ x:sx2, y:swY-swH, width:swW, height:48, color:rgb(0,0,0), opacity:0.35 });
+    p2.drawText(c2s.toUpperCase(), { x:sx2+14, y:swY-swH+28, font:bold, size:16, color:white });
+    p2.drawText('Secondary', { x:sx2+14, y:swY-swH+11, font:reg, size:9, color:rgb(0.82,0.84,0.89) });
 
-    p2.drawRectangle({ x:sx2, y:spec1Y-54, width:swW, height:58, color:white, borderRadius:3 });
-    const specRows2 = [
-      ['HEX', c2str.toUpperCase()],
-      ['RGB', `${Math.round(rgb2.r*255)}, ${Math.round(rgb2.g*255)}, ${Math.round(rgb2.b*255)}`],
+    p2.drawRectangle({ x:sx2, y:specY1-52, width:swW, height:56, color:white, borderRadius:4,
+      borderColor:lightBorder, borderWidth:0.5 });
+    [
+      ['HEX', c2s.toUpperCase()],
+      ['RGB', `${Math.round(r2.r*255)}, ${Math.round(r2.g*255)}, ${Math.round(r2.b*255)}`],
       ['CMYK', `${cmyk2.c}  ${cmyk2.m}  ${cmyk2.y}  ${cmyk2.k}`],
-    ];
-    specRows2.forEach(([label, val], i) => {
-      const ry = spec1Y - 16 - (i*14);
-      p2.drawText(label, { x:sx2+10, y:ry, font:bold, size:7.5, color:midGray });
-      p2.drawText(val, { x:sx2+52, y:ry, font:reg, size:7.5, color:darkGray });
+    ].forEach(([lbl, val], i) => {
+      const ry = specY1 - 16 - i*14;
+      p2.drawText(lbl, { x:sx2+10, y:ry, font:bold, size:7.5, color:mutedText });
+      p2.drawText(val, { x:sx2+54, y:ry, font:reg, size:7.5, color:darkText });
+    });
+
+    // Usage notes
+    const ux = sx2 + swW + 28;
+    const uW = W - ux - M;
+
+    p2.drawText('USAGE GUIDELINES', { x:ux, y:swY-8, font:bold, size:8.5, color:mutedText });
+    p2.drawRectangle({ x:ux, y:swY-14, width:uW, height:1, color:col1 });
+
+    [
+      `${c1s} is the primary brand colour. Use it for calls to action, headings, and key interactive elements.`,
+      `${c2s} is the secondary colour. Use it for body text, backgrounds, and supporting design elements.`,
+      'Always maintain a minimum contrast ratio of 4.5:1 when placing text over coloured backgrounds.',
+    ].forEach((line, i) => {
+      drawWrapped(p2, line, ux, swY-30-(i*38), reg, 8.5, darkText, uW, 13);
     });
 
     // Utility swatches
-    const ux = sx2 + swW + 32;
-    sectionLabel(p2, 'UTILITY COLORS', ux, swY - 14);
-    const utilColors = [
-      { label:'White', hex:'#FFFFFF', r:1,g:1,b:1, dark:true },
-      { label:'Black', hex:'#000000', r:0,g:0,b:0, dark:false },
-      { label:'Light Gray', hex:'#F3F4F6', r:0.95,g:0.96,b:0.96, dark:true },
+    p2.drawText('UTILITY', { x:ux, y:specY1+8, font:bold, size:8.5, color:mutedText });
+    const utils = [
+      ['White', '#FFFFFF', 1, 1, 1, true],
+      ['Black', '#1A1A1A', 0.1, 0.1, 0.1, false],
+      ['Light Gray', '#F3F4F6', 0.95, 0.96, 0.97, true],
     ];
-    utilColors.forEach((uc, i) => {
-      const uy = swY - 36 - (i*56);
-      p2.drawRectangle({ x:ux, y:uy-32, width:130, height:36, color:rgb(uc.r,uc.g,uc.b), borderRadius:3,
-        borderColor:veryLightGray, borderWidth:0.5 });
-      p2.drawText(uc.label, { x:ux+10, y:uy-14, font:bold, size:8, color:uc.dark?darkGray:white });
-      p2.drawText(uc.hex, { x:ux+10, y:uy-26, font:reg, size:7.5, color:uc.dark?midGray:rgb(0.7,0.7,0.7) });
+    utils.forEach(([name, hex, rr, gg, bb, dark], i) => {
+      const uy = specY1 - 12 - i*46;
+      p2.drawRectangle({ x:ux, y:uy-30, width:uW, height:34, color:rgb(rr,gg,bb), borderRadius:4,
+        borderColor:lightBorder, borderWidth:0.5 });
+      p2.drawText(name, { x:ux+10, y:uy-12, font:bold, size:8, color:dark?darkText:white });
+      p2.drawText(hex, { x:ux+10, y:uy-24, font:reg, size:7.5, color:dark?mutedText:rgb(0.7,0.7,0.7) });
     });
 
-    // Usage notes panel
-    const notesX = ux;
-    const notesY = swY - 36 - 3*56 - 20;
-    sectionLabel(p2, 'USAGE NOTES', notesX, notesY);
-    const notes = [
-      `Primary ${c1str} for CTAs, headings, and key accents.`,
-      `Secondary ${c2str} for body text and backgrounds.`,
-      'Maintain 4.5:1 contrast ratio for accessibility.',
-    ];
-    notes.forEach((note, i) => {
-      p2.drawText('—', { x:notesX, y:notesY-18-(i*16), font:reg, size:8, color:col1 });
-      p2.drawText(note, { x:notesX+12, y:notesY-18-(i*16), font:reg, size:8, color:darkGray });
-    });
-
-    // ── PAGE 3: Logo ──────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────
+    // PAGE 3 — LOGO
+    // ─────────────────────────────────────────────────────────────────────
     const p3 = doc.addPage([W, H]);
-    p3.drawRectangle({ x:0, y:0, width:W, height:H, color:offWhite });
-    p3.drawRectangle({ x:0, y:H-52, width:W, height:52, color:nearBlack });
-    p3.drawRectangle({ x:0, y:H-52, width:4, height:52, color:col1 });
-    p3.drawText('LOGO MARK', { x:M, y:H-34, font:bold, size:18, color:white });
-    addFooter(p3, 3);
+    p3.drawRectangle({ x:0, y:0, width:W, height:H, color:surfaceBg });
+    p3.drawRectangle({ x:0, y:H-56, width:W, height:56, color:nearBlack });
+    p3.drawRectangle({ x:0, y:H-56, width:4, height:56, color:col1 });
+    p3.drawText('LOGO MARK', { x:M, y:H-36, font:bold, size:20, color:white });
+    footer(p3, 3);
 
-    const logoBoxW = (W - M*2 - 24) / 2;
-    const logoBoxH = H - 52 - 22 - 80;
-    const logoBoxY = 22 + 80;
+    const lbW = (W - M*2 - 20) / 2;
+    const lbH = H - 56 - 22 - 90;
+    const lbY = 90;
 
     // Light bg box
-    p3.drawRectangle({ x:M, y:logoBoxY, width:logoBoxW, height:logoBoxH, color:white,
-      borderColor:lightGray, borderWidth:0.5, borderRadius:4 });
+    p3.drawRectangle({ x:M, y:lbY, width:lbW, height:lbH, color:white,
+      borderColor:lightBorder, borderWidth:0.5, borderRadius:6 });
+    p3.drawText('ON LIGHT', { x:M+8, y:lbY+lbH-20, font:bold, size:8, color:mutedText });
     if (logoImg) {
-      const ld = logoImg.scaleToFit(logoBoxW-48, logoBoxH-48);
-      p3.drawImage(logoImg, {
-        x: M+(logoBoxW-ld.width)/2,
-        y: logoBoxY+(logoBoxH-ld.height)/2,
-        width:ld.width, height:ld.height
-      });
+      const ld = logoImg.scaleToFit(lbW-60, lbH-60);
+      p3.drawImage(logoImg, { x:M+(lbW-ld.width)/2, y:lbY+(lbH-ld.height)/2, width:ld.width, height:ld.height });
     }
-    p3.drawText('ON LIGHT', { x:M+(logoBoxW/2)-22, y:logoBoxY-18, font:bold, size:8, color:midGray });
 
     // Dark bg box
-    const dbx = M + logoBoxW + 24;
-    p3.drawRectangle({ x:dbx, y:logoBoxY, width:logoBoxW, height:logoBoxH, color:nearBlack, borderRadius:4 });
+    const dbX = M + lbW + 20;
+    p3.drawRectangle({ x:dbX, y:lbY, width:lbW, height:lbH, color:nearBlack, borderRadius:6 });
+    p3.drawText('ON DARK', { x:dbX+8, y:lbY+lbH-20, font:bold, size:8, color:rgb(0.4,0.44,0.52) });
     if (logoImg) {
-      const ld = logoImg.scaleToFit(logoBoxW-48, logoBoxH-48);
-      p3.drawImage(logoImg, {
-        x: dbx+(logoBoxW-ld.width)/2,
-        y: logoBoxY+(logoBoxH-ld.height)/2,
-        width:ld.width, height:ld.height
-      });
+      const ld = logoImg.scaleToFit(lbW-60, lbH-60);
+      p3.drawImage(logoImg, { x:dbX+(lbW-ld.width)/2, y:lbY+(lbH-ld.height)/2, width:ld.width, height:ld.height });
     }
-    p3.drawText('ON DARK', { x:dbx+(logoBoxW/2)-20, y:logoBoxY-18, font:bold, size:8, color:midGray });
 
-    // Guidelines below
-    const glY = logoBoxY - 46;
-    sectionLabel(p3, 'USAGE GUIDELINES', M, glY);
-    const guidelines = [
-      'Always maintain clear space equal to the cap-height of the wordmark on all sides.',
-      'Do not distort, rotate, recolour, or add effects to the logo.',
-      'Minimum digital size: 120px wide. Minimum print size: 25mm wide.',
-    ];
-    guidelines.forEach((g, i) => {
-      p3.drawText('—', { x:M, y:glY-18-(i*14), font:reg, size:8, color:col1 });
-      p3.drawText(g, { x:M+14, y:glY-18-(i*14), font:reg, size:8, color:darkGray });
+    // Guidelines
+    p3.drawText('LOGO GUIDELINES', { x:M, y:lbY-24, font:bold, size:8.5, color:mutedText });
+    p3.drawRectangle({ x:M, y:lbY-30, width:W-M*2, height:0.5, color:lightBorder });
+    [
+      'Maintain clear space equal to the cap-height of the wordmark on all sides of the logo.',
+      'Do not distort, rotate, recolour, or add drop shadows or effects to the logo.',
+    ].forEach((txt, i) => {
+      p3.drawText('—', { x:M, y:lbY-46-(i*14), font:reg, size:8.5, color:col1 });
+      p3.drawText(txt, { x:M+14, y:lbY-46-(i*14), font:reg, size:8.5, color:darkText });
     });
 
-    // ── PAGE 4: Social Assets ─────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────
+    // PAGE 4 — SOCIAL ASSETS
+    // ─────────────────────────────────────────────────────────────────────
     const p4 = doc.addPage([W, H]);
-    p4.drawRectangle({ x:0, y:0, width:W, height:H, color:offWhite });
-    p4.drawRectangle({ x:0, y:H-52, width:W, height:52, color:nearBlack });
-    p4.drawRectangle({ x:0, y:H-52, width:4, height:52, color:col1 });
-    p4.drawText('SOCIAL MEDIA ASSETS', { x:M, y:H-34, font:bold, size:18, color:white });
-    addFooter(p4, 4);
+    p4.drawRectangle({ x:0, y:0, width:W, height:H, color:surfaceBg });
+    p4.drawRectangle({ x:0, y:H-56, width:W, height:56, color:nearBlack });
+    p4.drawRectangle({ x:0, y:H-56, width:4, height:56, color:col1 });
+    p4.drawText('SOCIAL MEDIA ASSETS', { x:M, y:H-36, font:bold, size:20, color:white });
+    footer(p4, 4);
 
     const availW = W - M*2;
-    const startY = H - 52 - 18;
+    const startY = H - 70;
 
-    // Facebook cover
-    sectionLabel(p4, 'FACEBOOK COVER  —  820 x 312 px', M, startY);
-    const fbRenderH = Math.round(availW * (312/820));
-    const fbY = startY - fbRenderH - 8;
+    p4.drawText('FACEBOOK COVER', { x:M, y:startY, font:bold, size:8.5, color:mutedText });
+    p4.drawText('820 x 312 px', { x:M + bold.widthOfTextAtSize('FACEBOOK COVER', 8.5) + 10, y:startY, font:reg, size:8.5, color:rgb(0.6,0.65,0.72) });
+
+    const fbH = Math.round(availW * (312/820));
+    const fbY = startY - fbH - 8;
+
     if (fbImg) {
-      const fd = fbImg.scaleToFit(availW, fbRenderH);
-      p4.drawImage(fbImg, { x:M+(availW-fd.width)/2, y:fbY+(fbRenderH-fd.height)/2, width:fd.width, height:fd.height });
-      // Border
-      p4.drawRectangle({ x:M, y:fbY, width:availW, height:fbRenderH,
-        borderColor:lightGray, borderWidth:0.5, color:rgb(0,0,0,0) });
-    } else {
-      p4.drawRectangle({ x:M, y:fbY, width:availW, height:fbRenderH, color:veryLightGray, borderRadius:3 });
-      p4.drawText('Facebook Cover', { x:M+availW/2-40, y:fbY+fbRenderH/2, font:reg, size:10, color:midGray });
+      const fd = fbImg.scaleToFit(availW, fbH);
+      p4.drawImage(fbImg, { x:M+(availW-fd.width)/2, y:fbY+(fbH-fd.height)/2, width:fd.width, height:fd.height });
     }
+    p4.drawRectangle({ x:M, y:fbY, width:availW, height:fbH,
+      borderColor:lightBorder, borderWidth:0.5, color:fbImg?rgb(0,0,0,0):rgb(0.90,0.91,0.94) });
+    if (!fbImg) p4.drawText('Facebook Cover', { x:M+availW/2-42, y:fbY+fbH/2-5, font:reg, size:10, color:mutedText });
 
-    // LinkedIn cover
-    const liTopY = fbY - 22;
-    sectionLabel(p4, 'LINKEDIN COVER  —  1584 x 396 px', M, liTopY);
-    const liRenderH = Math.round(availW * (396/1584));
-    const liY = liTopY - liRenderH - 8;
+    const liTop = fbY - 22;
+    p4.drawText('LINKEDIN COVER', { x:M, y:liTop, font:bold, size:8.5, color:mutedText });
+    p4.drawText('1584 x 396 px', { x:M + bold.widthOfTextAtSize('LINKEDIN COVER', 8.5) + 10, y:liTop, font:reg, size:8.5, color:rgb(0.6,0.65,0.72) });
+
+    const liH = Math.round(availW * (396/1584));
+    const liY = liTop - liH - 8;
+
     if (liImg) {
-      const ld = liImg.scaleToFit(availW, liRenderH);
-      p4.drawImage(liImg, { x:M+(availW-ld.width)/2, y:liY+(liRenderH-ld.height)/2, width:ld.width, height:ld.height });
-      p4.drawRectangle({ x:M, y:liY, width:availW, height:liRenderH,
-        borderColor:lightGray, borderWidth:0.5, color:rgb(0,0,0,0) });
-    } else {
-      p4.drawRectangle({ x:M, y:liY, width:availW, height:liRenderH, color:veryLightGray, borderRadius:3 });
-      p4.drawText('LinkedIn Cover', { x:M+availW/2-40, y:liY+liRenderH/2, font:reg, size:10, color:midGray });
+      const ld = liImg.scaleToFit(availW, liH);
+      p4.drawImage(liImg, { x:M+(availW-ld.width)/2, y:liY+(liH-ld.height)/2, width:ld.width, height:ld.height });
     }
+    p4.drawRectangle({ x:M, y:liY, width:availW, height:liH,
+      borderColor:lightBorder, borderWidth:0.5, color:liImg?rgb(0,0,0,0):rgb(0.90,0.91,0.94) });
+    if (!liImg) p4.drawText('LinkedIn Cover', { x:M+availW/2-40, y:liY+liH/2-5, font:reg, size:10, color:mutedText });
 
-    // ── PAGE 5: Typography & Brand Voice ──────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────
+    // PAGE 5 — TYPOGRAPHY & BRAND VOICE
+    // ─────────────────────────────────────────────────────────────────────
     const p5 = doc.addPage([W, H]);
-    p5.drawRectangle({ x:0, y:0, width:W, height:H, color:offWhite });
-    p5.drawRectangle({ x:0, y:H-52, width:W, height:52, color:nearBlack });
-    p5.drawRectangle({ x:0, y:H-52, width:4, height:52, color:col1 });
-    p5.drawText('TYPOGRAPHY & BRAND VOICE', { x:M, y:H-34, font:bold, size:18, color:white });
-    addFooter(p5, 5);
+    p5.drawRectangle({ x:0, y:0, width:W, height:H, color:surfaceBg });
+    p5.drawRectangle({ x:0, y:H-56, width:W, height:56, color:nearBlack });
+    p5.drawRectangle({ x:0, y:H-56, width:4, height:56, color:col1 });
+    p5.drawText('TYPOGRAPHY & BRAND VOICE', { x:M, y:H-36, font:bold, size:20, color:white });
+    footer(p5, 5);
 
-    const tyY = H - 52 - 20;
+    const tyY = H - 75;
+    const halfW = (W - M*2 - 24) / 2;
 
-    // Typography section - left half
-    sectionLabel(p5, 'PRIMARY TYPEFACE', M, tyY);
+    // Left — typography
+    p5.drawText('PRIMARY TYPEFACE', { x:M, y:tyY, font:bold, size:8.5, color:mutedText });
+    p5.drawRectangle({ x:M, y:tyY-6, width:halfW, height:0.5, color:col1 });
 
-    // Big type specimen
-    p5.drawText('Aa', { x:M, y:tyY-70, font:bold, size:64, color:col1 });
-    p5.drawText('Helvetica Bold', { x:M, y:tyY-90, font:bold, size:16, color:nearBlack });
-    p5.drawText('Helvetica Regular', { x:M, y:tyY-112, font:reg, size:13, color:darkGray });
+    p5.drawText('Aa', { x:M, y:tyY-68, font:bold, size:60, color:col1 });
+    p5.drawText('Helvetica Bold', { x:M, y:tyY-84, font:bold, size:15, color:darkText });
+    p5.drawText('Helvetica Regular', { x:M, y:tyY-102, font:reg, size:12, color:midGray });
 
-    // Alphabet
-    p5.drawRectangle({ x:M, y:tyY-124, width:(W/2-M-12), height:0.5, color:lightGray });
-    p5.drawText('ABCDEFGHIJKLMNOPQRSTUVWXYZ', { x:M, y:tyY-140, font:reg, size:8.5, color:midGray });
-    p5.drawText('abcdefghijklmnopqrstuvwxyz', { x:M, y:tyY-154, font:reg, size:8.5, color:midGray });
-    p5.drawText('0123456789  !@#$%&*()', { x:M, y:tyY-168, font:reg, size:8.5, color:midGray });
+    p5.drawRectangle({ x:M, y:tyY-112, width:halfW, height:0.5, color:lightBorder });
+    p5.drawText('ABCDEFGHIJKLMNOPQRSTUVWXYZ', { x:M, y:tyY-126, font:reg, size:8.5, color:mutedText });
+    p5.drawText('abcdefghijklmnopqrstuvwxyz  0123456789', { x:M, y:tyY-140, font:reg, size:8.5, color:mutedText });
 
-    // Usage table
-    sectionLabel(p5, 'TYPE SCALE', M, tyY-186);
-    const typeRows = [
-      ['Display', '48 – 72 pt', 'Bold'],
-      ['Heading', '28 – 36 pt', 'Bold'],
-      ['Subheading', '18 – 24 pt', 'Bold'],
-      ['Body', '10 – 14 pt', 'Regular'],
-      ['Caption', '8 – 10 pt', 'Regular'],
-    ];
-    typeRows.forEach(([use, size, weight], i) => {
-      const isFirst = i === 0;
-      const ry = tyY - 204 - (i*20);
-      if (isFirst) {
-        p5.drawRectangle({ x:M, y:ry-5, width:W/2-M-12, height:19, color:col1, borderRadius:2 });
-        p5.drawText(use, { x:M+8, y:ry+1, font:bold, size:8.5, color:white });
-        p5.drawText(size, { x:M+130, y:ry+1, font:reg, size:8.5, color:rgb(0.85,0.85,0.85) });
-        p5.drawText(weight, { x:M+220, y:ry+1, font:reg, size:8.5, color:rgb(0.85,0.85,0.85) });
-      } else {
-        p5.drawRectangle({ x:M, y:ry-5, width:W/2-M-12, height:19, color:i%2===0?white:veryLightGray, borderRadius:2 });
-        p5.drawText(use, { x:M+8, y:ry+1, font:bold, size:8.5, color:darkGray });
-        p5.drawText(size, { x:M+130, y:ry+1, font:reg, size:8.5, color:midGray });
-        p5.drawText(weight, { x:M+220, y:ry+1, font:reg, size:8.5, color:midGray });
-      }
+    p5.drawText('TYPE SCALE', { x:M, y:tyY-160, font:bold, size:8.5, color:mutedText });
+    p5.drawRectangle({ x:M, y:tyY-166, width:halfW, height:0.5, color:lightBorder });
+
+    [
+      ['Display', '48-72pt', 'Bold', true],
+      ['Heading', '24-36pt', 'Bold', false],
+      ['Subheading', '16-20pt', 'Bold', false],
+      ['Body', '10-14pt', 'Regular', false],
+      ['Caption', '8-10pt', 'Regular', false],
+    ].forEach(([use, size, wt, accent], i) => {
+      const ry = tyY - 182 - i*19;
+      p5.drawRectangle({ x:M, y:ry-5, width:halfW, height:17,
+        color: accent ? col1 : (i%2===0 ? white : rgb(0.92,0.93,0.95)), borderRadius:2 });
+      p5.drawText(use, { x:M+8, y:ry+1, font:accent?bold:reg, size:8.5, color:accent?white:darkText });
+      p5.drawText(size, { x:M+halfW*0.54, y:ry+1, font:reg, size:8.5, color:accent?rgb(0.85,0.87,0.92):mutedText });
+      p5.drawText(wt, { x:M+halfW*0.78, y:ry+1, font:reg, size:8.5, color:accent?rgb(0.85,0.87,0.92):mutedText });
     });
 
-    // Brand voice - right half
-    const bvX = W/2 + 12;
-    const bvW = W/2 - M - 12;
-    sectionLabel(p5, 'BRAND VOICE', bvX, tyY);
+    // Right — brand voice
+    const bvX = M + halfW + 24;
+    const bvW = halfW;
+
+    p5.drawText('BRAND VOICE', { x:bvX, y:tyY, font:bold, size:8.5, color:mutedText });
+    p5.drawRectangle({ x:bvX, y:tyY-6, width:bvW, height:0.5, color:col1 });
 
     // Personality tags
     if (personality) {
-      const tags = personality.split(/[,.]/).map(t => t.trim()).filter(Boolean).slice(0,5);
-      let tagX = bvX;
-      let tagY = tyY - 22;
+      const tags = personality.split(/[,.]/).map(t => t.trim()).filter(Boolean).slice(0, 5);
+      let tagX = bvX, tagY = tyY - 24;
       tags.forEach(tag => {
-        const tw = bold.widthOfTextAtSize(tag, 8) + 16;
+        const clean = s(tag, 30);
+        const tw = bold.widthOfTextAtSize(clean, 8) + 18;
         if (tagX + tw > bvX + bvW) { tagX = bvX; tagY -= 22; }
         p5.drawRectangle({ x:tagX, y:tagY-8, width:tw, height:18, color:col1, borderRadius:9 });
-        p5.drawText(tag, { x:tagX+8, y:tagY-1, font:bold, size:8, color:white });
+        p5.drawText(clean, { x:tagX+9, y:tagY-1, font:bold, size:8, color:white });
         tagX += tw + 6;
       });
     }
 
-    // Description
+    // About
     if (description) {
-      sectionLabel(p5, 'ABOUT', bvX, tyY-70);
-      const words = description.split(' ');
-      let line = '', lineY = tyY-88;
-      const maxW = bvW;
-      words.forEach(word => {
-        const test = line ? line + ' ' + word : word;
-        if (reg.widthOfTextAtSize(test, 8.5) > maxW) {
-          if (lineY > 80) {
-            p5.drawText(line, { x:bvX, y:lineY, font:reg, size:8.5, color:darkGray });
-            lineY -= 14;
-          }
-          line = word;
-        } else { line = test; }
-      });
-      if (line && lineY > 80) p5.drawText(line, { x:bvX, y:lineY, font:reg, size:8.5, color:darkGray });
+      p5.drawText('ABOUT', { x:bvX, y:tyY-66, font:bold, size:8.5, color:mutedText });
+      p5.drawRectangle({ x:bvX, y:tyY-72, width:bvW, height:0.5, color:lightBorder });
+      drawWrapped(p5, description, bvX, tyY-88, reg, 8.5, darkText, bvW, 14);
     }
 
-    // Tagline callout box
+    // Tagline callout
     if (tagline) {
-      const tqY = 80;
-      p5.drawRectangle({ x:bvX, y:tqY, width:bvW, height:52, color:nearBlack, borderRadius:4 });
-      p5.drawRectangle({ x:bvX, y:tqY, width:4, height:52, color:col1, borderRadius:0 });
-      p5.drawText('TAGLINE', { x:bvX+16, y:tqY+38, font:bold, size:7, color:col1 });
-      // Split tagline if too long
-      const maxTW = bvW - 24;
-      if (reg.widthOfTextAtSize(tagline, 13) <= maxTW) {
-        p5.drawText(tagline, { x:bvX+16, y:tqY+18, font:oblique, size:13, color:white });
+      const tqY = 85;
+      p5.drawRectangle({ x:bvX, y:tqY, width:bvW, height:58, color:nearBlack, borderRadius:6 });
+      p5.drawRectangle({ x:bvX, y:tqY, width:4, height:58, color:col1 });
+      p5.drawText('TAGLINE', { x:bvX+16, y:tqY+43, font:bold, size:7, color:col1 });
+
+      // Split tagline safely if needed
+      const tqClean = s(tagline, 65);
+      const maxTW = bvW - 28;
+      if (it.widthOfTextAtSize(tqClean, 13) <= maxTW) {
+        p5.drawText(tqClean, { x:bvX+16, y:tqY+24, font:it, size:13, color:white });
       } else {
-        const words2 = tagline.split(' ');
+        const words = tqClean.split(' ');
         let l1 = '', l2 = '';
-        words2.forEach(w => {
-          if (!l1 || reg.widthOfTextAtSize(l1+' '+w, 11) <= maxTW) l1 = l1?l1+' '+w:w;
-          else l2 = l2?l2+' '+w:w;
+        words.forEach(w => {
+          const test = l1 ? l1+' '+w : w;
+          if (it.widthOfTextAtSize(test, 11) <= maxTW) l1 = test;
+          else l2 = l2 ? l2+' '+w : w;
         });
-        p5.drawText(l1, { x:bvX+16, y:tqY+26, font:oblique, size:11, color:white });
-        if (l2) p5.drawText(l2, { x:bvX+16, y:tqY+12, font:oblique, size:11, color:white });
+        p5.drawText(l1, { x:bvX+16, y:tqY+30, font:it, size:11, color:white });
+        if (l2) p5.drawText(l2, { x:bvX+16, y:tqY+14, font:it, size:11, color:white });
       }
     }
 
     const pdfBytes = await doc.save();
-    const safeName = (brand.brandName||'brand').replace(/[^a-zA-Z0-9]/g,'-').toLowerCase();
+    const fname = s(brand.brandName, 40).replace(/[^a-zA-Z0-9]/g, '-').toLowerCase() || 'brand';
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${safeName}-brand-kit.pdf"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${fname}-brand-kit.pdf"`);
     return res.status(200).send(Buffer.from(pdfBytes));
 
   } catch (e) {
-    console.error('PDF generation error:', e);
-    return res.status(500).json({ error: e.message, stack: e.stack });
+    console.error('PDF error:', e);
+    return res.status(500).json({ error: e.message });
   }
 };
-
-// Helper to get logo dimensions safely
-function ld_h(img, maxW, maxH) {
-  if (!img) return maxH;
-  const s = img.scaleToFit(maxW, maxH);
-  return s.height;
-}

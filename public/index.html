@@ -4,259 +4,623 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Brand Kit Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f0f0; color: #111; min-height: 100vh; padding: 2rem; }
-  .container { max-width: 920px; margin: 0 auto; }
-  .header { display: flex; align-items: center; gap: 14px; margin-bottom: 2rem; }
-  .logo-box { width: 44px; height: 44px; background: #D92526; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  h1 { font-size: 22px; font-weight: 700; }
-  .subline { font-size: 13px; color: #888; margin-top: 3px; }
-  .tabs { display: flex; margin-bottom: 1.5rem; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-  .tab { flex: 1; padding: 12px; font-size: 13px; font-weight: 600; text-align: center; cursor: pointer; color: #888; border: none; background: none; font-family: inherit; transition: all 0.15s; border-bottom: 2px solid transparent; }
-  .tab.active { color: #D92526; border-bottom-color: #D92526; background: #fff8f8; }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-  .card { background: #fff; border-radius: 16px; padding: 1.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 1.25rem; }
-  .card-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #bbb; margin-bottom: 1.25rem; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .full { grid-column: 1 / -1; }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  label { font-size: 13px; font-weight: 600; color: #333; }
-  .hint { font-size: 11px; color: #aaa; }
-  input[type=text], textarea {
-    font-family: inherit; font-size: 14px; padding: 10px 13px;
-    border: 1.5px solid #e8e8e8; border-radius: 9px;
-    background: #fafafa; color: #111; width: 100%; transition: border-color 0.15s;
-  }
-  input:focus, textarea:focus { outline: none; border-color: #D92526; background: #fff; }
-  textarea { resize: vertical; line-height: 1.5; }
-  textarea.prompt-area { min-height: 110px; font-size: 13px; }
-  .color-row { display: flex; gap: 8px; align-items: center; }
-  .color-row input[type=color] { width: 46px; height: 42px; padding: 3px; border: 1.5px solid #e8e8e8; border-radius: 9px; cursor: pointer; flex-shrink: 0; }
-  .color-row input[type=text] { flex: 1; }
-  .btn-row { display: flex; gap: 10px; }
-  .btn-primary { flex: 1; padding: 14px; background: #D92526; color: white; border: none; border-radius: 11px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
-  .btn-primary:hover { opacity: 0.88; }
-  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
-  .btn-secondary { padding: 14px 20px; background: #fff; color: #333; border: 1.5px solid #ddd; border-radius: 11px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
-  .btn-secondary:hover { border-color: #D92526; color: #D92526; }
-  .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-dark { width: 100%; padding: 14px; background: #111; color: white; border: none; border-radius: 11px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.15s; margin-top: 1.25rem; }
-  .btn-dark:hover { opacity: 0.85; }
-  .btn-dark:disabled { opacity: 0.35; cursor: not-allowed; }
-  .status { margin-top: 1rem; padding: 12px 16px; border-radius: 10px; font-size: 13px; display: none; line-height: 1.5; }
-  .status.info { background: #eef3ff; color: #2c5fe6; display: block; border: 1px solid #c7d7ff; }
-  .status.error { background: #fff0f0; color: #c81e1e; display: block; border: 1px solid #ffc5c5; }
-  .status.success { background: #f0fdf4; color: #166534; display: block; border: 1px solid #bbf7d0; }
-  .pipeline { display: none; align-items: center; margin-top: 1.25rem; padding: 1rem 1.25rem; background: #fff; border-radius: 12px; border: 1px solid #eee; gap: 4px; flex-wrap: wrap; }
-  .pipeline.visible { display: flex; }
-  .pipe-step { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #ccc; flex: 1; min-width: 60px; }
-  .pipe-step.active { color: #2c5fe6; }
-  .pipe-step.done { color: #166534; }
-  .pipe-step.error { color: #c81e1e; }
-  .pipe-dot { width: 24px; height: 24px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; color: #ccc; }
-  .pipe-step.active .pipe-dot { background: #eef3ff; color: #2c5fe6; }
-  .pipe-step.done .pipe-dot { background: #f0fdf4; color: #166534; }
-  .pipe-step.error .pipe-dot { background: #fff0f0; color: #c81e1e; }
-  .pipe-arrow { color: #ddd; margin: 0 2px; font-size: 13px; flex-shrink: 0; }
-  .prompt-panel { display: none; background: #fff; border-radius: 16px; padding: 1.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 1.25rem; border: 2px solid #eef3ff; }
-  .prompt-panel.visible { display: block; }
-  .prompt-panel-title { font-size: 14px; font-weight: 700; color: #2c5fe6; margin-bottom: 4px; }
-  .prompt-panel-sub { font-size: 12px; color: #888; margin-bottom: 1.25rem; }
-  .prompt-fields { display: flex; flex-direction: column; gap: 14px; }
-  .prompt-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #D92526; margin-bottom: 5px; }
-  .assets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 1.25rem; }
-  .asset-card { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #eee; }
-  .asset-card.banner { grid-column: 1 / -1; }
-  .asset-head { padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; gap: 8px; flex-wrap: wrap; }
-  .asset-name { font-size: 12px; font-weight: 700; color: #444; flex: 1; }
-  .asset-actions { display: flex; gap: 6px; flex-shrink: 0; }
-  .btn-sm { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; border: 1.5px solid #ddd; background: #fff; color: #555; }
-  .btn-sm:hover { border-color: #D92526; color: #D92526; }
-  .btn-sm.dl { border-color: #D92526; color: #D92526; }
-  .btn-sm.dl:hover { background: #D92526; color: white; }
-  .asset-body { background: #e8e8e8; min-height: 150px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-  .asset-body img { width: 100%; display: block; }
-  .asset-body.square { padding: 16px; background: #f5f5f5; }
-  .asset-body.square img { max-height: 230px; width: auto; margin: 0 auto; display: block; }
-  .spinner { width: 30px; height: 30px; border: 2.5px solid #ddd; border-top-color: #D92526; border-radius: 50%; animation: spin 0.75s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .fail-msg { font-size: 12px; color: #c81e1e; padding: 1.25rem; text-align: center; line-height: 1.6; }
-  .history-empty { text-align: center; padding: 3rem; color: #aaa; font-size: 14px; }
-  .history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-  .history-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #eee; }
-  .history-thumb { width: 100%; height: 130px; object-fit: cover; display: block; background: #f0f0f0; }
-  .history-info { padding: 12px 14px; }
-  .history-brand { font-size: 14px; font-weight: 700; }
-  .history-date { font-size: 11px; color: #aaa; margin-top: 2px; }
-  .history-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-  @media (max-width: 620px) { .grid, .assets-grid { grid-template-columns: 1fr; } .asset-card.banner { grid-column: 1; } .btn-row { flex-direction: column; } }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #04060d;
+  --surface: rgba(255,255,255,0.04);
+  --surface-hover: rgba(255,255,255,0.07);
+  --glass: rgba(255,255,255,0.05);
+  --glass-border: rgba(255,255,255,0.08);
+  --glass-border-bright: rgba(255,255,255,0.15);
+  --accent: #3b82f6;
+  --accent2: #8b5cf6;
+  --accent3: #06b6d4;
+  --glow: rgba(59,130,246,0.35);
+  --glow2: rgba(139,92,246,0.25);
+  --text: #f8fafc;
+  --text2: #94a3b8;
+  --text3: #475569;
+  --success: #10b981;
+  --error: #f43f5e;
+  --r: 12px;
+  --r-sm: 8px;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Animated gradient mesh background */
+.bg-mesh {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  overflow: hidden;
+}
+.mesh-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  animation: float 8s ease-in-out infinite;
+}
+.mesh-orb:nth-child(1) {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+  top: -200px; left: -100px;
+  animation-delay: 0s;
+}
+.mesh-orb:nth-child(2) {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+  top: 200px; right: -150px;
+  animation-delay: -3s;
+}
+.mesh-orb:nth-child(3) {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%);
+  bottom: -100px; left: 30%;
+  animation-delay: -5s;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-40px) scale(1.05); }
+}
+
+.layout { position: relative; z-index: 1; display: flex; min-height: 100vh; }
+
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+.sidebar {
+  width: 240px; flex-shrink: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%);
+  border-right: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; height: 100vh;
+  z-index: 50;
+}
+
+.sidebar-top {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.wordmark {
+  display: flex; align-items: center; gap: 10px;
+}
+
+.wordmark-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 20px var(--glow);
+}
+
+.wordmark-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 800;
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+}
+.wordmark-sub { font-size: 10px; color: var(--text3); font-weight: 400; font-family: 'Inter', sans-serif; margin-top: 1px; -webkit-text-fill-color: var(--text3); }
+
+.sidebar-nav { padding: 16px 12px; flex: 1; }
+
+.nav-group-label {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--text3); padding: 0 8px; margin: 16px 0 6px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: var(--r-sm);
+  font-size: 13px; font-weight: 500; color: var(--text2);
+  cursor: pointer; transition: all 0.15s; border: none;
+  background: none; width: 100%; text-align: left; font-family: 'Inter', sans-serif;
+  position: relative; overflow: hidden;
+}
+.nav-item::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  opacity: 0; transition: opacity 0.15s; border-radius: var(--r-sm);
+}
+.nav-item:hover { color: var(--text); background: var(--surface-hover); }
+.nav-item.active { color: white; background: linear-gradient(90deg, rgba(59,130,246,0.2), rgba(139,92,246,0.15)); border: 1px solid rgba(59,130,246,0.25); }
+.nav-item.active .nav-dot { background: var(--accent); box-shadow: 0 0 8px var(--glow); }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; transition: all 0.15s; }
+.nav-badge { margin-left: auto; background: linear-gradient(90deg, var(--accent), var(--accent2)); color: white; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+.nav-dim { opacity: 0.35; cursor: not-allowed; }
+
+.sidebar-bottom {
+  padding: 16px 20px;
+  border-top: 1px solid var(--glass-border);
+}
+.powered-by { font-size: 10px; color: var(--text3); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.powered-models { font-size: 11px; color: var(--text2); font-weight: 500; }
+.status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--success); margin-right: 5px; box-shadow: 0 0 6px var(--success); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+/* ── Main ────────────────────────────────────────────────────────────────── */
+.main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+
+.topbar {
+  height: 60px; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--glass-border);
+  background: rgba(4,6,13,0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: sticky; top: 0; z-index: 40;
+}
+
+.topbar-left h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px; font-weight: 800;
+  background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,0.65) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.topbar-left p { font-size: 12px; color: var(--text3); margin-top: 1px; }
+
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.topbar-badge {
+  font-size: 11px; font-weight: 600; padding: 5px 12px;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 999px; color: var(--text2);
+  backdrop-filter: blur(10px);
+}
+
+.content { padding: 28px 32px; flex: 1; }
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r);
+  padding: 22px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: border-color 0.2s;
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+.card:hover { border-color: var(--glass-border-bright); }
+
+.card-title {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text3); margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--glass-border), transparent);
+}
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.full { grid-column: 1/-1; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--text2); }
+
+input[type=text], textarea {
+  font-family: 'Inter', sans-serif; font-size: 13px;
+  padding: 10px 13px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-sm);
+  color: var(--text); width: 100%;
+  transition: all 0.15s;
+}
+input:focus, textarea:focus {
+  outline: none;
+  border-color: rgba(59,130,246,0.5);
+  background: rgba(59,130,246,0.05);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+textarea { resize: vertical; line-height: 1.6; min-height: 72px; }
+textarea.prompt-area { min-height: 100px; font-size: 12px; }
+input::placeholder, textarea::placeholder { color: var(--text3); }
+
+.color-row { display: flex; gap: 8px; align-items: center; }
+.color-row input[type=color] {
+  width: 42px; height: 38px; padding: 2px;
+  border: 1px solid var(--glass-border); border-radius: var(--r-sm);
+  cursor: pointer; background: rgba(0,0,0,0.3); flex-shrink: 0;
+}
+.color-row input[type=text] { flex: 1; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn-row { display: flex; gap: 10px; margin-top: 4px; }
+
+.btn {
+  padding: 11px 22px; border-radius: var(--r-sm);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: all 0.2s; border: none;
+  white-space: nowrap; display: inline-flex; align-items: center; gap: 7px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  box-shadow: 0 4px 24px rgba(59,130,246,0.3), 0 0 0 1px rgba(255,255,255,0.05) inset;
+}
+.btn-primary:hover { box-shadow: 0 4px 32px rgba(59,130,246,0.5), 0 0 0 1px rgba(255,255,255,0.1) inset; transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.btn-ghost {
+  background: var(--glass); color: var(--text2);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+}
+.btn-ghost:hover { border-color: var(--glass-border-bright); color: var(--text); }
+.btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-export {
+  width: 100%; justify-content: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--text); padding: 13px;
+  font-size: 14px; font-weight: 600;
+  margin-top: 16px;
+  backdrop-filter: blur(10px);
+}
+.btn-export:hover {
+  background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15));
+  border-color: rgba(59,130,246,0.4);
+  color: white;
+}
+.btn-export:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Status ──────────────────────────────────────────────────────────────── */
+.status { display: none; margin-top: 12px; padding: 11px 15px; border-radius: var(--r-sm); font-size: 12px; line-height: 1.5; }
+.status.info { background: rgba(59,130,246,0.08); color: #93c5fd; border: 1px solid rgba(59,130,246,0.2); display:block; }
+.status.error { background: rgba(244,63,94,0.08); color: #fda4af; border: 1px solid rgba(244,63,94,0.2); display:block; }
+.status.success { background: rgba(16,185,129,0.08); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.2); display:block; }
+
+/* ── Pipeline ────────────────────────────────────────────────────────────── */
+.pipeline { display: none; align-items: center; margin-top: 14px; padding: 14px 18px; background: rgba(0,0,0,0.3); border-radius: var(--r-sm); border: 1px solid var(--glass-border); gap: 6px; flex-wrap: wrap; }
+.pipeline.visible { display: flex; }
+.pipe-step { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; color: var(--text3); flex: 1; min-width: 60px; }
+.pipe-step.active { color: var(--accent); }
+.pipe-step.done { color: var(--success); }
+.pipe-step.error { color: var(--error); }
+.pipe-dot { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; border: 1px solid var(--glass-border); }
+.pipe-step.active .pipe-dot { background: rgba(59,130,246,0.2); border-color: var(--accent); color: var(--accent); }
+.pipe-step.done .pipe-dot { background: rgba(16,185,129,0.15); border-color: var(--success); color: var(--success); }
+.pipe-step.error .pipe-dot { background: rgba(244,63,94,0.15); border-color: var(--error); color: var(--error); }
+.pipe-arrow { color: var(--text3); font-size: 11px; flex-shrink: 0; }
+
+/* ── Prompt panel ────────────────────────────────────────────────────────── */
+.prompt-panel { display: none; margin-top: 14px; }
+.prompt-panel.visible { display: block; }
+.prompt-card {
+  background: rgba(59,130,246,0.06);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: var(--r); padding: 20px;
+  position: relative; overflow: hidden;
+}
+.prompt-card::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+  background: linear-gradient(180deg, var(--accent), var(--accent2));
+}
+.prompt-card-title { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 2px; padding-left: 8px; }
+.prompt-card-sub { font-size: 11px; color: var(--text3); margin-bottom: 16px; padding-left: 8px; }
+.prompt-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent2); margin-bottom: 5px; }
+
+/* ── Assets ──────────────────────────────────────────────────────────────── */
+.assets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.asset-card {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: var(--r); overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.asset-card:hover { border-color: var(--glass-border-bright); }
+.asset-card.banner { grid-column: 1/-1; }
+.asset-head {
+  padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--glass-border); gap: 8px; flex-wrap: wrap;
+  background: rgba(0,0,0,0.2);
+}
+.asset-name { font-size: 11px; font-weight: 700; color: var(--text2); flex: 1; }
+.asset-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.btn-xs {
+  font-size: 10px; font-weight: 600; padding: 4px 11px; border-radius: 5px;
+  cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s;
+  white-space: nowrap; border: 1px solid var(--glass-border);
+  background: transparent; color: var(--text2);
+}
+.btn-xs:hover { border-color: var(--glass-border-bright); color: var(--text); }
+.btn-xs.dl { border-color: rgba(59,130,246,0.4); color: var(--accent); }
+.btn-xs.dl:hover { background: linear-gradient(135deg, var(--accent), var(--accent2)); border-color: transparent; color: white; }
+.asset-body {
+  background: rgba(0,0,0,0.4);
+  min-height: 140px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.asset-body img { width: 100%; display: block; }
+.asset-body.square { padding: 16px; }
+.asset-body.square img { max-height: 210px; width: auto; margin: 0 auto; display: block; }
+
+.spinner { width: 28px; height: 28px; border: 2px solid var(--glass-border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.fail-msg { font-size: 12px; color: var(--error); padding: 1.25rem; text-align: center; line-height: 1.6; }
+
+.pdf-section { display: none; margin-top: 16px; }
+.pdf-section.visible { display: block; }
+.pdf-hint { font-size: 10px; color: var(--text3); text-align: center; margin-top: 7px; }
+
+/* ── History ─────────────────────────────────────────────────────────────── */
+.history-empty { text-align: center; padding: 4rem; color: var(--text3); font-size: 13px; }
+.history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 14px; }
+.history-card {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: var(--r); overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.history-card:hover { border-color: var(--glass-border-bright); transform: translateY(-2px); }
+.history-thumb { width: 100%; height: 120px; object-fit: cover; display: block; background: rgba(0,0,0,0.4); }
+.history-info { padding: 12px 14px; }
+.history-brand { font-size: 13px; font-weight: 700; color: var(--text); }
+.history-date { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.history-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .grid, .assets-grid { grid-template-columns: 1fr; }
+  .asset-card.banner { grid-column: 1; }
+  .btn-row { flex-direction: column; }
+}
 </style>
 </head>
 <body>
-<div class="container">
 
-  <div class="header">
-    <div class="logo-box">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-      </svg>
-    </div>
-    <div>
-      <h1>Brand Kit Generator</h1>
-      <div class="subline">Claude prompts · Nano Banana Pro 2K · Exact exports · Full PDF brand kit</div>
-    </div>
-  </div>
-
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('generate')">Generate</button>
-    <button class="tab" onclick="switchTab('history')">History</button>
-  </div>
-
-  <div class="tab-content active" id="tab-generate">
-
-    <div class="card">
-      <div class="card-title">Brand Details</div>
-      <div class="grid">
-        <div class="field">
-          <label>Brand name</label>
-          <input type="text" id="brand" placeholder="e.g. Bookkeeping Pipeline" />
-        </div>
-        <div class="field">
-          <label>Tagline</label>
-          <input type="text" id="tagline" placeholder="e.g. More Books, Less Work" />
-        </div>
-        <div class="field">
-          <label>Primary color</label>
-          <div class="color-row">
-            <input type="color" id="c1p" value="#D92526" />
-            <input type="text" id="c1t" value="#D92526" maxlength="7" />
-          </div>
-        </div>
-        <div class="field">
-          <label>Secondary color</label>
-          <div class="color-row">
-            <input type="color" id="c2p" value="#4A4C4D" />
-            <input type="text" id="c2t" value="#4A4C4D" maxlength="7" />
-          </div>
-        </div>
-        <div class="field full">
-          <label>Niche / Industry</label>
-          <input type="text" id="niche" placeholder="e.g. Bookkeeping services for small business owners" />
-        </div>
-        <div class="field full">
-          <label>Brand personality</label>
-          <input type="text" id="personality" placeholder="e.g. Trustworthy, clean, professional, approachable" />
-        </div>
-        <div class="field full">
-          <label>What the brand does</label>
-          <textarea id="description" style="min-height:70px" placeholder="e.g. We handle bookkeeping for small business owners so they can focus on running their business."></textarea>
-        </div>
-        <div class="field full">
-          <label>Logo icon concept <span style="font-weight:400;color:#aaa">(optional)</span></label>
-          <input type="text" id="icon-concept" placeholder="e.g. Open book with upward arrow. Leave blank for AI." />
-        </div>
-        <div class="field full">
-          <label>Hard rules <span style="font-weight:400;color:#aaa">(optional)</span></label>
-          <input type="text" id="rules" placeholder="e.g. No human faces. Clean and minimal only." />
-        </div>
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn-secondary" id="promptbtn" onclick="writePrompts()">1. Write Prompts</button>
-      <button class="btn-primary" id="genbtn" onclick="generateAll()" disabled>2. Generate Kit</button>
-    </div>
-    <div class="status" id="status"></div>
-
-    <div class="prompt-panel" id="prompt-panel">
-      <div class="prompt-panel-title">Review &amp; edit prompts</div>
-      <div class="prompt-panel-sub">Claude wrote these. Edit anything, then hit Generate Kit.</div>
-      <div class="prompt-fields">
-        <div class="field">
-          <div class="prompt-label">Logo prompt</div>
-          <textarea class="prompt-area" id="prompt-logo"></textarea>
-        </div>
-        <div class="field">
-          <div class="prompt-label">Cover prompt (FB + LinkedIn)</div>
-          <textarea class="prompt-area" id="prompt-cover"></textarea>
-        </div>
-      </div>
-    </div>
-
-    <div class="pipeline" id="pipeline">
-      <div class="pipe-step" id="step-1"><div class="pipe-dot">1</div>Logo</div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-step" id="step-2"><div class="pipe-dot">2</div>Upload</div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-step" id="step-3"><div class="pipe-dot">3</div>Covers</div>
-      <div class="pipe-arrow">→</div>
-      <div class="pipe-step" id="step-4"><div class="pipe-dot">4</div>Done</div>
-    </div>
-
-    <div class="assets-grid" id="assets"></div>
-
-    <div id="pdf-wrap" style="display:none; margin-top:1.25rem;">
-      <button class="btn-dark" id="pdf-btn" onclick="exportPDF()">⬇ Export Brand Kit PDF</button>
-      <div style="font-size:11px;color:#aaa;margin-top:8px;text-align:center">5-page PDF built server-side — all images included at full quality</div>
-    </div>
-
-  </div>
-
-  <div class="tab-content" id="tab-history">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-        <div class="card-title" style="margin:0">Generation history</div>
-        <button class="btn-sm" onclick="clearHistory()">Clear all</button>
-      </div>
-      <div id="history-list"></div>
-    </div>
-  </div>
-
+<div class="bg-mesh">
+  <div class="mesh-orb"></div>
+  <div class="mesh-orb"></div>
+  <div class="mesh-orb"></div>
 </div>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="wordmark">
+        <div class="wordmark-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </div>
+        <div>
+          <div class="wordmark-text">Brand Kit</div>
+          <div class="wordmark-sub">Generator Pro</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">Workspace</div>
+      <button class="nav-item active" id="nav-generate" onclick="switchTab('generate')">
+        <div class="nav-dot"></div>
+        Generate Kit
+        <span class="nav-badge">AI</span>
+      </button>
+      <button class="nav-item" id="nav-history" onclick="switchTab('history')">
+        <div class="nav-dot"></div>
+        History
+      </button>
+
+      <div class="nav-group-label">Coming Soon</div>
+      <button class="nav-item nav-dim">
+        <div class="nav-dot"></div>
+        Templates
+      </button>
+      <button class="nav-item nav-dim">
+        <div class="nav-dot"></div>
+        Brand Assets
+      </button>
+      <button class="nav-item nav-dim">
+        <div class="nav-dot"></div>
+        Team Library
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="powered-by">Engine</div>
+      <div class="powered-models">
+        <span class="status-dot"></span>Claude + Nano Banana Pro
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:4px">2K resolution · PDF export</div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h2>Brand Kit Generator</h2>
+        <p>AI-powered brand identity in minutes</p>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-badge">v2.1</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- GENERATE TAB -->
+      <div class="tab-content active" id="tab-generate">
+
+        <div class="card">
+          <div class="card-title">Brand Details</div>
+          <div class="grid">
+            <div class="field">
+              <label>Brand name</label>
+              <input type="text" id="brand" placeholder="e.g. Bookkeeping Pipeline" />
+            </div>
+            <div class="field">
+              <label>Tagline</label>
+              <input type="text" id="tagline" placeholder="e.g. More Books, Less Work" />
+            </div>
+            <div class="field">
+              <label>Primary color</label>
+              <div class="color-row">
+                <input type="color" id="c1p" value="#D92526" />
+                <input type="text" id="c1t" value="#D92526" maxlength="7" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Secondary color</label>
+              <div class="color-row">
+                <input type="color" id="c2p" value="#4A4C4D" />
+                <input type="text" id="c2t" value="#4A4C4D" maxlength="7" />
+              </div>
+            </div>
+            <div class="field full">
+              <label>Niche / Industry</label>
+              <input type="text" id="niche" placeholder="e.g. Bookkeeping services for small business owners" />
+            </div>
+            <div class="field full">
+              <label>Brand personality</label>
+              <input type="text" id="personality" placeholder="e.g. Trustworthy, clean, professional, approachable" />
+            </div>
+            <div class="field full">
+              <label>What the brand does</label>
+              <textarea id="description" placeholder="e.g. We handle bookkeeping for small business owners so they can focus on running their business."></textarea>
+            </div>
+            <div class="field full">
+              <label>Logo icon concept <span style="font-weight:400;color:var(--text3)">(optional — leave blank for AI)</span></label>
+              <input type="text" id="icon-concept" placeholder="e.g. Open book with upward arrow" />
+            </div>
+            <div class="field full">
+              <label>Hard rules <span style="font-weight:400;color:var(--text3)">(optional)</span></label>
+              <input type="text" id="rules" placeholder="e.g. No human faces. Clean and minimal only." />
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="promptbtn" onclick="writePrompts()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            1. Write Prompts
+          </button>
+          <button class="btn btn-primary" id="genbtn" onclick="generateAll()" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            2. Generate Kit
+          </button>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <div class="prompt-panel" id="prompt-panel">
+          <div class="prompt-card">
+            <div class="prompt-card-title">Review &amp; Edit Prompts</div>
+            <div class="prompt-card-sub">Claude wrote these based on your brand. Edit anything before generating.</div>
+            <div style="display:flex;flex-direction:column;gap:14px;padding-left:8px">
+              <div class="field">
+                <div class="prompt-label">Logo prompt</div>
+                <textarea class="prompt-area" id="prompt-logo"></textarea>
+              </div>
+              <div class="field">
+                <div class="prompt-label">Cover prompt — used for FB &amp; LinkedIn</div>
+                <textarea class="prompt-area" id="prompt-cover"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipeline" id="pipeline">
+          <div class="pipe-step" id="step-1"><div class="pipe-dot">1</div>Logo</div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step" id="step-2"><div class="pipe-dot">2</div>Upload</div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step" id="step-3"><div class="pipe-dot">3</div>Covers</div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step" id="step-4"><div class="pipe-dot">4</div>Done</div>
+        </div>
+
+        <div class="assets-grid" id="assets"></div>
+
+        <div class="pdf-section" id="pdf-section">
+          <button class="btn btn-export" id="pdf-btn" onclick="exportPDF()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Brand Kit PDF
+          </button>
+          <div class="pdf-hint">5-page PDF — cover · color palette · logo mark · social assets · typography</div>
+        </div>
+
+      </div>
+
+      <!-- HISTORY TAB -->
+      <div class="tab-content" id="tab-history">
+        <div class="card">
+          <div class="card-title" style="justify-content:space-between">
+            <span>Generation History</span>
+            <button class="btn-xs" onclick="clearHistory()" style="text-transform:none;font-size:11px">Clear all</button>
+          </div>
+          <div id="history-list"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
 <script>
 const $ = id => document.getElementById(id);
-const S = { logoUrl: null, logoFalUrl: null, fbUrl: null, liUrl: null, brand: {} };
+const S = { logoUrl:null, logoFalUrl:null, fbUrl:null, liUrl:null, brand:{} };
 
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['generate','history'][i] === name));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  $('tab-' + name).classList.add('active');
-  if (name === 'history') renderHistory();
+  ['generate','history'].forEach(t => {
+    $('tab-'+t).classList.toggle('active', t===name);
+    $('nav-'+t)?.classList.toggle('active', t===name);
+  });
+  if(name==='history') renderHistory();
 }
 
-function syncColor(pid, tid) {
-  const p = $(pid), t = $(tid);
-  p.addEventListener('input', () => t.value = p.value);
-  t.addEventListener('input', () => { if (/^#[0-9A-Fa-f]{6}$/.test(t.value)) p.value = t.value; });
+function syncColor(pid,tid){
+  const p=$(pid),t=$(tid);
+  p.addEventListener('input',()=>t.value=p.value);
+  t.addEventListener('input',()=>{if(/^#[0-9A-Fa-f]{6}$/.test(t.value))p.value=t.value;});
 }
 syncColor('c1p','c1t'); syncColor('c2p','c2t');
 
-function setStatus(msg, type) { const s=$('status'); s.textContent=msg; s.className='status '+type; }
-function setStep(n, st) { const el=$('step-'+n); if(el) el.className='pipe-step '+st; }
+function setStatus(msg,type){const s=$('status');s.textContent=msg;s.className='status '+type;}
+function setStep(n,st){const el=$('step-'+n);if(el)el.className='pipe-step '+st;}
 
-function getBrand() {
+function getBrand(){
   return {
-    brandName: $('brand').value.trim(),
-    tagline: $('tagline').value.trim(),
-    niche: $('niche').value.trim(),
-    personality: $('personality').value.trim(),
-    description: $('description').value.trim(),
-    iconConcept: $('icon-concept').value.trim(),
-    rules: $('rules').value.trim(),
-    c1: $('c1t').value.trim(),
-    c2: $('c2t').value.trim()
+    brandName:$('brand').value.trim(), tagline:$('tagline').value.trim(),
+    niche:$('niche').value.trim(), personality:$('personality').value.trim(),
+    description:$('description').value.trim(), iconConcept:$('icon-concept').value.trim(),
+    rules:$('rules').value.trim(), c1:$('c1t').value.trim(), c2:$('c2t').value.trim()
   };
 }
 
-function mkCard(id, label, isBanner) {
-  const ex = $('card-'+id); if(ex) ex.remove();
-  const d = document.createElement('div');
-  d.className = 'asset-card' + (isBanner ? ' banner' : '');
-  d.id = 'card-' + id;
-  d.innerHTML = `
+function mkCard(id,label,isBanner){
+  const ex=$('card-'+id);if(ex)ex.remove();
+  const d=document.createElement('div');
+  d.className='asset-card'+(isBanner?' banner':'');
+  d.id='card-'+id;
+  d.innerHTML=`
     <div class="asset-head">
       <span class="asset-name">${label}</span>
       <div class="asset-actions" id="act-${id}"></div>
@@ -267,235 +631,220 @@ function mkCard(id, label, isBanner) {
   $('assets').appendChild(d);
 }
 
-function setBodyImg(id, url) {
-  const b=$('body-'+id); if(!b) return;
+function setBodyImg(id,url){
+  const b=$('body-'+id);if(!b)return;
   b.innerHTML='';
   const img=document.createElement('img');
-  img.src=url; img.style.maxWidth='100%'; img.style.display='block';
+  img.src=url;img.style.maxWidth='100%';img.style.display='block';
   b.appendChild(img);
 }
-function setSpinner(id){ const b=$('body-'+id); if(b) b.innerHTML='<div class="spinner"></div>'; }
-function setFail(id,msg){ const b=$('body-'+id); if(b) b.innerHTML=`<div class="fail-msg">${msg}</div>`; }
+function setSpinner(id){const b=$('body-'+id);if(b)b.innerHTML='<div class="spinner"></div>';}
+function setFail(id,msg){const b=$('body-'+id);if(b)b.innerHTML=`<div class="fail-msg">${msg}</div>`;}
 
-function setActions(id, btns) {
-  const el=$('act-'+id); if(!el) return; el.innerHTML='';
+function setActions(id,btns){
+  const el=$('act-'+id);if(!el)return;el.innerHTML='';
   btns.forEach(({label,cls,fn})=>{
     const b=document.createElement('button');
-    b.className='btn-sm'+(cls?' '+cls:'');
-    b.textContent=label; b.onclick=fn; el.appendChild(b);
+    b.className='btn-xs'+(cls?' '+cls:'');
+    b.textContent=label;b.onclick=fn;el.appendChild(b);
   });
 }
 
-// Export: scale-to-fill, no white bars
-function exportImage(url, tw, th, filename) {
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    const c = document.createElement('canvas');
-    c.width = tw; c.height = th;
-    const ctx = c.getContext('2d');
-    const scale = Math.max(tw/img.naturalWidth, th/img.naturalHeight);
-    const dw = img.naturalWidth*scale, dh = img.naturalHeight*scale;
-    ctx.drawImage(img, (tw-dw)/2, (th-dh)/2, dw, dh);
-    const a = document.createElement('a');
-    a.href = c.toDataURL('image/png'); a.download = filename; a.click();
+function exportImage(url,tw,th,filename){
+  const img=new Image();img.crossOrigin='anonymous';
+  img.onload=()=>{
+    const c=document.createElement('canvas');c.width=tw;c.height=th;
+    const ctx=c.getContext('2d');
+    const scale=Math.max(tw/img.naturalWidth,th/img.naturalHeight);
+    const dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;
+    ctx.drawImage(img,(tw-dw)/2,(th-dh)/2,dw,dh);
+    const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download=filename;a.click();
   };
-  img.onerror = () => { window.open(url,'_blank'); };
-  img.src = url;
+  img.onerror=()=>window.open(url,'_blank');
+  img.src=url;
 }
 
-async function post(path, body) {
-  const r = await fetch(path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  const data = await r.json();
-  if (!r.ok) throw new Error(data.error || r.statusText);
+async function post(path,body){
+  const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const data=await r.json();
+  if(!r.ok) throw new Error(data.error||r.statusText);
   return data;
 }
 
-async function writePrompts() {
-  const brand = getBrand();
-  if (!brand.brandName || !brand.niche) { setStatus('Brand name and niche required.', 'error'); return; }
-  S.brand = brand;
-  const btn = $('promptbtn');
-  btn.disabled = true; btn.textContent = 'Writing...';
-  setStatus('Claude is writing prompts...', 'info');
-  try {
-    const { prompts } = await post('/api/prompts', { brand });
-    $('prompt-logo').value = prompts.logo;
-    $('prompt-cover').value = prompts.cover;
-    $('prompt-panel').className = 'prompt-panel visible';
-    $('genbtn').disabled = false;
-    setStatus('Prompts ready. Edit if needed, then Generate Kit.', 'info');
-  } catch(e) { setStatus('Error: ' + e.message, 'error'); }
-  btn.disabled = false; btn.textContent = '↺ Re-write Prompts';
+async function writePrompts(){
+  const brand=getBrand();
+  if(!brand.brandName||!brand.niche){setStatus('Brand name and niche required.','error');return;}
+  S.brand=brand;
+  const btn=$('promptbtn');
+  btn.disabled=true;btn.textContent='Writing...';
+  setStatus('Claude is crafting your prompts...','info');
+  try{
+    const {prompts}=await post('/api/prompts',{brand});
+    $('prompt-logo').value=prompts.logo;
+    $('prompt-cover').value=prompts.cover;
+    $('prompt-panel').className='prompt-panel visible';
+    $('genbtn').disabled=false;
+    setStatus('Prompts ready. Review and edit if needed, then Generate Kit.','info');
+  }catch(e){setStatus('Error: '+e.message,'error');}
+  btn.disabled=false;btn.textContent='Re-write Prompts';
 }
 
-async function regenCover(id) {
-  if (!S.logoFalUrl) return;
-  setSpinner(id); setActions(id, []);
-  const prompt = $('prompt-cover').value.trim();
-  const type = id === 'fb' ? 'cover-fb' : 'cover-li';
-  try {
-    const { url } = await post('/api/generate', { type, prompt, logoFalUrl: S.logoFalUrl });
-    if (id === 'fb') S.fbUrl = url; else S.liUrl = url;
-    setBodyImg(id, url);
-    const dims = id==='fb' ? [820,312] : [1584,396];
-    const fname = id==='fb' ? 'facebook-cover.png' : 'linkedin-cover.png';
-    setActions(id, [
-      { label: '↺ Regen', fn: () => regenCover(id) },
-      { label: `Export ${dims[0]}×${dims[1]}`, cls:'dl', fn: () => exportImage(url, dims[0], dims[1], fname) }
+async function regenCover(id){
+  if(!S.logoFalUrl)return;
+  setSpinner(id);setActions(id,[]);
+  const prompt=$('prompt-cover').value.trim();
+  const type=id==='fb'?'cover-fb':'cover-li';
+  try{
+    const {url}=await post('/api/generate',{type,prompt,logoFalUrl:S.logoFalUrl});
+    if(id==='fb')S.fbUrl=url;else S.liUrl=url;
+    setBodyImg(id,url);
+    const dims=id==='fb'?[820,312]:[1584,396];
+    const fname=id==='fb'?'facebook-cover.png':'linkedin-cover.png';
+    setActions(id,[
+      {label:'↺ Regen',fn:()=>regenCover(id)},
+      {label:`Export ${dims[0]}×${dims[1]}`,cls:'dl',fn:()=>exportImage(url,dims[0],dims[1],fname)}
     ]);
-  } catch(e) {
-    setFail(id, e.message);
-    setActions(id, [{ label:'↺ Try again', fn:()=>regenCover(id) }]);
+  }catch(e){
+    setFail(id,e.message);
+    setActions(id,[{label:'↺ Try again',fn:()=>regenCover(id)}]);
   }
 }
 
-async function regenLogo() {
-  setSpinner('logo'); setActions('logo', []);
-  const prompt = $('prompt-logo').value.trim();
-  try {
-    const { url, falUrl } = await post('/api/generate', { type:'logo', prompt });
-    S.logoUrl = url; S.logoFalUrl = falUrl;
-    setBodyImg('logo', url);
-    setActions('logo', [
-      { label:'↺ Regen', fn: regenLogo },
-      { label:'Export 800×800', cls:'dl', fn:()=>exportImage(url, 800, 800, 'logo.png') }
+async function regenLogo(){
+  setSpinner('logo');setActions('logo',[]);
+  const prompt=$('prompt-logo').value.trim();
+  try{
+    const {url,falUrl}=await post('/api/generate',{type:'logo',prompt});
+    S.logoUrl=url;S.logoFalUrl=falUrl;
+    setBodyImg('logo',url);
+    setActions('logo',[
+      {label:'↺ Regen',fn:regenLogo},
+      {label:'Export 800×800',cls:'dl',fn:()=>exportImage(url,800,800,'logo.png')}
     ]);
-  } catch(e) {
-    setFail('logo', e.message);
-    setActions('logo', [{ label:'↺ Try again', fn:regenLogo }]);
+  }catch(e){
+    setFail('logo',e.message);
+    setActions('logo',[{label:'↺ Try again',fn:regenLogo}]);
   }
 }
 
-async function generateAll() {
-  const logoPrompt = $('prompt-logo').value.trim();
-  const coverPrompt = $('prompt-cover').value.trim();
-  if (!logoPrompt || !coverPrompt) { setStatus('Write prompts first.', 'error'); return; }
+async function generateAll(){
+  const logoPrompt=$('prompt-logo').value.trim();
+  const coverPrompt=$('prompt-cover').value.trim();
+  if(!logoPrompt||!coverPrompt){setStatus('Write prompts first.','error');return;}
 
-  S.brand = getBrand();
-  S.logoUrl = null; S.logoFalUrl = null; S.fbUrl = null; S.liUrl = null;
+  S.brand=getBrand();S.logoUrl=null;S.logoFalUrl=null;S.fbUrl=null;S.liUrl=null;
 
-  const btn = $('genbtn');
-  btn.disabled = true; btn.textContent = 'Generating...';
-  $('pipeline').className = 'pipeline visible';
-  $('pdf-wrap').style.display = 'none';
-  $('assets').innerHTML = '';
-  [1,2,3,4].forEach(n => setStep(n,''));
+  const btn=$('genbtn');
+  btn.disabled=true;btn.textContent='Generating...';
+  $('pipeline').className='pipeline visible';
+  $('pdf-section').className='pdf-section';
+  $('assets').innerHTML='';
+  [1,2,3,4].forEach(n=>setStep(n,''));
 
-  mkCard('logo', 'Logo — export at 800×800px', false);
-  mkCard('fb', 'Facebook Cover — export at 820×312px', true);
-  mkCard('li', 'LinkedIn Cover — export at 1584×396px', true);
+  mkCard('logo','Logo — exports at 800×800px',false);
+  mkCard('fb','Facebook Cover — exports at 820×312px',true);
+  mkCard('li','LinkedIn Cover — exports at 1584×396px',true);
 
-  // Logo
   setStep(1,'active');
-  setStatus('Generating logo at 2K...', 'info');
-  try {
-    const { url, falUrl } = await post('/api/generate', { type:'logo', prompt:logoPrompt });
-    S.logoUrl = url; S.logoFalUrl = falUrl;
-    setBodyImg('logo', url);
-    setActions('logo', [
-      { label:'↺ Regen', fn:regenLogo },
-      { label:'Export 800×800', cls:'dl', fn:()=>exportImage(url,800,800,'logo.png') }
+  setStatus('Generating logo at 2K resolution...','info');
+  try{
+    const {url,falUrl}=await post('/api/generate',{type:'logo',prompt:logoPrompt});
+    S.logoUrl=url;S.logoFalUrl=falUrl;
+    setBodyImg('logo',url);
+    setActions('logo',[
+      {label:'↺ Regen',fn:regenLogo},
+      {label:'Export 800×800',cls:'dl',fn:()=>exportImage(url,800,800,'logo.png')}
     ]);
-    setStep(1,'done'); setStep(2,'done');
-  } catch(e) {
+    setStep(1,'done');setStep(2,'done');
+  }catch(e){
     setStep(1,'error');
     ['logo','fb','li'].forEach(id=>setFail(id,'Logo failed: '+e.message));
     setStatus('Logo failed: '+e.message,'error');
-    btn.disabled=false; btn.textContent='2. Generate Kit'; return;
+    btn.disabled=false;btn.textContent='2. Generate Kit';return;
   }
 
-  // Covers in parallel
   setStep(3,'active');
-  setStatus('Generating covers with logo reference at 2K...', 'info');
-  const errs = [];
+  setStatus('Generating covers with your logo at 2K...','info');
+  const errs=[];
 
   await Promise.all([
     (async()=>{
-      try {
-        const { url } = await post('/api/generate', { type:'cover-fb', prompt:coverPrompt, logoFalUrl:S.logoFalUrl });
-        S.fbUrl = url;
-        setBodyImg('fb', url);
-        setActions('fb', [
-          { label:'↺ Regen', fn:()=>regenCover('fb') },
-          { label:'Export 820×312', cls:'dl', fn:()=>exportImage(url,820,312,'facebook-cover.png') }
+      try{
+        const {url}=await post('/api/generate',{type:'cover-fb',prompt:coverPrompt,logoFalUrl:S.logoFalUrl});
+        S.fbUrl=url;setBodyImg('fb',url);
+        setActions('fb',[
+          {label:'↺ Regen',fn:()=>regenCover('fb')},
+          {label:'Export 820×312',cls:'dl',fn:()=>exportImage(url,820,312,'facebook-cover.png')}
         ]);
-      } catch(e) {
-        errs.push('Facebook'); setFail('fb',e.message);
-        setActions('fb', [{ label:'↺ Try again', fn:()=>regenCover('fb') }]);
-      }
+      }catch(e){errs.push('Facebook');setFail('fb',e.message);setActions('fb',[{label:'↺ Try again',fn:()=>regenCover('fb')}]);}
     })(),
     (async()=>{
-      try {
-        const { url } = await post('/api/generate', { type:'cover-li', prompt:coverPrompt, logoFalUrl:S.logoFalUrl });
-        S.liUrl = url;
-        setBodyImg('li', url);
-        setActions('li', [
-          { label:'↺ Regen', fn:()=>regenCover('li') },
-          { label:'Export 1584×396', cls:'dl', fn:()=>exportImage(url,1584,396,'linkedin-cover.png') }
+      try{
+        const {url}=await post('/api/generate',{type:'cover-li',prompt:coverPrompt,logoFalUrl:S.logoFalUrl});
+        S.liUrl=url;setBodyImg('li',url);
+        setActions('li',[
+          {label:'↺ Regen',fn:()=>regenCover('li')},
+          {label:'Export 1584×396',cls:'dl',fn:()=>exportImage(url,1584,396,'linkedin-cover.png')}
         ]);
-      } catch(e) {
-        errs.push('LinkedIn'); setFail('li',e.message);
-        setActions('li', [{ label:'↺ Try again', fn:()=>regenCover('li') }]);
-      }
+      }catch(e){errs.push('LinkedIn');setFail('li',e.message);setActions('li',[{label:'↺ Try again',fn:()=>regenCover('li')}]);}
     })()
   ]);
 
-  if(errs.length) setStep(3,'error'); else setStep(3,'done');
+  if(errs.length)setStep(3,'error');else setStep(3,'done');
   setStep(4,'done');
-  btn.disabled=false; btn.textContent='2. Generate Kit';
-  $('pdf-wrap').style.display='block';
-  saveToHistory(S.brand, S.logoUrl, S.fbUrl, S.liUrl);
-  setStatus(errs.length ? `Done — ${errs.join(' and ')} failed. Hit Regenerate.` : 'Brand kit ready. PDF available below.', errs.length?'error':'success');
+  btn.disabled=false;btn.textContent='2. Generate Kit';
+  $('pdf-section').className='pdf-section visible';
+  saveToHistory(S.brand,S.logoUrl,S.fbUrl,S.liUrl);
+  setStatus(
+    errs.length?`Done — ${errs.join(' and ')} cover(s) failed. Hit Regenerate.`
+    :'Brand kit ready. Export each asset or download the full PDF below.',
+    errs.length?'error':'success'
+  );
 }
 
-async function exportPDF() {
-  const btn = $('pdf-btn');
-  btn.disabled=true; btn.textContent='Building PDF...';
-  try {
-    const r = await fetch('/api/pdf', {
+async function exportPDF(){
+  const btn=$('pdf-btn');
+  btn.disabled=true;btn.textContent='Building PDF...';
+  try{
+    const r=await fetch('/api/pdf',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ brand:S.brand, logoUrl:S.logoUrl, fbUrl:S.fbUrl, liUrl:S.liUrl })
+      body:JSON.stringify({brand:S.brand,logoUrl:S.logoUrl,fbUrl:S.fbUrl,liUrl:S.liUrl})
     });
-    if(!r.ok) { const e=await r.json(); throw new Error(e.error); }
-    const blob = await r.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href=url; a.download=`${(S.brand.brandName||'brand').replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`;
-    a.click(); URL.revokeObjectURL(url);
-  } catch(e) { alert('PDF error: '+e.message); }
-  btn.disabled=false; btn.textContent='⬇ Export Brand Kit PDF';
+    if(!r.ok){const e=await r.json();throw new Error(e.error);}
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=`${(S.brand.brandName||'brand').replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`;
+    a.click();URL.revokeObjectURL(url);
+  }catch(e){alert('PDF error: '+e.message);}
+  btn.disabled=false;btn.textContent='Export Brand Kit PDF';
 }
 
-function saveToHistory(brand, logoUrl, fbUrl, liUrl) {
+function saveToHistory(brand,logoUrl,fbUrl,liUrl){
   const h=JSON.parse(localStorage.getItem('bkg_h')||'[]');
-  h.unshift({ id:Date.now(), brand:brand.brandName, tagline:brand.tagline, date:new Date().toLocaleString(), logoUrl, fbUrl, liUrl });
-  localStorage.setItem('bkg_h', JSON.stringify(h.slice(0,20)));
+  h.unshift({id:Date.now(),brand:brand.brandName,tagline:brand.tagline,date:new Date().toLocaleString(),logoUrl,fbUrl,liUrl});
+  localStorage.setItem('bkg_h',JSON.stringify(h.slice(0,20)));
 }
 
-function renderHistory() {
+function renderHistory(){
   const list=$('history-list');
   const h=JSON.parse(localStorage.getItem('bkg_h')||'[]');
-  if(!h.length){list.innerHTML='<div class="history-empty">No generations yet.</div>';return;}
+  if(!h.length){list.innerHTML='<div class="history-empty">No generations yet. Run your first brand kit to see it here.</div>';return;}
   list.innerHTML='';
-  const grid=document.createElement('div'); grid.className='history-grid';
+  const grid=document.createElement('div');grid.className='history-grid';
   h.forEach(item=>{
-    const c=document.createElement('div'); c.className='history-card';
+    const c=document.createElement('div');c.className='history-card';
     c.innerHTML=`
-      ${item.fbUrl?`<img class="history-thumb" src="${item.fbUrl}" />`:'<div class="history-thumb" style="background:#eee;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:12px">No cover</div>'}
+      ${item.fbUrl?`<img class="history-thumb" src="${item.fbUrl}" />`:'<div class="history-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">No cover</div>'}
       <div class="history-info">
         <div class="history-brand">${item.brand||'—'}</div>
-        ${item.tagline?`<div style="font-size:12px;color:#666;margin-top:2px">${item.tagline}</div>`:''}
+        ${item.tagline?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${item.tagline}</div>`:''}
         <div class="history-date">${item.date}</div>
         <div class="history-actions">
-          ${item.logoUrl?`<button class="btn-sm dl" onclick="window.open('${item.logoUrl}','_blank')">Logo</button>`:''}
-          ${item.fbUrl?`<button class="btn-sm dl" onclick="window.open('${item.fbUrl}','_blank')">FB</button>`:''}
-          ${item.liUrl?`<button class="btn-sm dl" onclick="window.open('${item.liUrl}','_blank')">LinkedIn</button>`:''}
+          ${item.logoUrl?`<button class="btn-xs dl" onclick="window.open('${item.logoUrl}','_blank')">Logo</button>`:''}
+          ${item.fbUrl?`<button class="btn-xs dl" onclick="window.open('${item.fbUrl}','_blank')">FB</button>`:''}
+          ${item.liUrl?`<button class="btn-xs dl" onclick="window.open('${item.liUrl}','_blank')">LinkedIn</button>`:''}
         </div>
       </div>`;
     grid.appendChild(c);
@@ -503,8 +852,8 @@ function renderHistory() {
   list.appendChild(grid);
 }
 
-function clearHistory() {
-  if(confirm('Clear all history?')){ localStorage.removeItem('bkg_h'); renderHistory(); }
+function clearHistory(){
+  if(confirm('Clear all history?')){localStorage.removeItem('bkg_h');renderHistory();}
 }
 </script>
 </body>

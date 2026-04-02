@@ -11,7 +11,6 @@ module.exports = async (req, res) => {
   const { brand, logoUrl, fbUrl, liUrl } = req.body;
   if (!brand) return res.status(400).json({ error: 'Missing brand data' });
 
-  // Sanitise string — strip anything outside printable ASCII for pdf-lib standard fonts
   function s(str, max) {
     if (!str) return '';
     return String(str).replace(/[^\x20-\x7E]/g, '').slice(0, max || 300);
@@ -28,12 +27,12 @@ module.exports = async (req, res) => {
 
   function toCmyk(r, g, b) {
     const k = 1 - Math.max(r, g, b);
-    if (k >= 1) return { c: 0, m: 0, y: 0, k: 100 };
+    if (k >= 1) return { c:0, m:0, y:0, k:100 };
     return {
       c: Math.round(((1-r-k)/(1-k))*100),
       m: Math.round(((1-g-k)/(1-k))*100),
       y: Math.round(((1-b-k)/(1-k))*100),
-      k: Math.round(k * 100)
+      k: Math.round(k*100)
     };
   }
 
@@ -54,33 +53,52 @@ module.exports = async (req, res) => {
     return null;
   }
 
+  function drawText(page, text, opts) {
+    if (!text || !text.trim()) return;
+    page.drawText(String(text), opts);
+  }
+
+  function wrap(page, text, x, y, font, size, color, maxW, lineH) {
+    const words = text.split(' ');
+    let line = '', cy = y;
+    words.forEach(w => {
+      const test = line ? line + ' ' + w : w;
+      if (font.widthOfTextAtSize(test, size) > maxW && line) {
+        if (cy > 30) page.drawText(line, { x, y:cy, font, size, color });
+        line = w; cy -= lineH;
+      } else { line = test; }
+    });
+    if (line && cy > 30) page.drawText(line, { x, y:cy, font, size, color });
+    return cy;
+  }
+
   try {
-    const c1s = brand.c1 || '#1A56DB';
-    const c2s = brand.c2 || '#374151';
+    const c1s = s(brand.c1 || '#D92526', 7);
+    const c2s = s(brand.c2 || '#4A4C4D', 7);
     const r1 = hexToRgb(c1s), r2 = hexToRgb(c2s);
     const col1 = rgb(r1.r, r1.g, r1.b);
     const col2 = rgb(r2.r, r2.g, r2.b);
-    const white = rgb(1, 1, 1);
-    const nearBlack = rgb(0.06, 0.07, 0.09);
-    const darkBg = rgb(0.1, 0.12, 0.16);
-    const surfaceBg = rgb(0.94, 0.95, 0.97);
-    const lightBorder = rgb(0.88, 0.90, 0.93);
-    const midGray = rgb(0.50, 0.54, 0.60);
-    const darkText = rgb(0.12, 0.14, 0.18);
-    const mutedText = rgb(0.38, 0.42, 0.50);
-
     const cmyk1 = toCmyk(r1.r, r1.g, r1.b);
     const cmyk2 = toCmyk(r2.r, r2.g, r2.b);
 
+    // Color system — matches reference PDF aesthetic
+    const white      = rgb(1, 1, 1);
+    const nearBlack  = rgb(0.12, 0.12, 0.12);
+    const ink        = rgb(0.15, 0.15, 0.15);
+    const bodyText   = rgb(0.30, 0.30, 0.30);
+    const muted      = rgb(0.55, 0.55, 0.55);
+    const faint      = rgb(0.82, 0.82, 0.82);
+    const bgLight    = rgb(0.96, 0.96, 0.96);
+    const bgDark     = rgb(0.14, 0.14, 0.16);
+
     const doc = await PDFDocument.create();
+    const B  = await doc.embedFont(StandardFonts.HelveticaBold);
+    const R  = await doc.embedFont(StandardFonts.Helvetica);
+    const BI = await doc.embedFont(StandardFonts.HelveticaBoldOblique);
+    const I  = await doc.embedFont(StandardFonts.HelveticaOblique);
 
-    // Use Helvetica — reliable, clean, no runtime fetch needed
-    // We'll use it well rather than fighting custom fonts
-    const bold = await doc.embedFont(StandardFonts.HelveticaBold);
-    const reg = await doc.embedFont(StandardFonts.Helvetica);
-    const it = await doc.embedFont(StandardFonts.HelveticaOblique);
-
-    const W = 841.89, H = 595.28, M = 40;
+    // A4 Landscape
+    const W = 841.89, H = 595.28;
 
     const [logoImg, fbImg, liImg] = await Promise.all([
       embedImg(doc, logoUrl),
@@ -89,353 +107,319 @@ module.exports = async (req, res) => {
     ]);
 
     const brandName = s(brand.brandName, 50);
-    const tagline = s(brand.tagline, 70);
-    const niche = s(brand.niche, 90);
-    const personality = s(brand.personality, 100);
-    const description = s(brand.description, 280);
+    const tagline   = s(brand.tagline, 80);
+    const niche     = s(brand.niche, 100);
+    const pers      = s(brand.personality, 120);
+    const desc      = s(brand.description, 400);
 
-    // ── Footer helper ──────────────────────────────────────────────────────
-    function footer(page, n) {
-      page.drawRectangle({ x:0, y:0, width:W, height:20, color:nearBlack });
-      page.drawRectangle({ x:0, y:0, width:3, height:20, color:col1 });
-      page.drawText(brandName, { x:12, y:6, font:reg, size:8, color:mutedText });
-      page.drawText(`0${n}`, { x:W-M, y:6, font:bold, size:8, color:midGray });
+    // ── Shared footer ──────────────────────────────────────────────────────
+    function footer(page, num, section) {
+      // Bottom rule
+      page.drawRectangle({ x:0, y:28, width:W, height:0.5, color:faint });
+      // Left: section name
+      drawText(page, section, { x:40, y:14, font:R, size:8, color:muted });
+      // Center: prepared by
+      const credit = 'Prepared by The AI Owners';
+      drawText(page, credit, { x:(W - R.widthOfTextAtSize(credit,8))/2, y:14, font:R, size:8, color:muted });
+      // Right: page number
+      const pStr = `${String(num).padStart(2,'0')}`;
+      drawText(page, pStr, { x:W-40-B.widthOfTextAtSize(pStr,9), y:13, font:B, size:9, color:col1 });
     }
 
-    // ── Wrap text helper ───────────────────────────────────────────────────
-    function drawWrapped(page, text, x, y, font, size, color, maxW, lineH) {
-      const words = text.split(' ');
-      let line = '', curY = y;
-      words.forEach(word => {
-        const test = line ? line + ' ' + word : word;
-        if (font.widthOfTextAtSize(test, size) > maxW) {
-          if (curY > 30) { page.drawText(line, { x, y:curY, font, size, color }); }
-          line = word; curY -= lineH;
-        } else { line = test; }
-      });
-      if (line && curY > 30) page.drawText(line, { x, y:curY, font, size, color });
-      return curY;
-    }
-
-    // ─────────────────────────────────────────────────────────────────────
-    // PAGE 1 — COVER
-    // ─────────────────────────────────────────────────────────────────────
-    const p1 = doc.addPage([W, H]);
-
-    // Full dark background
-    p1.drawRectangle({ x:0, y:0, width:W, height:H, color:nearBlack });
-
-    // Left accent panel
-    p1.drawRectangle({ x:0, y:0, width:W*0.40, height:H, color:col1 });
-
-    // Subtle dot grid on left panel
-    for (let gx = 24; gx < W*0.38; gx += 22) {
-      for (let gy = 24; gy < H; gy += 22) {
-        p1.drawCircle({ x:gx, y:gy, size:1, color:rgb(1,1,1), opacity:0.08 });
+    // ── Shared left accent sidebar ─────────────────────────────────────────
+    function leftBar(page, label) {
+      // Vertical rule at left
+      page.drawRectangle({ x:30, y:42, width:1.5, height:H-70, color:col1 });
+      // Rotated label — approximate by drawing character by character
+      // pdf-lib doesn't support rotation on text natively so we use a label at the top
+      if (label) {
+        drawText(page, label.toUpperCase(), { x:8, y:H-50, font:B, size:7.5, color:muted, rotate: { type:'degrees', angle:90 } });
       }
     }
 
-    // Diagonal cut on right edge of left panel
-    p1.drawRectangle({ x:W*0.40, y:0, width:3, height:H, color:rgb(1,1,1), opacity:0.06 });
+    // ─────────────────────────────────────────────────────────────────────
+    // PAGE 1 — COVER (full bleed, matches reference exactly)
+    // ─────────────────────────────────────────────────────────────────────
+    const p1 = doc.addPage([W, H]);
 
-    // Logo centered in left panel
+    // Full bleed: left half brand color, right half near-black
+    p1.drawRectangle({ x:0, y:0, width:W*0.48, height:H, color:col1 });
+    p1.drawRectangle({ x:W*0.48, y:0, width:W*0.52, height:H, color:nearBlack });
+
+    // Subtle texture lines on the dark side
+    for (let i = 0; i < 8; i++) {
+      const y = H*0.15 + i*(H*0.1);
+      p1.drawRectangle({ x:W*0.48, y, width:W*0.52, height:0.4, color:white, opacity:0.03 });
+    }
+
+    // Logo in left panel — centered vertically
     if (logoImg) {
-      const ld = logoImg.scaleToFit(W*0.28, H*0.40);
-      p1.drawImage(logoImg, {
-        x: (W*0.40 - ld.width) / 2,
-        y: H/2 - ld.height/2,
+      const ld = logoImg.scaleToFit(W*0.32, H*0.42);
+      const lx = (W*0.48 - ld.width) / 2;
+      const ly = (H - ld.height) / 2 + 20;
+      p1.drawImage(logoImg, { x:lx, y:ly, width:ld.width, height:ld.height });
+    }
+
+    // Horizontal thin rule below logo on left panel
+    p1.drawRectangle({ x:40, y:H*0.30, width:W*0.38, height:0.6, color:white, opacity:0.25 });
+
+    // Brand name — stacked large on the right side (matches reference)
+    const lines = brandName.toUpperCase().split(' ');
+    const lineSize = lines.length > 2 ? 46 : lines.length === 2 ? 52 : 60;
+    let textY = H * 0.62;
+    lines.forEach(line => {
+      drawText(p1, line, { x:W*0.52, y:textY, font:B, size:lineSize, color:white });
+      textY -= lineSize + 8;
+    });
+
+    // Tagline below brand name
+    if (tagline) {
+      drawText(p1, tagline, { x:W*0.52, y:textY - 10, font:I, size:14, color:rgb(0.75,0.77,0.82) });
+    }
+
+    // "Brand Kit" label + website top left corner
+    drawText(p1, 'Brand Kit', { x:40, y:H-30, font:B, size:11, color:white, opacity:0.7 });
+    if (brand.website) {
+      drawText(p1, s(brand.website, 50), { x:40, y:H-46, font:R, size:9, color:rgb(0.7,0.72,0.78) });
+    }
+
+    // Page number top right
+    drawText(p1, '01', { x:W-50, y:H-30, font:B, size:11, color:rgb(0.5,0.52,0.58) });
+
+    // "Prepared by" — bottom right
+    drawText(p1, 'Prepared by The AI Owners', { x:W*0.52, y:22, font:R, size:8, color:rgb(0.40,0.42,0.48) });
+
+    // ─────────────────────────────────────────────────────────────────────
+    // PAGE 2 — COLOR PALETTE (matches reference: 2-column, full specs)
+    // ─────────────────────────────────────────────────────────────────────
+    const p2 = doc.addPage([W, H]);
+    p2.drawRectangle({ x:0, y:0, width:W, height:H, color:white });
+
+    // Left sidebar accent
+    p2.drawRectangle({ x:0, y:0, width:5, height:H, color:col1 });
+
+    // Top: section header
+    drawText(p2, 'Introduction', { x:40, y:H-32, font:R, size:9, color:muted });
+    drawText(p2, '02', { x:W-50, y:H-32, font:B, size:9, color:muted });
+
+    // Main title
+    drawText(p2, 'Color', { x:40, y:H-60, font:B, size:28, color:ink });
+    drawText(p2, 'Palette', { x:40, y:H-90, font:B, size:28, color:ink });
+
+    // Horizontal rule after title
+    p2.drawRectangle({ x:40, y:H-100, width:W-80, height:0.5, color:faint });
+
+    // ── Swatch 1 ──
+    const sw1X = 40, sw1Y = H-120, swW = 110, swH = 110;
+    p2.drawRectangle({ x:sw1X, y:sw1Y-swH, width:swW, height:swH, color:col1 });
+    // Specs to the right of swatch
+    const sp1X = sw1X + swW + 20;
+    drawText(p2, `CMYK : (${cmyk1.c}%, ${cmyk1.m}%, ${cmyk1.y}%, ${cmyk1.k}%)`, { x:sp1X, y:sw1Y-22, font:R, size:9, color:bodyText });
+    drawText(p2, `RGB : (${Math.round(r1.r*255)}, ${Math.round(r1.g*255)}, ${Math.round(r1.b*255)})`, { x:sp1X, y:sw1Y-38, font:R, size:9, color:bodyText });
+    drawText(p2, `WEB : ${c1s.toUpperCase()}`, { x:sp1X, y:sw1Y-54, font:R, size:9, color:bodyText });
+
+    // Description paragraph for color 1
+    const desc1 = `The primary brand color ${c1s} brings energy, confidence, and attention. Use it for calls to action, headings, and key brand touchpoints where impact is needed.`;
+    wrap(p2, desc1, sp1X, sw1Y-78, R, 8.5, bodyText, W - sp1X - 40, 14);
+
+    // ── Swatch 2 ──
+    const sw2Y = sw1Y - swH - 30;
+    p2.drawRectangle({ x:sw1X, y:sw2Y-swH, width:swW, height:swH, color:col2 });
+    drawText(p2, `CMYK : (${cmyk2.c}%, ${cmyk2.m}%, ${cmyk2.y}%, ${cmyk2.k}%)`, { x:sp1X, y:sw2Y-22, font:R, size:9, color:bodyText });
+    drawText(p2, `RGB : (${Math.round(r2.r*255)}, ${Math.round(r2.g*255)}, ${Math.round(r2.b*255)})`, { x:sp1X, y:sw2Y-38, font:R, size:9, color:bodyText });
+    drawText(p2, `WEB : ${c2s.toUpperCase()}`, { x:sp1X, y:sw2Y-54, font:R, size:9, color:bodyText });
+
+    const desc2 = `The secondary color ${c2s} provides balance, sophistication, and grounding. Use it for body text, backgrounds, and supporting elements throughout the brand.`;
+    wrap(p2, desc2, sp1X, sw2Y-78, R, 8.5, bodyText, W - sp1X - 40, 14);
+
+    // Color narrative — right column (matches reference style)
+    const narX = W*0.58;
+    const narrative = `The color scheme featuring ${c1s} and ${c2s} has been carefully selected to reflect the brand's core values. The primary color commands attention and communicates ${pers ? pers.split(',')[0].trim().toLowerCase() : 'confidence'}, while the secondary anchors the palette with professionalism and trust. Together they create a cohesive visual identity that is both distinctive and appropriate for ${niche || 'the industry'}.`;
+    wrap(p2, narrative, narX, H-120, R, 8.5, bodyText, W-narX-40, 15);
+
+    footer(p2, 2, 'Introduction');
+
+    // ─────────────────────────────────────────────────────────────────────
+    // PAGE 3 — LOGO MARK (matches reference: dark + light mockup cards)
+    // ─────────────────────────────────────────────────────────────────────
+    const p3 = doc.addPage([W, H]);
+    p3.drawRectangle({ x:0, y:0, width:W, height:H, color:white });
+    p3.drawRectangle({ x:0, y:0, width:5, height:H, color:col1 });
+
+    drawText(p3, 'Introduction', { x:40, y:H-32, font:R, size:9, color:muted });
+    drawText(p3, '03', { x:W-50, y:H-32, font:B, size:9, color:muted });
+    drawText(p3, 'Mark', { x:40, y:H-60, font:B, size:28, color:ink });
+    drawText(p3, 'Construction', { x:40, y:H-90, font:B, size:28, color:ink });
+    p3.drawRectangle({ x:40, y:H-100, width:W-80, height:0.5, color:faint });
+
+    // Two large mockup cards (matching reference exactly)
+    const cardM = 40;
+    const cardW = (W - cardM*2 - 24) / 2;
+    const cardH = H - 140;
+    const cardY = 42;
+
+    // Dark card (left)
+    p3.drawRectangle({ x:cardM, y:cardY, width:cardW, height:cardH, color:bgDark, borderRadius:8 });
+    if (logoImg) {
+      const ld = logoImg.scaleToFit(cardW-60, cardH-60);
+      p3.drawImage(logoImg, {
+        x: cardM + (cardW-ld.width)/2,
+        y: cardY + (cardH-ld.height)/2,
         width: ld.width, height: ld.height
       });
     }
 
-    // Horizontal line below logo
-    p1.drawRectangle({ x:M, y:H/2 - (logoImg ? logoImg.scaleToFit(W*0.28,H*0.40).height/2 : 60) - 20, width:W*0.32, height:0.5, color:rgb(1,1,1), opacity:0.2 });
-
-    // Right side — brand name + tagline
-    const nameSize = brandName.length > 20 ? 38 : brandName.length > 14 ? 46 : 56;
-    p1.drawText(brandName, { x:W*0.44, y:H*0.57, font:bold, size:nameSize, color:white });
-
-    // Colour accent bar under name
-    p1.drawRectangle({ x:W*0.44, y:H*0.57 - 10, width:56, height:3, color:col1 });
-
-    if (tagline) {
-      p1.drawText(tagline, { x:W*0.44, y:H*0.57 - 30, font:reg, size:15, color:rgb(0.7,0.74,0.82) });
-    }
-
-    // Brand Kit label
-    p1.drawText('BRAND KIT', { x:W*0.44, y:H*0.20, font:bold, size:8, color:rgb(0.35,0.40,0.50) });
-    p1.drawText(new Date().toLocaleDateString('en-GB', { month:'long', year:'numeric' }), {
-      x:W*0.44, y:H*0.20 - 14, font:reg, size:9, color:rgb(0.30,0.35,0.45)
-    });
-
-    footer(p1, 1);
-
-    // ─────────────────────────────────────────────────────────────────────
-    // PAGE 2 — COLOR PALETTE
-    // ─────────────────────────────────────────────────────────────────────
-    const p2 = doc.addPage([W, H]);
-    p2.drawRectangle({ x:0, y:0, width:W, height:H, color:surfaceBg });
-
-    // Header
-    p2.drawRectangle({ x:0, y:H-56, width:W, height:56, color:nearBlack });
-    p2.drawRectangle({ x:0, y:H-56, width:4, height:56, color:col1 });
-    p2.drawText('COLOR PALETTE', { x:M, y:H-36, font:bold, size:20, color:white });
-
-    footer(p2, 2);
-
-    const swY = H - 80, swW = 195, swH = 155;
-
-    // Primary swatch
-    p2.drawRectangle({ x:M, y:swY-swH, width:swW, height:swH, color:col1, borderRadius:6 });
-    // Dark strip at bottom of swatch
-    p2.drawRectangle({ x:M, y:swY-swH, width:swW, height:48, color:rgb(0,0,0), opacity:0.3 });
-    p2.drawText(c1s.toUpperCase(), { x:M+14, y:swY-swH+28, font:bold, size:16, color:white });
-    p2.drawText('Primary', { x:M+14, y:swY-swH+11, font:reg, size:9, color:rgb(0.85,0.87,0.92) });
-
-    // Primary specs card
-    const specY1 = swY - swH - 14;
-    p2.drawRectangle({ x:M, y:specY1-52, width:swW, height:56, color:white, borderRadius:4,
-      borderColor:lightBorder, borderWidth:0.5 });
-
-    [
-      ['HEX', c1s.toUpperCase()],
-      ['RGB', `${Math.round(r1.r*255)}, ${Math.round(r1.g*255)}, ${Math.round(r1.b*255)}`],
-      ['CMYK', `${cmyk1.c}  ${cmyk1.m}  ${cmyk1.y}  ${cmyk1.k}`],
-    ].forEach(([lbl, val], i) => {
-      const ry = specY1 - 16 - i*14;
-      p2.drawText(lbl, { x:M+10, y:ry, font:bold, size:7.5, color:mutedText });
-      p2.drawText(val, { x:M+54, y:ry, font:reg, size:7.5, color:darkText });
-    });
-
-    // Secondary swatch
-    const sx2 = M + swW + 20;
-    p2.drawRectangle({ x:sx2, y:swY-swH, width:swW, height:swH, color:col2, borderRadius:6 });
-    p2.drawRectangle({ x:sx2, y:swY-swH, width:swW, height:48, color:rgb(0,0,0), opacity:0.35 });
-    p2.drawText(c2s.toUpperCase(), { x:sx2+14, y:swY-swH+28, font:bold, size:16, color:white });
-    p2.drawText('Secondary', { x:sx2+14, y:swY-swH+11, font:reg, size:9, color:rgb(0.82,0.84,0.89) });
-
-    p2.drawRectangle({ x:sx2, y:specY1-52, width:swW, height:56, color:white, borderRadius:4,
-      borderColor:lightBorder, borderWidth:0.5 });
-    [
-      ['HEX', c2s.toUpperCase()],
-      ['RGB', `${Math.round(r2.r*255)}, ${Math.round(r2.g*255)}, ${Math.round(r2.b*255)}`],
-      ['CMYK', `${cmyk2.c}  ${cmyk2.m}  ${cmyk2.y}  ${cmyk2.k}`],
-    ].forEach(([lbl, val], i) => {
-      const ry = specY1 - 16 - i*14;
-      p2.drawText(lbl, { x:sx2+10, y:ry, font:bold, size:7.5, color:mutedText });
-      p2.drawText(val, { x:sx2+54, y:ry, font:reg, size:7.5, color:darkText });
-    });
-
-    // Usage notes
-    const ux = sx2 + swW + 28;
-    const uW = W - ux - M;
-
-    p2.drawText('USAGE GUIDELINES', { x:ux, y:swY-8, font:bold, size:8.5, color:mutedText });
-    p2.drawRectangle({ x:ux, y:swY-14, width:uW, height:1, color:col1 });
-
-    [
-      `${c1s} is the primary brand colour. Use it for calls to action, headings, and key interactive elements.`,
-      `${c2s} is the secondary colour. Use it for body text, backgrounds, and supporting design elements.`,
-      'Always maintain a minimum contrast ratio of 4.5:1 when placing text over coloured backgrounds.',
-    ].forEach((line, i) => {
-      drawWrapped(p2, line, ux, swY-30-(i*38), reg, 8.5, darkText, uW, 13);
-    });
-
-    // Utility swatches
-    p2.drawText('UTILITY', { x:ux, y:specY1+8, font:bold, size:8.5, color:mutedText });
-    const utils = [
-      ['White', '#FFFFFF', 1, 1, 1, true],
-      ['Black', '#1A1A1A', 0.1, 0.1, 0.1, false],
-      ['Light Gray', '#F3F4F6', 0.95, 0.96, 0.97, true],
-    ];
-    utils.forEach(([name, hex, rr, gg, bb, dark], i) => {
-      const uy = specY1 - 12 - i*46;
-      p2.drawRectangle({ x:ux, y:uy-30, width:uW, height:34, color:rgb(rr,gg,bb), borderRadius:4,
-        borderColor:lightBorder, borderWidth:0.5 });
-      p2.drawText(name, { x:ux+10, y:uy-12, font:bold, size:8, color:dark?darkText:white });
-      p2.drawText(hex, { x:ux+10, y:uy-24, font:reg, size:7.5, color:dark?mutedText:rgb(0.7,0.7,0.7) });
-    });
-
-    // ─────────────────────────────────────────────────────────────────────
-    // PAGE 3 — LOGO
-    // ─────────────────────────────────────────────────────────────────────
-    const p3 = doc.addPage([W, H]);
-    p3.drawRectangle({ x:0, y:0, width:W, height:H, color:surfaceBg });
-    p3.drawRectangle({ x:0, y:H-56, width:W, height:56, color:nearBlack });
-    p3.drawRectangle({ x:0, y:H-56, width:4, height:56, color:col1 });
-    p3.drawText('LOGO MARK', { x:M, y:H-36, font:bold, size:20, color:white });
-    footer(p3, 3);
-
-    const lbW = (W - M*2 - 20) / 2;
-    const lbH = H - 56 - 22 - 90;
-    const lbY = 90;
-
-    // Light bg box
-    p3.drawRectangle({ x:M, y:lbY, width:lbW, height:lbH, color:white,
-      borderColor:lightBorder, borderWidth:0.5, borderRadius:6 });
-    p3.drawText('ON LIGHT', { x:M+8, y:lbY+lbH-20, font:bold, size:8, color:mutedText });
+    // Light card (right)
+    const c2X = cardM + cardW + 24;
+    p3.drawRectangle({ x:c2X, y:cardY, width:cardW, height:cardH, color:bgLight, borderRadius:8 });
+    // Subtle shadow effect border
+    p3.drawRectangle({ x:c2X, y:cardY, width:cardW, height:cardH, color:faint, borderRadius:8, borderWidth:0.5, borderColor:faint });
     if (logoImg) {
-      const ld = logoImg.scaleToFit(lbW-60, lbH-60);
-      p3.drawImage(logoImg, { x:M+(lbW-ld.width)/2, y:lbY+(lbH-ld.height)/2, width:ld.width, height:ld.height });
-    }
-
-    // Dark bg box
-    const dbX = M + lbW + 20;
-    p3.drawRectangle({ x:dbX, y:lbY, width:lbW, height:lbH, color:nearBlack, borderRadius:6 });
-    p3.drawText('ON DARK', { x:dbX+8, y:lbY+lbH-20, font:bold, size:8, color:rgb(0.4,0.44,0.52) });
-    if (logoImg) {
-      const ld = logoImg.scaleToFit(lbW-60, lbH-60);
-      p3.drawImage(logoImg, { x:dbX+(lbW-ld.width)/2, y:lbY+(lbH-ld.height)/2, width:ld.width, height:ld.height });
-    }
-
-    // Guidelines
-    p3.drawText('LOGO GUIDELINES', { x:M, y:lbY-24, font:bold, size:8.5, color:mutedText });
-    p3.drawRectangle({ x:M, y:lbY-30, width:W-M*2, height:0.5, color:lightBorder });
-    [
-      'Maintain clear space equal to the cap-height of the wordmark on all sides of the logo.',
-      'Do not distort, rotate, recolour, or add drop shadows or effects to the logo.',
-    ].forEach((txt, i) => {
-      p3.drawText('—', { x:M, y:lbY-46-(i*14), font:reg, size:8.5, color:col1 });
-      p3.drawText(txt, { x:M+14, y:lbY-46-(i*14), font:reg, size:8.5, color:darkText });
-    });
-
-    // ─────────────────────────────────────────────────────────────────────
-    // PAGE 4 — SOCIAL ASSETS
-    // ─────────────────────────────────────────────────────────────────────
-    const p4 = doc.addPage([W, H]);
-    p4.drawRectangle({ x:0, y:0, width:W, height:H, color:surfaceBg });
-    p4.drawRectangle({ x:0, y:H-56, width:W, height:56, color:nearBlack });
-    p4.drawRectangle({ x:0, y:H-56, width:4, height:56, color:col1 });
-    p4.drawText('SOCIAL MEDIA ASSETS', { x:M, y:H-36, font:bold, size:20, color:white });
-    footer(p4, 4);
-
-    const availW = W - M*2;
-    const startY = H - 70;
-
-    p4.drawText('FACEBOOK COVER', { x:M, y:startY, font:bold, size:8.5, color:mutedText });
-    p4.drawText('820 x 312 px', { x:M + bold.widthOfTextAtSize('FACEBOOK COVER', 8.5) + 10, y:startY, font:reg, size:8.5, color:rgb(0.6,0.65,0.72) });
-
-    const fbH = Math.round(availW * (312/820));
-    const fbY = startY - fbH - 8;
-
-    if (fbImg) {
-      const fd = fbImg.scaleToFit(availW, fbH);
-      p4.drawImage(fbImg, { x:M+(availW-fd.width)/2, y:fbY+(fbH-fd.height)/2, width:fd.width, height:fd.height });
-    }
-    p4.drawRectangle({ x:M, y:fbY, width:availW, height:fbH,
-      borderColor:lightBorder, borderWidth:0.5, color:fbImg?rgb(0,0,0,0):rgb(0.90,0.91,0.94) });
-    if (!fbImg) p4.drawText('Facebook Cover', { x:M+availW/2-42, y:fbY+fbH/2-5, font:reg, size:10, color:mutedText });
-
-    const liTop = fbY - 22;
-    p4.drawText('LINKEDIN COVER', { x:M, y:liTop, font:bold, size:8.5, color:mutedText });
-    p4.drawText('1584 x 396 px', { x:M + bold.widthOfTextAtSize('LINKEDIN COVER', 8.5) + 10, y:liTop, font:reg, size:8.5, color:rgb(0.6,0.65,0.72) });
-
-    const liH = Math.round(availW * (396/1584));
-    const liY = liTop - liH - 8;
-
-    if (liImg) {
-      const ld = liImg.scaleToFit(availW, liH);
-      p4.drawImage(liImg, { x:M+(availW-ld.width)/2, y:liY+(liH-ld.height)/2, width:ld.width, height:ld.height });
-    }
-    p4.drawRectangle({ x:M, y:liY, width:availW, height:liH,
-      borderColor:lightBorder, borderWidth:0.5, color:liImg?rgb(0,0,0,0):rgb(0.90,0.91,0.94) });
-    if (!liImg) p4.drawText('LinkedIn Cover', { x:M+availW/2-40, y:liY+liH/2-5, font:reg, size:10, color:mutedText });
-
-    // ─────────────────────────────────────────────────────────────────────
-    // PAGE 5 — TYPOGRAPHY & BRAND VOICE
-    // ─────────────────────────────────────────────────────────────────────
-    const p5 = doc.addPage([W, H]);
-    p5.drawRectangle({ x:0, y:0, width:W, height:H, color:surfaceBg });
-    p5.drawRectangle({ x:0, y:H-56, width:W, height:56, color:nearBlack });
-    p5.drawRectangle({ x:0, y:H-56, width:4, height:56, color:col1 });
-    p5.drawText('TYPOGRAPHY & BRAND VOICE', { x:M, y:H-36, font:bold, size:20, color:white });
-    footer(p5, 5);
-
-    const tyY = H - 75;
-    const halfW = (W - M*2 - 24) / 2;
-
-    // Left — typography
-    p5.drawText('PRIMARY TYPEFACE', { x:M, y:tyY, font:bold, size:8.5, color:mutedText });
-    p5.drawRectangle({ x:M, y:tyY-6, width:halfW, height:0.5, color:col1 });
-
-    p5.drawText('Aa', { x:M, y:tyY-68, font:bold, size:60, color:col1 });
-    p5.drawText('Helvetica Bold', { x:M, y:tyY-84, font:bold, size:15, color:darkText });
-    p5.drawText('Helvetica Regular', { x:M, y:tyY-102, font:reg, size:12, color:midGray });
-
-    p5.drawRectangle({ x:M, y:tyY-112, width:halfW, height:0.5, color:lightBorder });
-    p5.drawText('ABCDEFGHIJKLMNOPQRSTUVWXYZ', { x:M, y:tyY-126, font:reg, size:8.5, color:mutedText });
-    p5.drawText('abcdefghijklmnopqrstuvwxyz  0123456789', { x:M, y:tyY-140, font:reg, size:8.5, color:mutedText });
-
-    p5.drawText('TYPE SCALE', { x:M, y:tyY-160, font:bold, size:8.5, color:mutedText });
-    p5.drawRectangle({ x:M, y:tyY-166, width:halfW, height:0.5, color:lightBorder });
-
-    [
-      ['Display', '48-72pt', 'Bold', true],
-      ['Heading', '24-36pt', 'Bold', false],
-      ['Subheading', '16-20pt', 'Bold', false],
-      ['Body', '10-14pt', 'Regular', false],
-      ['Caption', '8-10pt', 'Regular', false],
-    ].forEach(([use, size, wt, accent], i) => {
-      const ry = tyY - 182 - i*19;
-      p5.drawRectangle({ x:M, y:ry-5, width:halfW, height:17,
-        color: accent ? col1 : (i%2===0 ? white : rgb(0.92,0.93,0.95)), borderRadius:2 });
-      p5.drawText(use, { x:M+8, y:ry+1, font:accent?bold:reg, size:8.5, color:accent?white:darkText });
-      p5.drawText(size, { x:M+halfW*0.54, y:ry+1, font:reg, size:8.5, color:accent?rgb(0.85,0.87,0.92):mutedText });
-      p5.drawText(wt, { x:M+halfW*0.78, y:ry+1, font:reg, size:8.5, color:accent?rgb(0.85,0.87,0.92):mutedText });
-    });
-
-    // Right — brand voice
-    const bvX = M + halfW + 24;
-    const bvW = halfW;
-
-    p5.drawText('BRAND VOICE', { x:bvX, y:tyY, font:bold, size:8.5, color:mutedText });
-    p5.drawRectangle({ x:bvX, y:tyY-6, width:bvW, height:0.5, color:col1 });
-
-    // Personality tags
-    if (personality) {
-      const tags = personality.split(/[,.]/).map(t => t.trim()).filter(Boolean).slice(0, 5);
-      let tagX = bvX, tagY = tyY - 24;
-      tags.forEach(tag => {
-        const clean = s(tag, 30);
-        const tw = bold.widthOfTextAtSize(clean, 8) + 18;
-        if (tagX + tw > bvX + bvW) { tagX = bvX; tagY -= 22; }
-        p5.drawRectangle({ x:tagX, y:tagY-8, width:tw, height:18, color:col1, borderRadius:9 });
-        p5.drawText(clean, { x:tagX+9, y:tagY-1, font:bold, size:8, color:white });
-        tagX += tw + 6;
+      const ld = logoImg.scaleToFit(cardW-60, cardH-60);
+      p3.drawImage(logoImg, {
+        x: c2X + (cardW-ld.width)/2,
+        y: cardY + (cardH-ld.height)/2,
+        width: ld.width, height: ld.height
       });
     }
 
-    // About
-    if (description) {
-      p5.drawText('ABOUT', { x:bvX, y:tyY-66, font:bold, size:8.5, color:mutedText });
-      p5.drawRectangle({ x:bvX, y:tyY-72, width:bvW, height:0.5, color:lightBorder });
-      drawWrapped(p5, description, bvX, tyY-88, reg, 8.5, darkText, bvW, 14);
+    footer(p3, 3, 'Introduction');
+
+    // ─────────────────────────────────────────────────────────────────────
+    // PAGE 4 — SOCIAL MEDIA ASSETS
+    // ─────────────────────────────────────────────────────────────────────
+    const p4 = doc.addPage([W, H]);
+    p4.drawRectangle({ x:0, y:0, width:W, height:H, color:white });
+    p4.drawRectangle({ x:0, y:0, width:5, height:H, color:col1 });
+
+    drawText(p4, 'Introduction', { x:40, y:H-32, font:R, size:9, color:muted });
+    drawText(p4, '04', { x:W-50, y:H-32, font:B, size:9, color:muted });
+    drawText(p4, 'Social', { x:40, y:H-60, font:B, size:28, color:ink });
+    drawText(p4, 'Assets', { x:40, y:H-90, font:B, size:28, color:ink });
+    p4.drawRectangle({ x:40, y:H-100, width:W-80, height:0.5, color:faint });
+
+    const aW = W - 80;
+    const aX = 40;
+    let aY = H - 115;
+
+    // Facebook
+    drawText(p4, 'Facebook Cover  —  820 × 312 px', { x:aX, y:aY, font:B, size:9, color:muted });
+    aY -= 8;
+    const fbH = Math.round(aW * (312/820));
+    aY -= fbH;
+    if (fbImg) {
+      const fd = fbImg.scaleToFit(aW, fbH);
+      p4.drawImage(fbImg, { x:aX+(aW-fd.width)/2, y:aY+(fbH-fd.height)/2, width:fd.width, height:fd.height });
     }
+    p4.drawRectangle({ x:aX, y:aY, width:aW, height:fbH, borderColor:faint, borderWidth:0.5, color:fbImg?rgb(0,0,0,0):bgLight });
+    if (!fbImg) drawText(p4, 'Facebook Cover', { x:aX+aW/2-40, y:aY+fbH/2, font:R, size:10, color:muted });
 
-    // Tagline callout
+    // Gap
+    aY -= 24;
+
+    // LinkedIn
+    drawText(p4, 'LinkedIn Cover  —  1584 × 396 px', { x:aX, y:aY, font:B, size:9, color:muted });
+    aY -= 8;
+    const liH = Math.round(aW * (396/1584));
+    aY -= liH;
+    if (liImg) {
+      const ld = liImg.scaleToFit(aW, liH);
+      p4.drawImage(liImg, { x:aX+(aW-ld.width)/2, y:aY+(liH-ld.height)/2, width:ld.width, height:ld.height });
+    }
+    p4.drawRectangle({ x:aX, y:aY, width:aW, height:liH, borderColor:faint, borderWidth:0.5, color:liImg?rgb(0,0,0,0):bgLight });
+    if (!liImg) drawText(p4, 'LinkedIn Cover', { x:aX+aW/2-40, y:aY+liH/2, font:R, size:10, color:muted });
+
+    footer(p4, 4, 'Introduction');
+
+    // ─────────────────────────────────────────────────────────────────────
+    // PAGE 5 — TYPOGRAPHY (matches reference: specimen + scale)
+    // ─────────────────────────────────────────────────────────────────────
+    const p5 = doc.addPage([W, H]);
+    p5.drawRectangle({ x:0, y:0, width:W, height:H, color:white });
+    p5.drawRectangle({ x:0, y:0, width:5, height:H, color:col1 });
+
+    drawText(p5, 'Introduction', { x:40, y:H-32, font:R, size:9, color:muted });
+    drawText(p5, '05', { x:W-50, y:H-32, font:B, size:9, color:muted });
+    drawText(p5, 'Corporate', { x:40, y:H-60, font:B, size:28, color:ink });
+    drawText(p5, 'Typography', { x:40, y:H-90, font:B, size:28, color:ink });
+    p5.drawRectangle({ x:40, y:H-100, width:W-80, height:0.5, color:faint });
+
+    // Left column — type specimen
+    const tyX = 40, tyW = W*0.50 - 20;
+    let tyY = H - 120;
+
+    drawText(p5, 'PRIMARY TYPEFACE', { x:tyX, y:tyY, font:B, size:8, color:muted });
+    tyY -= 4;
+    p5.drawRectangle({ x:tyX, y:tyY, width:tyW, height:0.5, color:faint });
+    tyY -= 10;
+
+    drawText(p5, 'Helvetica Semibold', { x:tyX, y:tyY, font:B, size:13, color:ink });
+    tyY -= 18;
+
+    // Big Aa specimen
+    drawText(p5, 'aA', { x:tyX, y:tyY-40, font:B, size:72, color:ink });
+    tyY -= 60;
+
+    // Alphabet
+    drawText(p5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', { x:tyX, y:tyY-10, font:B, size:9, color:muted });
+    drawText(p5, 'abcdefghijklmnopqrstuvwxyz', { x:tyX, y:tyY-24, font:R, size:9, color:muted });
+    drawText(p5, '0123456789!@#$%^&*()', { x:tyX, y:tyY-38, font:R, size:9, color:muted });
+
+    tyY -= 54;
+    p5.drawRectangle({ x:tyX, y:tyY, width:tyW, height:0.5, color:faint });
+    tyY -= 14;
+
+    // Lorem ipsum paragraph (matches reference style)
+    const loremText = 'Typography is the voice of a brand. The primary typeface should be used consistently across all brand materials — from digital to print — to build recognition and reinforce the brand\'s professional character.';
+    wrap(p5, loremText, tyX, tyY, R, 8.5, bodyText, tyW, 13);
+
+    // Right column — usage scale
+    const scX = W*0.52;
+    let scY = H - 120;
+    drawText(p5, 'Headings', { x:scX, y:scY, font:B, size:9, color:muted });
+    drawText(p5, 'Titles', { x:scX, y:scY-14, font:B, size:9, color:muted });
+    drawText(p5, 'Subtitles', { x:scX, y:scY-28, font:B, size:9, color:muted });
+    drawText(p5, 'Bold', { x:scX, y:scY-42, font:B, size:9, color:muted });
+    drawText(p5, 'Number', { x:scX, y:scY-56, font:B, size:9, color:muted });
+    p5.drawRectangle({ x:scX+70, y:scY-62, width:W-scX-70-40, height:0.5, color:faint });
+    drawText(p5, 'Primary Font', { x:scX, y:scY-74, font:B, size:10, color:ink });
+
+    // Secondary font row
+    scY -= 90;
+    p5.drawRectangle({ x:scX, y:scY, width:W-scX-40, height:0.5, color:faint });
+    scY -= 14;
+    drawText(p5, 'Helvetica Regular', { x:scX, y:scY, font:R, size:13, color:ink });
+    scY -= 20;
+    drawText(p5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', { x:scX, y:scY, font:R, size:8.5, color:muted });
+    scY -= 14;
+    drawText(p5, 'abcdefghijklmnopqrstuvwxyz', { x:scX, y:scY, font:R, size:8.5, color:muted });
+    scY -= 14;
+    drawText(p5, '0123456789!', { x:scX, y:scY, font:R, size:8.5, color:muted });
+
+    // Brand voice tagline callout
     if (tagline) {
-      const tqY = 85;
-      p5.drawRectangle({ x:bvX, y:tqY, width:bvW, height:58, color:nearBlack, borderRadius:6 });
-      p5.drawRectangle({ x:bvX, y:tqY, width:4, height:58, color:col1 });
-      p5.drawText('TAGLINE', { x:bvX+16, y:tqY+43, font:bold, size:7, color:col1 });
-
-      // Split tagline safely if needed
-      const tqClean = s(tagline, 65);
-      const maxTW = bvW - 28;
-      if (it.widthOfTextAtSize(tqClean, 13) <= maxTW) {
-        p5.drawText(tqClean, { x:bvX+16, y:tqY+24, font:it, size:13, color:white });
+      scY -= 30;
+      p5.drawRectangle({ x:scX, y:scY-52, width:W-scX-40, height:56, color:col1, borderRadius:4 });
+      p5.drawRectangle({ x:scX, y:scY-52, width:4, height:56, color:white, opacity:0.3 });
+      drawText(p5, 'BRAND TAGLINE', { x:scX+14, y:scY-16, font:B, size:7, color:rgb(1,1,1,0.6) });
+      // Handle long taglines
+      const tq = s(tagline, 55);
+      const tqW = W - scX - 55;
+      if (I.widthOfTextAtSize(tq, 13) <= tqW) {
+        drawText(p5, tq, { x:scX+14, y:scY-34, font:I, size:13, color:white });
       } else {
-        const words = tqClean.split(' ');
-        let l1 = '', l2 = '';
-        words.forEach(w => {
-          const test = l1 ? l1+' '+w : w;
-          if (it.widthOfTextAtSize(test, 11) <= maxTW) l1 = test;
-          else l2 = l2 ? l2+' '+w : w;
+        const wds = tq.split(' ');
+        let l1='',l2='';
+        wds.forEach(w=>{
+          if(I.widthOfTextAtSize((l1?l1+' ':'')+w,11)<=tqW) l1=(l1?l1+' ':'')+w;
+          else l2=(l2?l2+' ':'')+w;
         });
-        p5.drawText(l1, { x:bvX+16, y:tqY+30, font:it, size:11, color:white });
-        if (l2) p5.drawText(l2, { x:bvX+16, y:tqY+14, font:it, size:11, color:white });
+        drawText(p5, l1, { x:scX+14, y:scY-28, font:I, size:11, color:white });
+        if (l2) drawText(p5, l2, { x:scX+14, y:scY-43, font:I, size:11, color:white });
       }
     }
+
+    footer(p5, 5, 'Introduction');
 
     const pdfBytes = await doc.save();
     const fname = s(brand.brandName, 40).replace(/[^a-zA-Z0-9]/g, '-').toLowerCase() || 'brand';

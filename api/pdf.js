@@ -38,6 +38,14 @@ module.exports = async (req, res) => {
 
   async function fetchBuf(url) {
     if (!url) return null;
+    // If it's a base64 data URL sent from browser, decode directly
+    if (url.startsWith('data:')) {
+      try {
+        const base64 = url.split(',')[1];
+        return Buffer.from(base64, 'base64');
+      } catch (e) { return null; }
+    }
+    // Otherwise fetch from URL
     try {
       const r = await fetch(url, { timeout: 15000 });
       if (!r.ok) return null;

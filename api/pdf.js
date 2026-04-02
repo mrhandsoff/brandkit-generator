@@ -1,6 +1,13 @@
 const fetch = require('node-fetch');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
+// Increase Vercel timeout and body size for base64 image payloads
+module.exports.config = {
+  maxDuration: 60,
+  api: { bodyParser: { sizeLimit: '20mb' } }
+};
+
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');

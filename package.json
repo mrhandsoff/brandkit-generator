@@ -1,9 +1,0 @@
-{
-  "name": "brandkit-generator",
-  "version": "1.0.0",
-  "engines": { "node": ">=18" },
-  "dependencies": {
-    "pdf-lib": "^1.17.1",
-    "node-fetch": "^2.7.0"
-  }
-}

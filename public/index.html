@@ -594,12 +594,58 @@ async function generateAll(){
   setStatus('Brand kit ready. Download each asset or export the full PDF below.','success');
 }
 
+// Convert an image URL to base64 data URL using canvas
+// This runs in the browser where the images are already accessible
+function imgToBase64(url) {
+  return new Promise(resolve => {
+    if (!url) return resolve(null);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        c.getContext('2d').drawImage(img, 0, 0);
+        resolve(c.toDataURL('image/png'));
+      } catch(e) { resolve(null); }
+    };
+    img.onerror = () => {
+      // If crossOrigin fails, try without it
+      const img2 = new Image();
+      img2.onload = () => {
+        try {
+          const c = document.createElement('canvas');
+          c.width = img2.naturalWidth; c.height = img2.naturalHeight;
+          c.getContext('2d').drawImage(img2, 0, 0);
+          resolve(c.toDataURL('image/png'));
+        } catch(e) { resolve(null); }
+      };
+      img2.onerror = () => resolve(null);
+      img2.src = url;
+    };
+    img.src = url;
+  });
+}
+
 async function exportPDF(){
-  const btn=$('pdf-btn');btn.disabled=true;btn.textContent='Building PDF...';
+  const btn=$('pdf-btn');btn.disabled=true;btn.textContent='Encoding images...';
   try{
+    // Encode all images in browser before sending — avoids server-side CORS/expiry issues
+    const [logoB64, fbB64, liB64] = await Promise.all([
+      imgToBase64(S.logoUrl),
+      imgToBase64(S.fbUrl),
+      imgToBase64(S.liUrl)
+    ]);
+
+    btn.textContent='Building PDF...';
     const r=await fetch('/api/pdf',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({brand:S.brand,logoUrl:S.logoUrl,fbUrl:S.fbUrl,liUrl:S.liUrl})
+      body:JSON.stringify({
+        brand:S.brand,
+        logoUrl:logoB64||S.logoUrl,
+        fbUrl:fbB64||S.fbUrl,
+        liUrl:liB64||S.liUrl
+      })
     });
     if(!r.ok){const e=await r.json();throw new Error(e.error);}
     const blob=await r.blob();

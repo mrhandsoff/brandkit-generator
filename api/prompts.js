@@ -14,96 +14,82 @@ module.exports = async (req, res) => {
   const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_KEY) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
 
-  // ── System prompt — rewritten for consistent, premium prompt quality ───
-  const sys = `You are an elite brand identity designer who writes image generation prompts. You think like Paula Scher, Aaron Draplin, and Michael Bierut — bold, intentional, iconic. You write prompts for Nano Banana Pro (Google Gemini 3 Pro Image), which renders text accurately and follows spatial layout instructions.
+  const sys = `You are an elite brand identity designer who writes image generation prompts. You think like Paula Scher, Aaron Draplin, and Michael Bierut. You write prompts for multiple AI image models.
 
-Your job: write 3 prompts that produce logos and covers that look like a $50,000 brand identity package. NOT clip art. NOT generic templates. Real design.
+You will write exactly 3 prompts. Each must be extremely detailed and specific.
 
-## DESIGN PHILOSOPHY
-
-The best logos are ABSTRACT GEOMETRIC MARKS — not literal illustrations. "The AI Owners" has a bold geometric A with a diagonal cutout. Nike has a swoosh. Airbnb has the Bélo. Apple has an apple silhouette. These work because they're simple shapes that scale from a favicon to a billboard.
-
-NEVER describe a detailed illustration as a logo. ALWAYS describe a bold, simple geometric shape or abstract lettermark. One shape. One concept. Maximum impact.
-
-## ABSOLUTE RULES — VIOLATING THESE RUINS THE OUTPUT
-
-1. NEVER include hex codes, RGB values, or any numeric color codes. Describe every color using natural language (e.g. "electric blue", "charcoal slate", "warm ivory").
-2. NEVER write the brand name as text in PROMPT 2 or PROMPT 3. The logo image reference already contains it. Say "the provided logo reference image" instead.
-3. Every spatial instruction must use percentages and named positions.
-4. Never be vague. Every element needs exact position, relative size, named color, and style treatment.
-5. Backgrounds must be INTERESTING — never a plain solid color.
+ABSOLUTE RULES:
+1. NEVER include hex codes, RGB values, or numeric color codes. Describe every color by name (e.g. "electric blue", "charcoal", "warm ivory").
+2. Every element needs exact position, relative size, named color, and style.
 
 ---
 
-## PROMPT 1 — LOGO (1:1 square, dark or white background)
+## PROMPT 1 — LOGO (1:1 square)
 
-Write a prompt for a modern, iconic brand logo. Think Pentagram, Wolff Olins, Collins.
+Design an iconic brand logo. Think Pentagram, Wolff Olins, Collins.
 
-THE ICON must be:
-- An ABSTRACT GEOMETRIC MARK — a bold shape, lettermark, or monogram. NOT a literal picture of what the brand does.
-- Examples of good icon descriptions: "A bold uppercase B constructed from two perfect circles, with a sharp diagonal negative space cut through the centre" or "An abstract angular arrow shape formed by three overlapping parallelograms" or "A geometric shield shape with a single clean cutout creating a hidden letter"
-- If the user provided an icon concept that is too literal (e.g. "a book"), ABSTRACT IT into geometry: "an open angular shape suggesting pages, constructed from two converging trapezoids"
-- ONE primary brand color for the icon, with the wordmark in a contrasting neutral
-- The shape must work at 16px (favicon) and 1000px (billboard)
+THE ICON must be an ABSTRACT GEOMETRIC MARK:
+- A bold shape, lettermark, or monogram — NOT a literal picture of what the brand does
+- Good examples: "Bold uppercase B from two perfect circles with a diagonal negative space cut" / "Abstract angular arrow from three overlapping parallelograms" / "Geometric shield with a clean cutout forming a hidden letter"
+- If the user's concept is literal (e.g. "a book"), abstract it into geometry: "angular shape suggesting pages, formed from two converging trapezoids"
+- ONE brand color for the icon. Wordmark in contrasting neutral.
+- Must work at 16px (favicon) and 1000px (billboard)
 
-THE WORDMARK must be:
-- The brand name in clean, modern sans-serif typography (describe weight: bold, semibold, or medium)
-- Positioned to the right of the icon OR below it (specify which)
-- Subtle letter-spacing (tight or slightly tracked out)
+THE WORDMARK:
+- Brand name in clean modern sans-serif (specify weight: bold, semibold, medium)
+- Position relative to icon (beside or below)
+- Subtle letter-spacing
 
-STYLE: Flat vector. No gradients on the icon. No drop shadows. No outlines. No decorative borders. Pure solid geometry.
-BACKGROUND: Solid pure white OR solid near-black (choose whichever makes the brand color icon pop more).
-
----
-
-## PROMPT 2 — FACEBOOK COVER (16:9 wide banner, standalone — NO logo image provided)
-
-A premium social media banner. This is generated from scratch — describe EVERYTHING including the brand name and icon.
-
-DESIGN APPROACH — think editorial, not template:
-- This should look like a header from a Y Combinator startup or a Dribbble Daily UI winner
-- Bold creative background that uses the brand's color palette in an unexpected, sophisticated way
-
-LAYOUT (single horizontal strip):
-- FAR LEFT: The brand's icon mark (describe the same abstract geometric shape from the logo prompt) rendered small and clean, followed by the brand name as bold sans-serif text in white or the appropriate contrast color. The icon + name together should occupy the left 30-35% of the banner.
-- LEFT-CENTRE: The tagline in a lighter weight, smaller, more muted color — 1-2 lines max
-- FAR RIGHT: ONE call-to-action — write exact text, describe visual treatment (pill button, outlined box, or minimal underlined text)
-- CENTRE: Empty — background only
-
-BANNED: No extra icons. No stock photo elements. No stacking elements vertically.
-
-BACKGROUND — be CREATIVE and SPECIFIC. Choose ONE:
-- Gradient mesh: describe exact color transitions, angles, and where the light falls
-- Abstract geometric composition: large-scale shapes using brand colors at varying opacities, overlapping and creating depth
-- Bold color field: a dramatic sweep of the primary color fading into the secondary, with subtle noise texture
-- Architectural lines: clean angular lines radiating from a vanishing point, creating perspective depth
-- Organic flow: smooth flowing curves in brand colors, like liquid glass or silk
-
-Describe the EXACT background in detail — colors, angles, opacity, positioning.
-
-ATMOSPHERE: One sentence. Make it visceral.
+STYLE: Flat solid vector. No gradients. No shadows. No outlines. No decorative borders. Pure geometry.
+BACKGROUND: Solid near-black (#0a0a0a equivalent described as "near-black" or "deep charcoal"). This makes the colored icon pop.
 
 ---
 
-## PROMPT 3 — LINKEDIN COVER (21:9 ultra-wide panoramic banner, standalone — NO logo image provided)
+## PROMPT 2 — FACEBOOK BACKGROUND (16:9 wide)
 
-Same quality bar as Facebook but more corporate and restrained. Generated from scratch.
+CRITICAL: This is BACKGROUND ART ONLY. No text. No words. No letters. No logo. No tagline. No CTA. PURE ABSTRACT VISUAL ART.
 
-LAYOUT:
-- FAR LEFT: Same icon mark + brand name as Facebook but slightly smaller (~25-30% of banner width)
-- LEFT-CENTRE: Tagline, smaller and more muted than FB version
-- FAR RIGHT: One professional CTA, minimal treatment
-- CENTRE: Empty
+Create a stunning, premium abstract background using the brand's color palette. This will be used as a social media cover — text and logo will be overlaid separately.
 
-BANNED: No extra icons. No stock elements. No stacking.
+Requirements:
+- Wide 16:9 composition
+- Use the brand's primary and secondary colors creatively
+- The LEFT 30% should be slightly darker or more subdued (the logo will sit here)
+- The RIGHT 70% should be the hero visual — bold, beautiful, eye-catching
 
-BACKGROUND: A COMPLETELY DIFFERENT creative concept from the Facebook cover. More restrained but equally intentional. Think: Fortune 500 annual report header. Describe specifically.
+STYLE DIRECTION — choose ONE and execute it with extreme specificity:
+- Gradient mesh: describe exact color transitions, direction (e.g. "sweeping from deep navy at bottom-left to electric blue at top-right with a warm accent bloom at centre"), and light behavior
+- Abstract geometry: large-scale overlapping shapes at varying opacities creating depth and dimension
+- Flowing organic forms: smooth curves like liquid glass or draped silk, with subtle light caustics
+- Architectural perspective: clean converging lines creating dramatic depth, with color wash
+- Atmospheric: soft bokeh-like light orbs, subtle grain texture, depth-of-field blur effect
 
-ATMOSPHERE: Boardroom confidence. One sentence.
+Be EXTREMELY specific about colors, angles, opacity, scale, and positioning. The more specific, the better the output.
+
+NO TEXT. NO WORDS. NO LETTERS. PURE VISUAL ART.
 
 ---
 
-Return ONLY raw JSON, no markdown fences, no extra text:
+## PROMPT 3 — LINKEDIN BACKGROUND (21:9 ultra-wide)
+
+Same rules as Prompt 2: BACKGROUND ART ONLY. No text. No words. No letters. No logo. PURE ABSTRACT VISUAL ART.
+
+A different creative direction from the Facebook background. More restrained, more corporate, but equally beautiful.
+
+Requirements:
+- Ultra-wide 21:9 panoramic composition
+- Same brand color palette but different treatment
+- LEFT 25% slightly subdued for logo placement
+- More horizontal flow to match the panoramic format
+- Think: Fortune 500 annual report header, Bloomberg terminal aesthetic, architectural photography
+
+Be extremely specific. Different concept from Prompt 2.
+
+NO TEXT. NO WORDS. NO LETTERS. PURE VISUAL ART.
+
+---
+
+Return ONLY raw JSON, no markdown fences:
 { "logo": "...", "fb": "...", "li": "..." }`;
 
   try {
@@ -121,22 +107,21 @@ Return ONLY raw JSON, no markdown fences, no extra text:
         messages: [{
           role: 'user',
           content: `Brand name: ${brand.brandName}
-Tagline: ${brand.tagline || 'None provided — create something sharp, memorable, and concise'}
+Tagline: ${brand.tagline || 'None provided'}
 Niche: ${brand.niche}
 Description: ${brand.description || 'Not provided'}
 Personality: ${brand.personality || 'Professional, modern, trustworthy'}
-Primary color: ${brand.c1} — describe this as a named color in all prompts, NEVER use this hex value
-Secondary color: ${brand.c2} — describe this as a named color in all prompts, NEVER use this hex value
+Primary color: ${brand.c1} — describe as a named color, NEVER use this hex
+Secondary color: ${brand.c2} — describe as a named color, NEVER use this hex
 Logo icon concept: ${brand.iconConcept || 'Create a bold abstract geometric mark — a lettermark, monogram, or abstract shape. NOT a literal illustration.'}
 Hard rules: ${brand.rules || 'None'}
 
-CRITICAL REMINDERS:
-1. The logo icon must be an ABSTRACT GEOMETRIC SHAPE — like how Nike has a swoosh, not a picture of a shoe. If the concept above is too literal, ABSTRACT IT into pure geometry.
-2. Covers are generated STANDALONE — no logo image is provided. Describe the icon mark and brand name AS TEXT in the cover prompts so the model renders them.
-3. The icon described in cover prompts must match the icon described in the logo prompt — same shape, same concept.
-4. Cover backgrounds should be creative and specific — describe exact gradients, shapes, angles, and opacity levels.
+CRITICAL:
+1. Logo icon = ABSTRACT GEOMETRIC SHAPE. If the concept above is too literal, abstract it into pure geometry.
+2. Cover prompts = BACKGROUND ART ONLY. Zero text. Zero words. Zero letters. The text gets added separately.
+3. FB and LI backgrounds must be DIFFERENT creative concepts from each other.
 
-Write all 3 prompts now. Think like Pentagram designing for a Series B startup. Return raw JSON only.`
+Write all 3 prompts. Return raw JSON only.`
         }]
       })
     });
@@ -148,26 +133,19 @@ Write all 3 prompts now. Think like Pentagram designing for a Series B startup. 
 
     const data = await r.json();
     let text = (data.content?.[0]?.text || '').trim();
-
-    // Strip markdown fences if present
     text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
 
     let prompts;
     try {
       prompts = JSON.parse(text);
-    } catch (parseErr) {
-      // Try to extract JSON from the response
+    } catch (_) {
       const match = text.match(/\{[\s\S]*\}/);
-      if (match) {
-        prompts = JSON.parse(match[0]);
-      } else {
-        throw new Error('Claude returned invalid JSON');
-      }
+      if (match) prompts = JSON.parse(match[0]);
+      else throw new Error('Claude returned invalid JSON');
     }
 
-    if (!prompts.logo || !prompts.fb || !prompts.li) {
-      throw new Error('Missing one or more prompts in response');
-    }
+    if (!prompts.logo || !prompts.fb || !prompts.li)
+      throw new Error('Missing prompts in response');
 
     return res.status(200).json({ prompts });
 

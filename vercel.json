@@ -1,12 +1,15 @@
 {
   "version": 2,
   "functions": {
-    "api/pdf.js": { "maxDuration": 60 },
     "api/generate.js": { "maxDuration": 300 },
-    "api/prompts.js": { "maxDuration": 30 }
+    "api/prompts.js":  { "maxDuration": 30 },
+    "api/save.js":     { "maxDuration": 60 },
+    "api/kit.js":      { "maxDuration": 10 },
+    "api/pdf.js":      { "maxDuration": 60 }
   },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/public/index.html" }
+    { "src": "/kit",      "dest": "/public/kit.html" },
+    { "src": "/(.*)",     "dest": "/public/index.html" }
   ]
 }

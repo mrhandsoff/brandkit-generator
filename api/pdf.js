@@ -45,19 +45,31 @@ module.exports = async (req, res) => {
 
   async function fetchBuf(url) {
     if (!url) return null;
-    // If it's a base64 data URL sent from browser, decode directly
+    // Handle base64 data URLs sent from browser
     if (url.startsWith('data:')) {
       try {
         const base64 = url.split(',')[1];
         return Buffer.from(base64, 'base64');
       } catch (e) { return null; }
     }
-    // Otherwise fetch from URL
-    try {
-      const r = await fetch(url, { timeout: 15000 });
-      if (!r.ok) return null;
-      return await r.buffer();
-    } catch (e) { return null; }
+    // Fetch remote URL with retries
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const r = await fetch(url, {
+          timeout: 20000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; BrandKit/1.0)',
+            'Accept': 'image/*,*/*'
+          }
+        });
+        if (!r.ok) continue;
+        return await r.buffer();
+      } catch (e) {
+        if (attempt === 2) return null;
+        await new Promise(res => setTimeout(res, 1000));
+      }
+    }
+    return null;
   }
 
   async function embedImg(doc, url) {

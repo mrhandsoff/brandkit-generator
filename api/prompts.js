@@ -89,8 +89,18 @@ NO TEXT. NO WORDS. NO LETTERS. PURE VISUAL ART.
 
 ---
 
+## FONT PAIRING
+
+Based on the brand's personality and niche, suggest a Google Fonts pairing:
+- "heading": A distinctive display/heading font from Google Fonts (e.g. "Space Grotesk", "Outfit", "Syne", "Cabinet Grotesk", "Plus Jakarta Sans", "Clash Display", "Satoshi"). Pick something that matches the brand personality — bold brands get geometric sans, elegant brands get refined serifs, tech brands get monospace-influenced faces.
+- "body": A clean readable body font from Google Fonts (e.g. "Inter", "DM Sans", "General Sans", "Manrope", "Nunito Sans", "Source Sans 3"). Should complement the heading font.
+
+Do NOT always pick the same fonts. Match the brand's personality.
+
+---
+
 Return ONLY raw JSON, no markdown fences:
-{ "logo": "...", "fb": "...", "li": "..." }`;
+{ "logo": "...", "fb": "...", "li": "...", "fonts": { "heading": "...", "body": "..." } }`;
 
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
@@ -146,6 +156,9 @@ Write all 3 prompts. Return raw JSON only.`
 
     if (!prompts.logo || !prompts.fb || !prompts.li)
       throw new Error('Missing prompts in response');
+
+    // Ensure fonts exist with fallback
+    if (!prompts.fonts) prompts.fonts = { heading: 'Space Grotesk', body: 'DM Sans' };
 
     return res.status(200).json({ prompts });
 

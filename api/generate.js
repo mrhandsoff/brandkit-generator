@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 
 const FAL_KEY = () => process.env.FAL_API_KEY;
 
-// ── Retry wrapper ────────────────────────────────────────────────────────
+// ── Retry wrapper ────────────────────────────────────────────────────
 async function withRetry(fn, retries = 2, label = '') {
   let lastErr;
   for (let i = 0; i <= retries; i++) {
@@ -19,7 +19,7 @@ async function withRetry(fn, retries = 2, label = '') {
   throw lastErr;
 }
 
-// ── fal.ai queue-based generation ────────────────────────────────────────
+// ── fal.ai queue-based generation ────────────────────────────────────
 async function falQueue(endpoint, body) {
   const r = await fetch(`https://queue.fal.run/${endpoint}`, {
     method: 'POST',
@@ -33,7 +33,6 @@ async function falQueue(endpoint, body) {
   const job = await r.json();
   if (!job.status_url || !job.response_url) throw new Error('No polling URLs from fal');
 
-  // Poll for completion — 6 min max
   for (let i = 0; i < 120; i++) {
     await new Promise(res => setTimeout(res, 3000));
     let sd;
@@ -49,39 +48,12 @@ async function falQueue(endpoint, body) {
       if (!url) throw new Error('No image URL in fal result');
       return url;
     }
-    if (sd.status === 'FAILED') {
-      const reason = sd.error || sd.detail || 'Unknown';
-      throw new Error(`fal generation failed: ${reason}`);
-    }
+    if (sd.status === 'FAILED') throw new Error(`fal generation failed: ${sd.error || 'Unknown'}`);
   }
   throw new Error('fal timed out after 6 minutes');
 }
 
-// ── Upload an image URL to fal storage (needed for image references) ─────
-async function uploadToFal(imageUrl) {
-  const imgResp = await fetch(imageUrl);
-  if (!imgResp.ok) throw new Error(`Failed to fetch image for upload: ${imgResp.status}`);
-  const blob = await imgResp.buffer();
-
-  const init = await fetch('https://rest.fal.run/storage/upload/initiate', {
-    method: 'POST',
-    headers: { 'Authorization': `Key ${FAL_KEY()}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content_type: 'image/png', file_name: 'asset.png' })
-  });
-  if (!init.ok) throw new Error(`Upload initiate failed: ${init.status}`);
-  const { upload_url, file_url } = await init.json();
-
-  const putResp = await fetch(upload_url, {
-    method: 'PUT',
-    body: blob,
-    headers: { 'Content-Type': 'image/png' }
-  });
-  if (!putResp.ok) throw new Error(`Upload PUT failed: ${putResp.status}`);
-
-  return file_url;
-}
-
-// ── Main handler ─────────────────────────────────────────────────────────
+// ── Main handler ─────────────────────────────────────────────────────
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -90,13 +62,12 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   if (!FAL_KEY()) return res.status(500).json({ error: 'FAL_API_KEY not configured' });
 
-  const { type, prompt, logoFalUrl } = req.body;
-
+  const { type, prompt } = req.body;
   if (!type || !prompt) return res.status(400).json({ error: 'type and prompt are required' });
 
   try {
 
-    // ── LOGO — 1:1, 2K, standalone generation ────────────────────────────
+    // ── LOGO — 1:1, 2K ─────────────────────────────────────────────
     if (type === 'logo') {
       const url = await withRetry(() => falQueue('fal-ai/nano-banana-pro', {
         prompt,
@@ -108,24 +79,13 @@ module.exports = async (req, res) => {
         limit_generations: true
       }), 2, 'logo');
 
-      // Upload to fal storage so it can be used as a reference in cover generation
-      let falUrl = url;
-      try {
-        falUrl = await uploadToFal(url);
-      } catch (e) {
-        console.warn('Logo upload to fal storage failed, using direct URL:', e.message);
-      }
-
-      return res.status(200).json({ url, falUrl });
+      return res.status(200).json({ url });
     }
 
-    // ── FACEBOOK COVER — 16:9, edit endpoint with logo as reference ──────
+    // ── FACEBOOK COVER — 16:9, standalone (no logo ref) ─────────────
     if (type === 'cover-fb') {
-      if (!logoFalUrl) return res.status(400).json({ error: 'logoFalUrl required for FB cover' });
-
-      const url = await withRetry(() => falQueue('fal-ai/nano-banana-pro/edit', {
+      const url = await withRetry(() => falQueue('fal-ai/nano-banana-pro', {
         prompt,
-        image_urls: [logoFalUrl],
         num_images: 1,
         aspect_ratio: '16:9',
         output_format: 'png',
@@ -137,17 +97,10 @@ module.exports = async (req, res) => {
       return res.status(200).json({ url });
     }
 
-    // ── LINKEDIN COVER — 21:9, FRESH generation with logo reference ──────
-    // FIX: Previously tried to outpaint the FB cover, which caused the model
-    // to regenerate the logo incorrectly. Now we generate a fresh LinkedIn
-    // cover using the same logo reference but a separate prompt optimized
-    // for ultra-wide format. This is far more reliable.
+    // ── LINKEDIN COVER — 21:9, standalone (no logo ref) ─────────────
     if (type === 'cover-li') {
-      if (!logoFalUrl) return res.status(400).json({ error: 'logoFalUrl required for LinkedIn cover' });
-
-      const url = await withRetry(() => falQueue('fal-ai/nano-banana-pro/edit', {
+      const url = await withRetry(() => falQueue('fal-ai/nano-banana-pro', {
         prompt,
-        image_urls: [logoFalUrl],
         num_images: 1,
         aspect_ratio: '21:9',
         output_format: 'png',

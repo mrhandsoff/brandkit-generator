@@ -227,7 +227,7 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
       </div>
       <div class="status" id="status"></div>
       <div class="prompt-panel" id="prompt-panel"><div class="prompt-card"><div class="prompt-card-title">Review &amp; Edit Prompts</div><div class="prompt-card-sub">Claude wrote these. Edit anything before generating.</div><div class="prompt-fields"><div class="field"><div class="prompt-label">Logo (1:1)</div><textarea class="prompt-area" id="prompt-logo"></textarea></div><div class="field"><div class="prompt-label">Facebook Cover (16:9)</div><textarea class="prompt-area" id="prompt-fb"></textarea></div><div class="field"><div class="prompt-label">LinkedIn Cover (21:9)</div><textarea class="prompt-area" id="prompt-li"></textarea></div></div></div></div>
-      <div class="pipeline" id="pipeline"><div class="pipe-step" id="step-1"><div class="pipe-dot">1</div>Logo</div><div class="pipe-arrow">&rarr;</div><div class="pipe-step" id="step-2"><div class="pipe-dot">2</div>Upload</div><div class="pipe-arrow">&rarr;</div><div class="pipe-step" id="step-3"><div class="pipe-dot">3</div>FB Cover</div><div class="pipe-arrow">&rarr;</div><div class="pipe-step" id="step-4"><div class="pipe-dot">4</div>LI Cover</div><div class="pipe-arrow">&rarr;</div><div class="pipe-step" id="step-5"><div class="pipe-dot">5</div>Save</div></div>
+      <div class="pipeline" id="pipeline"><div class="pipe-step" id="step-1"><div class="pipe-dot">1</div>Logo</div><div class="pipe-arrow">&rarr;</div><div class="pipe-step" id="step-2"><div class="pipe-dot">2</div>FB Cover</div><div class="pipe-arrow">&rarr;</div><div class="pipe-step" id="step-3"><div class="pipe-dot">3</div>LI Cover</div><div class="pipe-arrow">&rarr;</div><div class="pipe-step" id="step-4"><div class="pipe-dot">4</div>Save</div></div>
       <div class="assets-grid" id="assets"></div>
       <div class="export-section" id="pdf-section">
         <div class="export-grid">
@@ -272,7 +272,7 @@ if (localStorage.getItem('tao_auth') === 'true') {
 }
 
 const $=id=>document.getElementById(id);
-const S={logoUrl:null,logoFalUrl:null,fbUrl:null,liUrl:null,brand:{},jsonUrl:null};
+const S={logoUrl:null,fbUrl:null,liUrl:null,brand:{},jsonUrl:null};
 
 function switchTab(n){['generate','history'].forEach(t=>{$('tab-'+t)?.classList.toggle('active',t===n);$('nav-'+t)?.classList.toggle('active',t===n)});if(n==='history')renderHistory()}
 function syncColor(p,t){const pi=$(p),ti=$(t);pi.addEventListener('input',()=>ti.value=pi.value);ti.addEventListener('input',()=>{if(/^#[0-9A-Fa-f]{6}$/.test(ti.value))pi.value=ti.value})}
@@ -312,27 +312,27 @@ async function renderRecent(){const h=_historyCache.slice(0,6);const el=$('recen
 
 async function writePrompts(){const brand=getBrand();if(!brand.brandName||!brand.niche){setStatus('Business name and industry required.','error');return}S.brand=brand;const btn=$('promptbtn');btn.disabled=true;btn.textContent='Writing...';setStatus('Claude is writing 3 prompts...','info');try{const{prompts}=await post('/api/prompts',{brand});$('prompt-logo').value=prompts.logo||'';$('prompt-fb').value=prompts.fb||'';$('prompt-li').value=prompts.li||'';$('prompt-panel').className='prompt-panel visible';$('genbtn').disabled=false;setStatus('Prompts ready. Review then hit Generate Brand Kit.','info')}catch(e){setStatus('Error: '+e.message,'error')}btn.disabled=false;btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Re-write'}
 
-async function regenAsset(id){const promptId={logo:'prompt-logo',fb:'prompt-fb',li:'prompt-li'}[id];const prompt=$(promptId).value.trim();if(!prompt)return;setSpinner(id);setActions(id,[]);const typeMap={logo:'logo',fb:'cover-fb',li:'cover-li'};try{const{url,falUrl}=await post('/api/generate',{type:typeMap[id],prompt,logoFalUrl:S.logoFalUrl});if(id==='logo'){S.logoUrl=url;if(falUrl)S.logoFalUrl=falUrl}if(id==='fb')S.fbUrl=url;if(id==='li')S.liUrl=url;setBodyImg(id,url);setActions(id,[{label:'Regen',fn:()=>regenAsset(id)},{label:'Download',cls:'dl',fn:()=>dlAsset(url,id)}])}catch(e){setFail(id,e.message);setActions(id,[{label:'Retry',fn:()=>regenAsset(id)}])}}
+async function regenAsset(id){const promptId={logo:'prompt-logo',fb:'prompt-fb',li:'prompt-li'}[id];const prompt=$(promptId).value.trim();if(!prompt)return;setSpinner(id);setActions(id,[]);const typeMap={logo:'logo',fb:'cover-fb',li:'cover-li'};try{const{url}=await post('/api/generate',{type:typeMap[id],prompt});if(id==='logo')S.logoUrl=url;if(id==='fb')S.fbUrl=url;if(id==='li')S.liUrl=url;setBodyImg(id,url);setActions(id,[{label:'Regen',fn:()=>regenAsset(id)},{label:'Download',cls:'dl',fn:()=>dlAsset(url,id)}])}catch(e){setFail(id,e.message);setActions(id,[{label:'Retry',fn:()=>regenAsset(id)}])}}
 
 async function generateAll(){
   const logoPrompt=$('prompt-logo').value.trim(),fbPrompt=$('prompt-fb').value.trim(),liPrompt=$('prompt-li').value.trim();
   if(!logoPrompt||!fbPrompt||!liPrompt){setStatus('All 3 prompts required.','error');return}
-  S.brand=getBrand();S.logoUrl=null;S.logoFalUrl=null;S.fbUrl=null;S.liUrl=null;S.jsonUrl=null;
+  S.brand=getBrand();S.logoUrl=null;S.fbUrl=null;S.liUrl=null;S.jsonUrl=null;
   const btn=$('genbtn');btn.disabled=true;btn.textContent='Generating...';
   $('pipeline').className='pipeline visible';$('pdf-section').className='export-section';$('assets').innerHTML='';
-  [1,2,3,4,5].forEach(n=>setStep(n,''));
+  [1,2,3,4].forEach(n=>setStep(n,''));
   mkCard('logo','Logo',false);mkCard('fb','Facebook Cover',true);mkCard('li','LinkedIn Cover',true);
 
   setStep(1,'active');setStatus('Generating logo at 2K...','info');
-  try{const{url,falUrl}=await post('/api/generate',{type:'logo',prompt:logoPrompt});S.logoUrl=url;S.logoFalUrl=falUrl;setBodyImg('logo',url);setActions('logo',[{label:'Regen',fn:()=>regenAsset('logo')},{label:'Download',cls:'dl',fn:()=>dlAsset(url,'logo')}]);setStep(1,'done');setStep(2,'done')}catch(e){setStep(1,'error');['logo','fb','li'].forEach(id=>setFail(id,'Logo failed — '+e.message));setStatus('Logo failed: '+e.message,'error');btn.disabled=false;btn.textContent='Generate Brand Kit';return}
+  try{const{url}=await post('/api/generate',{type:'logo',prompt:logoPrompt});S.logoUrl=url;setBodyImg('logo',url);setActions('logo',[{label:'Regen',fn:()=>regenAsset('logo')},{label:'Download',cls:'dl',fn:()=>dlAsset(url,'logo')}]);setStep(1,'done')}catch(e){setStep(1,'error');['logo','fb','li'].forEach(id=>setFail(id,'Logo failed — '+e.message));setStatus('Logo failed: '+e.message,'error');btn.disabled=false;btn.textContent='Generate Brand Kit';return}
 
-  setStep(3,'active');setStatus('Generating Facebook cover...','info');
-  try{const{url}=await post('/api/generate',{type:'cover-fb',prompt:fbPrompt,logoFalUrl:S.logoFalUrl});S.fbUrl=url;setBodyImg('fb',url);setActions('fb',[{label:'Regen',fn:()=>regenAsset('fb')},{label:'Download',cls:'dl',fn:()=>dlAsset(url,'fb')}]);setStep(3,'done')}catch(e){setStep(3,'error');setFail('fb',e.message);setActions('fb',[{label:'Retry',fn:()=>regenAsset('fb')}])}
+  setStep(2,'active');setStatus('Generating Facebook cover...','info');
+  try{const{url}=await post('/api/generate',{type:'cover-fb',prompt:fbPrompt});S.fbUrl=url;setBodyImg('fb',url);setActions('fb',[{label:'Regen',fn:()=>regenAsset('fb')},{label:'Download',cls:'dl',fn:()=>dlAsset(url,'fb')}]);setStep(2,'done')}catch(e){setStep(2,'error');setFail('fb',e.message);setActions('fb',[{label:'Retry',fn:()=>regenAsset('fb')}])}
 
-  setStep(4,'active');setStatus('Generating LinkedIn cover...','info');
-  try{const{url}=await post('/api/generate',{type:'cover-li',prompt:liPrompt,logoFalUrl:S.logoFalUrl});S.liUrl=url;setBodyImg('li',url);setActions('li',[{label:'Regen',fn:()=>regenAsset('li')},{label:'Download',cls:'dl',fn:()=>dlAsset(url,'li')}]);setStep(4,'done')}catch(e){setStep(4,'error');setFail('li',e.message);setActions('li',[{label:'Retry',fn:()=>regenAsset('li')}])}
+  setStep(3,'active');setStatus('Generating LinkedIn cover...','info');
+  try{const{url}=await post('/api/generate',{type:'cover-li',prompt:liPrompt});S.liUrl=url;setBodyImg('li',url);setActions('li',[{label:'Regen',fn:()=>regenAsset('li')},{label:'Download',cls:'dl',fn:()=>dlAsset(url,'li')}]);setStep(3,'done')}catch(e){setStep(3,'error');setFail('li',e.message);setActions('li',[{label:'Retry',fn:()=>regenAsset('li')}])}
 
-  setStep(5,'active');setStatus('Saving assets to permanent storage...','info');
+  setStep(4,'active');setStatus('Saving assets to permanent storage...','info');
   try{
     const [lb,fb,li]=await Promise.all([imgToB64(S.logoUrl),imgToB64(S.fbUrl),imgToB64(S.liUrl)]);
     const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||S.logoUrl,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl});
@@ -342,7 +342,7 @@ async function generateAll(){
     if(saved.liUrl){S.liUrl=saved.liUrl;setBodyImg('li',saved.liUrl)}
   }catch(e){console.warn('Auto-save failed:',e.message)}
 
-  setStep(5,'done');btn.disabled=false;btn.textContent='Generate Brand Kit';
+  setStep(4,'done');btn.disabled=false;btn.textContent='Generate Brand Kit';
   $('pdf-section').className='export-section visible';
   await saveToHistory(S.brand,S.logoUrl,S.fbUrl,S.liUrl);await updateStats();await renderRecent();
   setStatus('Brand kit ready. Assets saved permanently.','success');

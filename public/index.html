@@ -447,26 +447,12 @@ function setActions(id,btns){
 }
 
 // Simple download — open in new tab, user saves from there
-function dlAsset(url,id){
-  // Try canvas scale-to-fill first for covers
-  const dims={fb:[820,312],li:[1584,396],logo:[800,800]};
-  const d=dims[id];
-  if(d){
-    const img=new Image();img.crossOrigin='anonymous';
-    img.onload=()=>{
-      const c=document.createElement('canvas');c.width=d[0];c.height=d[1];
-      const ctx=c.getContext('2d');
-      const scale=Math.max(d[0]/img.naturalWidth,d[1]/img.naturalHeight);
-      const dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;
-      ctx.drawImage(img,(d[0]-dw)/2,(d[1]-dh)/2,dw,dh);
-      const a=document.createElement('a');a.href=c.toDataURL('image/png');
-      a.download=`${id}.png`;a.click();
-    };
-    img.onerror=()=>window.open(url,'_blank');
-    img.src=url;
-  } else {
-    window.open(url,'_blank');
-  }
+function dlAsset(url, id){
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = id + '.png';
+  a.target = '_blank';
+  a.click();
 }
 
 async function post(path,body){
@@ -594,8 +580,7 @@ async function generateAll(){
   setStatus('Brand kit ready. Download each asset or export the full PDF below.','success');
 }
 
-// Convert an image URL to base64 data URL using canvas
-// This runs in the browser where the images are already accessible
+// Encode image as compressed JPEG base64 — keeps payload small enough for Vercel
 function imgToBase64(url) {
   return new Promise(resolve => {
     if (!url) return resolve(null);
@@ -604,33 +589,23 @@ function imgToBase64(url) {
     img.onload = () => {
       try {
         const c = document.createElement('canvas');
-        c.width = img.naturalWidth; c.height = img.naturalHeight;
-        c.getContext('2d').drawImage(img, 0, 0);
-        resolve(c.toDataURL('image/png'));
+        const maxW = 800;
+        const scale = Math.min(1, maxW / img.naturalWidth);
+        c.width = Math.round(img.naturalWidth * scale);
+        c.height = Math.round(img.naturalHeight * scale);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        resolve(c.toDataURL('image/jpeg', 0.70));
       } catch(e) { resolve(null); }
     };
-    img.onerror = () => {
-      // If crossOrigin fails, try without it
-      const img2 = new Image();
-      img2.onload = () => {
-        try {
-          const c = document.createElement('canvas');
-          c.width = img2.naturalWidth; c.height = img2.naturalHeight;
-          c.getContext('2d').drawImage(img2, 0, 0);
-          resolve(c.toDataURL('image/png'));
-        } catch(e) { resolve(null); }
-      };
-      img2.onerror = () => resolve(null);
-      img2.src = url;
-    };
+    img.onerror = () => resolve(null);
     img.src = url;
   });
 }
 
 async function exportPDF(){
-  const btn=$('pdf-btn');btn.disabled=true;btn.textContent='Encoding images...';
+  const btn=$('pdf-btn');
+  btn.disabled=true; btn.textContent='Preparing images...';
   try{
-    // Encode all images in browser before sending — avoids server-side CORS/expiry issues
     const [logoB64, fbB64, liB64] = await Promise.all([
       imgToBase64(S.logoUrl),
       imgToBase64(S.fbUrl),
@@ -638,23 +613,42 @@ async function exportPDF(){
     ]);
 
     btn.textContent='Building PDF...';
-    const r=await fetch('/api/pdf',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        brand:S.brand,
-        logoUrl:logoB64||S.logoUrl,
-        fbUrl:fbB64||S.fbUrl,
-        liUrl:liB64||S.liUrl
-      })
+
+    const payload = JSON.stringify({
+      brand: S.brand,
+      logoUrl: logoB64 || S.logoUrl,
+      fbUrl: fbB64 || S.fbUrl,
+      liUrl: liB64 || S.liUrl
     });
-    if(!r.ok){const e=await r.json();throw new Error(e.error);}
-    const blob=await r.blob();
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;a.download=`${(S.brand.brandName||'brand').replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`;
-    a.click();URL.revokeObjectURL(url);
-  }catch(e){alert('PDF error: '+e.message);}
-  btn.disabled=false;btn.textContent='Export Brand Kit PDF';
+
+    const r = await fetch('/api/pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload
+    });
+
+    // Check content type before parsing — if it's not PDF, something went wrong
+    const ct = r.headers.get('content-type') || '';
+    if (!r.ok || !ct.includes('pdf')) {
+      // Try to read error as text first, not JSON, to avoid parse errors
+      const errText = await r.text();
+      let errMsg = errText;
+      try { errMsg = JSON.parse(errText).error || errText; } catch(e) {}
+      throw new Error(errMsg.slice(0, 200));
+    }
+
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(S.brand.brandName||'brand').replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    alert('PDF error: ' + e.message);
+    console.error(e);
+  }
+  btn.disabled=false; btn.textContent='Export Brand Kit PDF';
 }
 
 function saveToHistory(brand,logoUrl,fbUrl,liUrl){

@@ -145,8 +145,8 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
   <div class="pp" id="pp"><div class="pc"><div class="pc-t">Review & Edit Prompts</div><div class="pf"><div class="field"><div class="pl">Logo (2 models)</div><textarea class="pa" id="p-logo"></textarea></div><div class="field"><div class="pl">Facebook Background (art only)</div><textarea class="pa" id="p-fb"></textarea></div><div class="field"><div class="pl">LinkedIn Background (art only)</div><textarea class="pa" id="p-li"></textarea></div></div></div></div>
   <div class="lp" id="lp"><div class="lp-t">Pick Your Logo — click to select, then covers update</div><div class="lg2" id="lg"></div></div>
   <div class="cp" id="cp">
-    <div class="cc"><div class="cc-h"><span class="cc-n">Facebook Cover Preview</span><div><button class="bx" onclick="regenCover('fb')">Regen</button> <button class="bx dl" onclick="dl(S.fbUrl,'fb-bg')">BG</button></div></div><div class="cc-body"><img class="cc-bg" id="fb-bg"/><div class="cc-overlay"><img class="cc-logo" id="fb-logo"/><div class="cc-text"><div class="cc-tagline" id="fb-tag"></div></div><div class="cc-cta" id="fb-cta">Learn More</div></div></div></div>
-    <div class="cc"><div class="cc-h"><span class="cc-n">LinkedIn Cover Preview</span><div><button class="bx" onclick="regenCover('li')">Regen</button> <button class="bx dl" onclick="dl(S.liUrl,'li-bg')">BG</button></div></div><div class="cc-body"><img class="cc-bg" id="li-bg"/><div class="cc-overlay"><img class="cc-logo" id="li-logo"/><div class="cc-text"><div class="cc-tagline" id="li-tag"></div></div><div class="cc-cta" id="li-cta">Get Started</div></div></div></div>
+    <div class="cc"><div class="cc-h"><span class="cc-n">Facebook Cover — 16:9</span><div><button class="bx" onclick="regenCover('fb')">Regen</button> <button class="bx dl" onclick="dl(S.fbUrl,'fb-bg')">Download</button></div></div><div class="cc-body"><img class="cc-bg" id="fb-bg"/></div></div>
+    <div class="cc"><div class="cc-h"><span class="cc-n">LinkedIn Cover — 21:9</span><div><button class="bx" onclick="regenCover('li')">Regen</button> <button class="bx dl" onclick="dl(S.liUrl,'li-bg')">Download</button></div></div><div class="cc-body"><img class="cc-bg" id="li-bg"/></div></div>
   </div>
   <div class="exp" id="exp">
     <div class="exp-grid">
@@ -192,33 +192,42 @@ async function rR(){const h=_h.slice(0,6);const el=E('recent');if(!h.length){el.
 async function selectLogo(idx){
   const l=S.logos[idx];if(!l||!l.url)return;
   S.logoUrl=l.url;
+  S.logoUrlClean=null; // reset - user can run Remove BG separately
+  S.jsonUrl=null; // force re-save on next share/PDF so it uses this logo
   document.querySelectorAll('.lo').forEach((el,i)=>el.classList.toggle('sel',i===idx));
-  // Remove background
-  ss('Removing logo background...','info');
+  ss('Logo '+l.name+' selected. Hit Share or PDF to use this one.','success');
+}
+
+async function removeBg(idx){
+  const l=S.logos[idx];if(!l||!l.url)return;
+  ss('Removing background...','info');
   try{
     const{url}=await post('/api/generate',{type:'remove-bg',imageUrl:l.url});
-    S.logoUrlClean=url;
-  }catch(e){S.logoUrlClean=l.url;console.warn('BG removal failed:',e.message)}
-  // Update cover overlays
-  E('fb-logo').src=S.logoUrlClean||S.logoUrl;
-  E('li-logo').src=S.logoUrlClean||S.logoUrl;
-  ss('Logo selected and background removed.','success');
+    S.logos[idx].cleanUrl=url;
+    // If this is the selected logo, update the clean version
+    if(S.logoUrl===l.url)S.logoUrlClean=url;
+    // Re-render to show download button for transparent version
+    renderLogos(S.logos);
+    ss('Background removed. Download the transparent version.','success');
+  }catch(e){ss('BG removal failed: '+e.message,'error')}
 }
 
 function renderLogos(logos){
   S.logos=logos;
   const g=E('lg');g.innerHTML='';
+  const selIdx=logos.findIndex(l=>l.url===S.logoUrl);
   logos.forEach((l,i)=>{
+    const isSel=(selIdx>=0?i===selIdx:i===0&&l.url);
     const d=document.createElement('div');
-    d.className='lo'+(i===0&&l.url?' sel':'');
-    d.innerHTML=`<div class="lo-h"><span class="lo-m">${l.name}</span><div class="lo-chk">✓</div></div><div class="lo-b">${l.url?`<img src="${l.url}"/>`:`<span style="color:var(--error);font-size:11px">${l.error||'Failed'}</span>`}</div><div class="lo-a">${l.url?`<button class="bx" onclick="event.stopPropagation();regenLogo('${l.id}',${i})">Regen</button><button class="bx dl" onclick="event.stopPropagation();dl('${l.url}','logo-${l.id}')">Download</button>`:''}</div>`;
+    d.className='lo'+(isSel?' sel':'');
+    const hasClean=l.cleanUrl;
+    d.innerHTML=`<div class="lo-h"><span class="lo-m">${l.name}</span><div class="lo-chk">✓</div></div><div class="lo-b">${l.url?`<img src="${l.url}"/>`:`<span style="color:var(--error);font-size:11px">${l.error||'Failed'}</span>`}</div><div class="lo-a" style="flex-wrap:wrap">${l.url?`<button class="bx" onclick="event.stopPropagation();regenLogo('${l.id}',${i})">Regen</button><button class="bx" onclick="event.stopPropagation();removeBg(${i})">Remove BG</button><button class="bx dl" onclick="event.stopPropagation();dl('${l.url}','logo-${l.id}')">Original</button>${hasClean?`<button class="bx dl" onclick="event.stopPropagation();dl('${l.cleanUrl}','logo-${l.id}-transparent')">Transparent</button>`:''}`:''}${hasClean?`<div style="font-size:9px;color:var(--success);width:100%;margin-top:4px">✓ BG removed</div>`:''}</div>`;
     d.onclick=()=>{if(l.url)selectLogo(i)};
     g.appendChild(d);
   });
   E('lp').className='lp v';
-  // Auto-select first
-  const first=logos.findIndex(l=>l.url);
-  if(first>=0)selectLogo(first);
+  // Auto-select first if none selected
+  if(selIdx<0){const first=logos.findIndex(l=>l.url);if(first>=0){S.logoUrl=logos[first].url;g.children[first]?.classList.add('sel')}}
 }
 
 async function regenLogo(modelId,idx){
@@ -257,7 +266,6 @@ async function generateAll(){
   S.brand=brand();S.logoUrl=null;S.logoUrlClean=null;S.logos=[];S.fbUrl=null;S.liUrl=null;S.jsonUrl=null;
   const btn=E('gbtn');btn.disabled=true;btn.textContent='Generating...';
   E('lp').className='lp';E('cp').className='cp';E('exp').className='exp';
-  E('fb-tag').textContent=S.brand.tagline||'';E('li-tag').textContent=S.brand.tagline||'';
   ss('Generating 2 logo options + 2 cover backgrounds in parallel...','info');
 
   const[lr,fr,lir]=await Promise.allSettled([

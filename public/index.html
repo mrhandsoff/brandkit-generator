@@ -243,6 +243,10 @@ function setActions(id,btns){const el=$('act-'+id);if(!el)return;el.innerHTML=''
 function dlAsset(url,id){const a=document.createElement('a');a.href=url;a.download=id+'.png';a.target='_blank';a.click()}
 async function post(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await r.json();if(!r.ok)throw new Error(data.error||r.statusText);return data}
 
+// Convert image URL to base64 — runs in browser where images are already cached
+// Compresses to JPEG to keep payload small enough for Vercel
+function imgToB64(url){return new Promise(resolve=>{if(!url)return resolve(null);const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{try{const c=document.createElement('canvas');const maxW=1200;const scale=Math.min(1,maxW/img.naturalWidth);c.width=Math.round(img.naturalWidth*scale);c.height=Math.round(img.naturalHeight*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',0.85))}catch(e){console.warn('b64 convert failed:',e.message);resolve(null)}};img.onerror=()=>resolve(null);img.src=url})}
+
 function updateStats(){const h=JSON.parse(localStorage.getItem('bkg_h')||'[]');$('stat-kits').textContent=h.length;$('stat-assets').textContent=h.length*3;$('stat-clients').textContent=new Set(h.map(i=>i.brand).filter(Boolean)).size}
 updateStats();
 
@@ -271,8 +275,15 @@ async function generateAll(){
   setStep(4,'active');setStatus('Generating LinkedIn cover...','info');
   try{const{url}=await post('/api/generate',{type:'cover-li',prompt:liPrompt,logoFalUrl:S.logoFalUrl});S.liUrl=url;setBodyImg('li',url);setActions('li',[{label:'Regen',fn:()=>regenAsset('li')},{label:'Download',cls:'dl',fn:()=>dlAsset(url,'li')}]);setStep(4,'done')}catch(e){setStep(4,'error');setFail('li',e.message);setActions('li',[{label:'Retry',fn:()=>regenAsset('li')}])}
 
-  setStep(5,'active');setStatus('Saving assets...','info');
-  try{const saved=await post('/api/save',{brand:S.brand,logoUrl:S.logoUrl,fbUrl:S.fbUrl,liUrl:S.liUrl});S.jsonUrl=saved.jsonUrl;if(saved.logoUrl){S.logoUrl=saved.logoUrl;setBodyImg('logo',saved.logoUrl)}if(saved.fbUrl){S.fbUrl=saved.fbUrl;setBodyImg('fb',saved.fbUrl)}if(saved.liUrl){S.liUrl=saved.liUrl;setBodyImg('li',saved.liUrl)}}catch(e){console.warn('Auto-save failed:',e.message)}
+  setStep(5,'active');setStatus('Saving assets to permanent storage...','info');
+  try{
+    const [lb,fb,li]=await Promise.all([imgToB64(S.logoUrl),imgToB64(S.fbUrl),imgToB64(S.liUrl)]);
+    const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||S.logoUrl,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl});
+    S.jsonUrl=saved.jsonUrl;
+    if(saved.logoUrl){S.logoUrl=saved.logoUrl;setBodyImg('logo',saved.logoUrl)}
+    if(saved.fbUrl){S.fbUrl=saved.fbUrl;setBodyImg('fb',saved.fbUrl)}
+    if(saved.liUrl){S.liUrl=saved.liUrl;setBodyImg('li',saved.liUrl)}
+  }catch(e){console.warn('Auto-save failed:',e.message)}
 
   setStep(5,'done');btn.disabled=false;btn.textContent='Generate Brand Kit';
   $('pdf-section').className='export-section visible';
@@ -280,7 +291,7 @@ async function generateAll(){
   setStatus('Brand kit ready. Assets saved permanently.','success');
 }
 
-async function shareKit(){const btn=$('share-btn');btn.disabled=true;btn.textContent='Generating...';try{if(!S.jsonUrl){const saved=await post('/api/save',{brand:S.brand,logoUrl:S.logoUrl,fbUrl:S.fbUrl,liUrl:S.liUrl});S.jsonUrl=saved.jsonUrl}const fullUrl=`${window.location.origin}/kit?jsonUrl=${encodeURIComponent(S.jsonUrl)}`;$('share-url').value=fullUrl;$('share-result').className='share-result visible'}catch(e){alert('Error: '+e.message)}btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Client Share Link'}
+async function shareKit(){const btn=$('share-btn');btn.disabled=true;btn.textContent='Generating...';try{if(!S.jsonUrl){const[lb,fb,li]=await Promise.all([imgToB64(S.logoUrl),imgToB64(S.fbUrl),imgToB64(S.liUrl)]);const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||S.logoUrl,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl});S.jsonUrl=saved.jsonUrl;if(saved.logoUrl)S.logoUrl=saved.logoUrl;if(saved.fbUrl)S.fbUrl=saved.fbUrl;if(saved.liUrl)S.liUrl=saved.liUrl}const fullUrl=`${window.location.origin}/kit?jsonUrl=${encodeURIComponent(S.jsonUrl)}`;$('share-url').value=fullUrl;$('share-result').className='share-result visible'}catch(e){alert('Error: '+e.message)}btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Client Share Link'}
 
 async function exportPDF(){const btn=$('pdf-btn');btn.disabled=true;btn.textContent='Building PDF...';try{const r=await fetch('/api/pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({brand:S.brand,logoUrl:S.logoUrl,fbUrl:S.fbUrl,liUrl:S.liUrl})});const ct=r.headers.get('content-type')||'';if(!r.ok||!ct.includes('pdf')){const t=await r.text();let msg=t;try{msg=JSON.parse(t).error||t}catch(_){}throw new Error(msg.slice(0,200))}const blob=await r.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${(S.brand.brandName||'brand').replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`;a.click();URL.revokeObjectURL(url)}catch(e){alert('PDF error: '+e.message)}btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Export PDF'}
 

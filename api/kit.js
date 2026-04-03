@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Brand Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --c1: #D92526;
+  --c2: #4A4C4D;
+  --c1-rgb: 217, 37, 38;
+  --c2-rgb: 74, 76, 77;
+  --bg: #08090e;
+  --surface: #0f1117;
+  --text: #edeef2;
+  --text2: #8b8fa3;
+  --text3: #4a4e60;
+  --glass: rgba(255,255,255,0.035);
+  --glass-border: rgba(255,255,255,0.07);
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Grain overlay ────────────────────────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+}
+
+/* ── Loading ──────────────────────────────────────────────────────────── */
+#loading {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 24px;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0, 1);
+}
+#loading.hidden { opacity: 0; pointer-events: none; }
+.load-ring {
+  width: 40px; height: 40px;
+  border: 2px solid rgba(var(--c1-rgb), 0.15);
+  border-top-color: var(--c1);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.load-text { font-size: 12px; color: var(--text3); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ── Error ────────────────────────────────────────────────────────────── */
+#error-state {
+  display: none; position: fixed; inset: 0; z-index: 99;
+  background: var(--bg); align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px; text-align: center; padding: 40px;
+}
+#error-state.show { display: flex; }
+#error-state h2 { font-family: var(--serif); font-size: 32px; font-weight: 400; }
+#error-state p { color: var(--text2); font-size: 15px; max-width: 400px; line-height: 1.6; }
+
+/* ── Mesh background ──────────────────────────────────────────────────── */
+.bg-mesh { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.orb {
+  position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.7;
+  animation: orbDrift 16s ease-in-out infinite;
+}
+.orb-1 { width:900px;height:900px;top:-400px;left:-300px;animation-delay:0s; }
+.orb-2 { width:700px;height:700px;top:30%;right:-300px;animation-delay:-6s; }
+.orb-3 { width:500px;height:500px;bottom:-200px;left:25%;animation-delay:-11s; }
+@keyframes orbDrift { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-40px) scale(1.03)} 66%{transform:translate(-20px,30px) scale(0.97)} }
+
+/* ── Nav ──────────────────────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  height: 60px; padding: 0 clamp(20px, 4vw, 48px);
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(8,9,14,0.75);
+  backdrop-filter: blur(24px) saturate(1.4); -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.nav-brand { display: flex; align-items: center; gap: 14px; }
+.nav-logo-wrap {
+  width: 32px; height: 32px; border-radius: 8px;
+  overflow: hidden; background: var(--glass); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--glass-border);
+}
+.nav-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+.nav-name { font-family: var(--sans); font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+.nav-sep { width: 1px; height: 20px; background: var(--glass-border); }
+.nav-tagline { font-size: 12px; color: var(--text3); }
+.nav-right { display: flex; align-items: center; gap: 6px; }
+.nav-links { display: flex; gap: 2px; }
+.nav-link {
+  font-size: 12px; font-weight: 500; color: var(--text3);
+  padding: 6px 12px; border-radius: 6px; cursor: pointer;
+  border: none; background: none; font-family: var(--sans);
+  transition: all 0.2s;
+}
+.nav-link:hover { background: rgba(255,255,255,0.05); color: var(--text2); }
+
+/* ── Sections ─────────────────────────────────────────────────────────── */
+section { position: relative; z-index: 1; }
+
+/* ── HERO ─────────────────────────────────────────────────────────────── */
+#hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 100px 40px 80px;
+  position: relative; overflow: hidden;
+}
+.hero-cover {
+  position: absolute; inset: 0; z-index: 0;
+  background-size: cover; background-position: center;
+  filter: brightness(0.2) saturate(1.3) blur(1px);
+  transform: scale(1.05);
+}
+.hero-cover-gradient {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom,
+    rgba(8,9,14,0.3) 0%,
+    rgba(8,9,14,0.1) 40%,
+    rgba(8,9,14,0.6) 70%,
+    var(--bg) 100%
+  );
+}
+
+.hero-content { position: relative; z-index: 2; max-width: 860px; }
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--c1);
+  padding: 7px 16px; border-radius: 999px;
+  background: rgba(var(--c1-rgb), 0.08);
+  border: 1px solid rgba(var(--c1-rgb), 0.15);
+  margin-bottom: 32px;
+}
+.hero-eyebrow-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--c1);
+  box-shadow: 0 0 8px rgba(var(--c1-rgb), 0.6);
+  animation: dotPulse 2.5s ease-in-out infinite;
+}
+@keyframes dotPulse { 0%,100%{opacity:1;box-shadow:0 0 8px rgba(var(--c1-rgb),0.6)} 50%{opacity:0.5;box-shadow:0 0 4px rgba(var(--c1-rgb),0.3)} }
+
+.hero-name {
+  font-family: var(--serif);
+  font-size: clamp(48px, 9vw, 110px);
+  font-weight: 400; font-style: italic; line-height: 0.95;
+  color: white;
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.hero-tagline {
+  font-size: clamp(15px, 2vw, 19px);
+  color: var(--text2); font-weight: 400; line-height: 1.6;
+  max-width: 520px; margin: 0 auto 48px;
+}
+
+.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+.btn-primary {
+  padding: 14px 28px; border-radius: 10px;
+  background: var(--c1);
+  color: white; font-size: 14px; font-weight: 600;
+  border: none; cursor: pointer; font-family: var(--sans);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0, 1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 0 0 1px rgba(var(--c1-rgb),0.3);
+  display: flex; align-items: center; gap: 8px;
+  letter-spacing: -0.01em;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(var(--c1-rgb),0.35), 0 0 0 1px rgba(var(--c1-rgb),0.4); }
+
+.btn-ghost {
+  padding: 14px 28px; border-radius: 10px;
+  background: rgba(255,255,255,0.06); color: var(--text2);
+  font-size: 14px; font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-family: var(--sans);
+  transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+  backdrop-filter: blur(10px); letter-spacing: -0.01em;
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,0.18); color: var(--text); background: rgba(255,255,255,0.09); }
+
+.scroll-hint {
+  position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase;
+  animation: scrollBounce 2.5s ease-in-out infinite;
+}
+@keyframes scrollBounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
+
+/* ── Section wrapper ──────────────────────────────────────────────────── */
+.section-wrap {
+  max-width: 1060px; margin: 0 auto;
+  padding: clamp(60px, 10vw, 120px) clamp(20px, 4vw, 48px);
+}
+
+.section-header { margin-bottom: 56px; }
+.section-number {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--c1); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-number::after { content: ''; flex: 1; max-width: 60px; height: 1px; background: rgba(var(--c1-rgb), 0.3); }
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 400; line-height: 1.05;
+  color: white;
+  letter-spacing: -0.02em;
+}
+
+/* ── COLOR PALETTE ────────────────────────────────────────────────────── */
+.colors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.color-card {
+  border-radius: 16px; overflow: hidden;
+  border: 1px solid var(--glass-border);
+  background: var(--surface);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0, 1), border-color 0.3s;
+}
+.color-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.1); }
+
+.color-swatch {
+  height: 200px; position: relative;
+  display: flex; align-items: flex-end; padding: 20px 24px;
+}
+.color-swatch-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+
+.color-info { padding: 24px; }
+.color-hex {
+  font-family: var(--serif); font-size: 26px; font-weight: 400;
+  margin-bottom: 16px; letter-spacing: -0.01em;
+}
+.color-specs { display: flex; flex-direction: column; gap: 0; }
+.color-spec {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; padding: 10px 0;
+  border-bottom: 1px solid var(--glass-border);
+}
+.color-spec:last-child { border-bottom: none; }
+.color-spec-label { color: var(--text3); font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; }
+.color-spec-value { color: var(--text2); font-weight: 500; font-variant-numeric: tabular-nums; font-size: 12px; }
+
+.color-utilities { margin-top: 24px; }
+.color-utilities-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 12px; }
+.color-utility-row { display: flex; gap: 10px; }
+.color-utility-swatch {
+  flex: 1; height: 52px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+  border: 1px solid var(--glass-border);
+}
+
+/* ── LOGO ─────────────────────────────────────────────────────────────── */
+.logo-toggle {
+  display: flex; gap: 2px; background: var(--surface);
+  border: 1px solid var(--glass-border); border-radius: 10px; padding: 3px;
+  width: fit-content; margin-bottom: 20px;
+}
+.logo-toggle-btn {
+  padding: 8px 18px; border-radius: 7px; font-size: 12px; font-weight: 500;
+  border: none; cursor: pointer; font-family: var(--sans); transition: all 0.2s;
+  color: var(--text3); background: none;
+}
+.logo-toggle-btn.active { background: rgba(255,255,255,0.08); color: var(--text); }
+
+.logo-display {
+  border-radius: 20px; overflow: hidden;
+  border: 1px solid var(--glass-border);
+  transition: background 0.5s cubic-bezier(0.4, 0, 0, 1);
+  display: flex; align-items: center; justify-content: center;
+  min-height: 400px; padding: 60px;
+}
+.logo-display.light { background: #ffffff; }
+.logo-display.dark { background: #0c0e15; }
+.logo-display.brand { background: var(--c1); }
+
+.logo-display img {
+  max-width: 55%; max-height: 240px;
+  object-fit: contain; transition: all 0.4s;
+}
+
+.logo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.logo-mini {
+  border-radius: 16px; padding: 36px; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--glass-border); min-height: 180px;
+  transition: transform 0.3s;
+}
+.logo-mini:hover { transform: translateY(-2px); }
+.logo-mini img { max-width: 65%; max-height: 90px; object-fit: contain; }
+.logo-mini.light { background: #fff; }
+.logo-mini.dark { background: #0c0e15; }
+
+.logo-guidelines { margin-top: 40px; }
+.guideline {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 18px 0; border-bottom: 1px solid var(--glass-border);
+}
+.guideline:last-child { border-bottom: none; }
+.guideline-icon {
+  width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;
+  border-radius: 5px; background: rgba(var(--c1-rgb), 0.1);
+  display: flex; align-items: center; justify-content: center;
+}
+.guideline-icon::after {
+  content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--c1);
+}
+.guideline-text { font-size: 14px; color: var(--text2); line-height: 1.65; }
+
+/* ── SOCIAL ASSETS ────────────────────────────────────────────────────── */
+.social-asset { margin-bottom: 56px; }
+.social-asset:last-child { margin-bottom: 0; }
+.social-asset-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px; flex-wrap: wrap; gap: 10px;
+}
+.social-asset-name { font-size: 15px; font-weight: 600; color: var(--text); }
+.social-asset-dims {
+  font-size: 11px; font-weight: 500; color: var(--text3);
+  background: var(--surface); border: 1px solid var(--glass-border);
+  padding: 5px 12px; border-radius: 999px; font-variant-numeric: tabular-nums;
+}
+
+.social-asset-frame {
+  border-radius: 16px; overflow: hidden;
+  border: 1px solid var(--glass-border);
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0, 1), box-shadow 0.4s;
+}
+.social-asset-frame:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+}
+.social-asset-frame img { width: 100%; display: block; }
+
+.social-asset-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 14px; flex-wrap: wrap; gap: 8px;
+}
+.social-platform {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text3); font-weight: 500;
+}
+.platform-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.btn-dl {
+  padding: 9px 18px; border-radius: 8px;
+  background: rgba(255,255,255,0.06); color: var(--text2);
+  font-size: 12px; font-weight: 500;
+  border: 1px solid var(--glass-border); cursor: pointer; font-family: var(--sans);
+  transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+}
+.btn-dl:hover { border-color: rgba(255,255,255,0.15); color: var(--text); background: rgba(255,255,255,0.09); }
+
+/* ── TYPOGRAPHY ───────────────────────────────────────────────────────── */
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+.type-specimen {
+  background: var(--surface); border: 1px solid var(--glass-border);
+  border-radius: 20px; padding: 40px; overflow: hidden; position: relative;
+}
+.type-specimen::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--c1-rgb), 0.3), transparent);
+}
+.type-specimen-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 24px; }
+.type-big { font-size: 80px; font-weight: 700; line-height: 1; color: var(--text); margin-bottom: 4px; font-family: var(--sans); }
+.type-name { font-size: 14px; font-weight: 500; color: var(--text2); margin-bottom: 20px; }
+.type-alphabet { font-size: 11px; color: var(--text3); line-height: 2; letter-spacing: 0.03em; }
+
+.type-scale { background: var(--surface); border: 1px solid var(--glass-border); border-radius: 20px; padding: 40px; }
+.type-scale-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 24px; }
+.type-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 14px 0; border-bottom: 1px solid var(--glass-border);
+  gap: 16px;
+}
+.type-row:last-child { border-bottom: none; }
+.type-row-name { font-size: 12px; font-weight: 500; color: var(--text2); min-width: 90px; }
+.type-row-sample { flex: 1; }
+.type-row-spec { font-size: 11px; color: var(--text3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* ── BRAND VOICE ──────────────────────────────────────────────────────── */
+.voice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+
+.tagline-card {
+  background: var(--c1);
+  border-radius: 20px; padding: 52px 40px;
+  position: relative; overflow: hidden;
+}
+.tagline-card::before {
+  content: '\201C';
+  position: absolute; top: -10px; left: 24px;
+  font-size: 180px; font-weight: 400; color: rgba(255,255,255,0.08);
+  font-family: var(--serif); line-height: 1;
+}
+.tagline-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.55); margin-bottom: 20px; }
+.tagline-text {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.5vw, 32px);
+  font-weight: 400; font-style: italic;
+  color: white; line-height: 1.3;
+  position: relative; z-index: 1;
+}
+
+.voice-details { display: flex; flex-direction: column; gap: 16px; }
+
+.voice-card {
+  background: var(--surface); border: 1px solid var(--glass-border);
+  border-radius: 16px; padding: 24px;
+  transition: border-color 0.2s;
+}
+.voice-card:hover { border-color: rgba(255,255,255,0.1); }
+.voice-card-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 14px; }
+.voice-card-content { font-size: 14px; color: var(--text2); line-height: 1.7; }
+
+.personality-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.personality-tag {
+  padding: 7px 14px; border-radius: 8px;
+  background: rgba(var(--c1-rgb), 0.08);
+  border: 1px solid rgba(var(--c1-rgb), 0.15);
+  color: var(--c1); font-size: 12px; font-weight: 600;
+  transition: background 0.2s;
+}
+.personality-tag:hover { background: rgba(var(--c1-rgb), 0.14); }
+
+/* ── FOOTER ───────────────────────────────────────────────────────────── */
+footer {
+  position: relative; z-index: 1;
+  border-top: 1px solid var(--glass-border);
+  padding: 40px clamp(20px, 4vw, 48px);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 20px;
+  max-width: 1060px; margin: 0 auto;
+}
+
+.footer-credit { display: flex; align-items: center; gap: 14px; }
+.footer-credit-logo {
+  width: 28px; height: 28px; border-radius: 7px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  display: flex; align-items: center; justify-content: center;
+}
+.footer-credit-text { font-size: 12px; color: var(--text3); }
+.footer-credit-name { font-size: 13px; font-weight: 600; color: var(--text2); }
+
+.footer-link { font-size: 12px; color: var(--text3); text-decoration: none; transition: color 0.15s; }
+.footer-link:hover { color: var(--text2); }
+
+/* ── Animations ───────────────────────────────────────────────────────── */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0, 1), transform 0.8s cubic-bezier(0.4, 0, 0, 1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.08s; }
+.reveal-d2 { transition-delay: 0.16s; }
+.reveal-d3 { transition-delay: 0.24s; }
+
+/* ── Toast ────────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 32px; right: 32px; z-index: 200;
+  background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25);
+  color: #6ee7b7; padding: 12px 20px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; backdrop-filter: blur(20px);
+  transform: translateY(80px); opacity: 0; transition: all 0.35s cubic-bezier(0.4, 0, 0, 1);
+  pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+@media (max-width: 768px) {
+  .colors-grid, .type-grid, .voice-grid, .logo-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .section-wrap { padding: 60px 20px; }
+  #hero { padding: 80px 20px 60px; }
+  footer { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="load-ring"></div>
+  <div class="load-text">Loading brand kit</div>
+</div>
+
+<div id="error-state">
+  <h2>Brand Kit Not Found</h2>
+  <p>This brand kit may have expired or the link is incorrect. Please check with the sender for an updated link.</p>
+</div>
+
+<div class="bg-mesh">
+  <div class="orb orb-1" id="orb1"></div>
+  <div class="orb orb-2" id="orb2"></div>
+  <div class="orb orb-3" id="orb3"></div>
+</div>
+
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo-wrap"><img id="nav-logo" src="" alt="" /></div>
+    <div class="nav-name" id="nav-name"></div>
+    <div class="nav-sep"></div>
+    <div class="nav-tagline" id="nav-tagline"></div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-links">
+      <button class="nav-link" onclick="goTo('colors')">Colors</button>
+      <button class="nav-link" onclick="goTo('logo')">Logo</button>
+      <button class="nav-link" onclick="goTo('social')">Social</button>
+      <button class="nav-link" onclick="goTo('typography')">Type</button>
+      <button class="nav-link" onclick="goTo('voice')">Voice</button>
+    </div>
+  </div>
+</nav>
+
+<section id="hero">
+  <div class="hero-cover" id="hero-cover"></div>
+  <div class="hero-cover-gradient"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow"><div class="hero-eyebrow-dot"></div><span>Brand Identity Kit</span></div>
+    <h1 class="hero-name" id="hero-name"></h1>
+    <p class="hero-tagline" id="hero-tagline"></p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="downloadAll()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download All Assets
+      </button>
+      <button class="btn-ghost" onclick="goTo('colors')">
+        Explore Kit
+      </button>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    Scroll
+  </div>
+</section>
+
+<section id="colors">
+  <div class="section-wrap">
+    <div class="section-header reveal">
+      <div class="section-number">01 — Color Palette</div>
+      <h2 class="section-title">Brand Colors</h2>
+    </div>
+    <div class="colors-grid" id="colors-grid"></div>
+    <div class="color-utilities reveal reveal-d2" style="margin-top:20px">
+      <div class="color-utilities-title">Utility Colors</div>
+      <div class="color-utility-row">
+        <div class="color-utility-swatch" style="background:#fff;color:#111">#FFFFFF</div>
+        <div class="color-utility-swatch" style="background:#111;color:#fff">#111111</div>
+        <div class="color-utility-swatch" style="background:#f3f4f6;color:#374151">#F3F4F6</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="logo">
+  <div class="section-wrap">
+    <div class="section-header reveal">
+      <div class="section-number">02 — Logo Mark</div>
+      <h2 class="section-title">Logo Construction</h2>
+    </div>
+    <div class="reveal">
+      <div class="logo-toggle">
+        <button class="logo-toggle-btn active" onclick="setLogoBg('dark',this)">Dark</button>
+        <button class="logo-toggle-btn" onclick="setLogoBg('light',this)">Light</button>
+        <button class="logo-toggle-btn" onclick="setLogoBg('brand',this)">Brand</button>
+      </div>
+      <div class="logo-display dark" id="logo-display">
+        <img id="logo-img" src="" alt="Logo" />
+      </div>
+    </div>
+    <div class="logo-grid reveal reveal-d1">
+      <div class="logo-mini dark"><img id="logo-mini-dark" src="" alt="" /></div>
+      <div class="logo-mini light"><img id="logo-mini-light" src="" alt="" /></div>
+    </div>
+    <div class="logo-guidelines reveal reveal-d2">
+      <div class="guideline"><div class="guideline-icon"></div><div class="guideline-text">Maintain clear space equal to the cap-height of the wordmark on all sides of the logo.</div></div>
+      <div class="guideline"><div class="guideline-icon"></div><div class="guideline-text">Do not distort, rotate, recolour, or apply effects to the logo mark.</div></div>
+      <div class="guideline"><div class="guideline-icon"></div><div class="guideline-text">Minimum digital size: 120px wide. Minimum print size: 25mm wide.</div></div>
+      <div class="guideline"><div class="guideline-icon"></div><div class="guideline-text">Use the appropriate version for each background — light on dark, dark on light.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="social">
+  <div class="section-wrap">
+    <div class="section-header reveal">
+      <div class="section-number">03 — Social Media</div>
+      <h2 class="section-title">Social Assets</h2>
+    </div>
+    <div id="social-assets"></div>
+  </div>
+</section>
+
+<section id="typography">
+  <div class="section-wrap">
+    <div class="section-header reveal">
+      <div class="section-number">04 — Typography</div>
+      <h2 class="section-title">Type System</h2>
+    </div>
+    <div class="type-grid reveal">
+      <div class="type-specimen">
+        <div class="type-specimen-label">Primary Typeface</div>
+        <div class="type-big">Aa</div>
+        <div class="type-name">DM Sans / Helvetica</div>
+        <div class="type-alphabet">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz<br>0123456789 !@#$%^&*()</div>
+      </div>
+      <div class="type-scale">
+        <div class="type-scale-label">Type Scale</div>
+        <div class="type-row"><div class="type-row-name">Display</div><div class="type-row-sample" style="font-size:28px;font-weight:700;color:var(--text)">Headline</div><div class="type-row-spec">48-72pt Bold</div></div>
+        <div class="type-row"><div class="type-row-name">Heading</div><div class="type-row-sample" style="font-size:20px;font-weight:600;color:var(--text2)">Section Title</div><div class="type-row-spec">24-36pt Semi</div></div>
+        <div class="type-row"><div class="type-row-name">Subhead</div><div class="type-row-sample" style="font-size:15px;font-weight:500;color:var(--text3)">Subheading</div><div class="type-row-spec">16-20pt Medium</div></div>
+        <div class="type-row"><div class="type-row-name">Body</div><div class="type-row-sample" style="font-size:13px;color:var(--text3)">Body copy text</div><div class="type-row-spec">10-14pt Regular</div></div>
+        <div class="type-row"><div class="type-row-name">Caption</div><div class="type-row-sample" style="font-size:11px;color:var(--text3)">Caption text</div><div class="type-row-spec">8-10pt Regular</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="voice">
+  <div class="section-wrap">
+    <div class="section-header reveal">
+      <div class="section-number">05 — Brand Voice</div>
+      <h2 class="section-title">Voice &amp; Personality</h2>
+    </div>
+    <div class="voice-grid">
+      <div class="tagline-card reveal">
+        <div class="tagline-label">Brand Tagline</div>
+        <div class="tagline-text" id="voice-tagline"></div>
+      </div>
+      <div class="voice-details">
+        <div class="voice-card reveal reveal-d1">
+          <div class="voice-card-label">Personality</div>
+          <div class="personality-tags" id="personality-tags"></div>
+        </div>
+        <div class="voice-card reveal reveal-d2">
+          <div class="voice-card-label">About the Brand</div>
+          <div class="voice-card-content" id="brand-description"></div>
+        </div>
+        <div class="voice-card reveal reveal-d3">
+          <div class="voice-card-label">Industry</div>
+          <div class="voice-card-content" id="brand-niche"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-credit">
+    <div class="footer-credit-logo">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+    </div>
+    <div>
+      <div class="footer-credit-name">The AI Owners</div>
+      <div class="footer-credit-text">Brand Kit Generator</div>
+    </div>
+  </div>
+  <a class="footer-link" href="https://theaiowners.com" target="_blank">theaiowners.com</a>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const jsonUrl = params.get('jsonUrl');
+
+function goTo(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+function hexToRgb(hex) {
+  const c = hex.replace('#', '');
+  return { r: parseInt(c.slice(0,2), 16), g: parseInt(c.slice(2,4), 16), b: parseInt(c.slice(4,6), 16) };
+}
+
+function toCmyk(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const k = 1 - Math.max(r, g, b);
+  if (k >= 1) return { c:0, m:0, y:0, k:100 };
+  return {
+    c: Math.round(((1-r-k)/(1-k))*100),
+    m: Math.round(((1-g-k)/(1-k))*100),
+    y: Math.round(((1-b-k)/(1-k))*100),
+    k: Math.round(k*100)
+  };
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function dlUrl(url, name) {
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.target = '_blank'; a.click();
+}
+
+function downloadAll() {
+  if (window._kit) {
+    const k = window._kit;
+    if (k.logoUrl) dlUrl(k.logoUrl, 'logo.png');
+    setTimeout(() => { if (k.fbUrl) dlUrl(k.fbUrl, 'facebook-cover.jpg'); }, 500);
+    setTimeout(() => { if (k.liUrl) dlUrl(k.liUrl, 'linkedin-cover.jpg'); }, 1000);
+    showToast('Downloading all assets...');
+  }
+}
+
+function setLogoBg(bg, btn) {
+  document.getElementById('logo-display').className = 'logo-display ' + bg;
+  document.querySelectorAll('.logo-toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function buildColorCard(hex, label, delay) {
+  const rgb = hexToRgb(hex);
+  const cmyk = toCmyk(rgb.r, rgb.g, rgb.b);
+  const luma = rgb.r * 0.299 + rgb.g * 0.587 + rgb.b * 0.114;
+  const tc = luma > 140 ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)';
+  return `
+    <div class="color-card reveal${delay ? ' reveal-d1' : ''}">
+      <div class="color-swatch" style="background:${hex}">
+        <div class="color-swatch-label" style="color:${tc}">${label}</div>
+      </div>
+      <div class="color-info">
+        <div class="color-hex" style="color:${hex}">${hex.toUpperCase()}</div>
+        <div class="color-specs">
+          <div class="color-spec"><span class="color-spec-label">Hex</span><span class="color-spec-value">${hex.toUpperCase()}</span></div>
+          <div class="color-spec"><span class="color-spec-label">RGB</span><span class="color-spec-value">${rgb.r}, ${rgb.g}, ${rgb.b}</span></div>
+          <div class="color-spec"><span class="color-spec-label">CMYK</span><span class="color-spec-value">${cmyk.c}% ${cmyk.m}% ${cmyk.y}% ${cmyk.k}%</span></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function buildSocialAsset(url, name, dims, platform, color, delay) {
+  if (!url) return '';
+  const safeName = name.toLowerCase().replace(/\s+/g, '-');
+  return `
+    <div class="social-asset reveal${delay ? ' reveal-d1' : ''}">
+      <div class="social-asset-header">
+        <div class="social-asset-name">${name}</div>
+        <div class="social-asset-dims">${dims}</div>
+      </div>
+      <div class="social-asset-frame">
+        <img src="${url}" alt="${name}" loading="lazy" />
+      </div>
+      <div class="social-asset-footer">
+        <div class="social-platform">
+          <div class="platform-dot" style="background:${color}"></div>
+          ${platform}
+        </div>
+        <button class="btn-dl" onclick="dlUrl('${url}','${safeName}.jpg')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download
+        </button>
+      </div>
+    </div>`;
+}
+
+async function loadKit() {
+  if (!jsonUrl) {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('error-state').classList.add('show');
+    return;
+  }
+
+  try {
+    const r = await fetch(`/api/kit?jsonUrl=${encodeURIComponent(jsonUrl)}`);
+    if (!r.ok) throw new Error('Not found');
+    const kit = await r.json();
+    window._kit = kit;
+    const { brand, logoUrl, fbUrl, liUrl } = kit;
+    const c1 = brand.c1 || '#D92526';
+    const c2 = brand.c2 || '#4A4C4D';
+    const c1rgb = hexToRgb(c1);
+    const c2rgb = hexToRgb(c2);
+
+    document.documentElement.style.setProperty('--c1', c1);
+    document.documentElement.style.setProperty('--c2', c2);
+    document.documentElement.style.setProperty('--c1-rgb', `${c1rgb.r},${c1rgb.g},${c1rgb.b}`);
+    document.documentElement.style.setProperty('--c2-rgb', `${c2rgb.r},${c2rgb.g},${c2rgb.b}`);
+
+    document.getElementById('orb1').style.background = `radial-gradient(circle, rgba(${c1rgb.r},${c1rgb.g},${c1rgb.b},0.1) 0%, transparent 70%)`;
+    document.getElementById('orb2').style.background = `radial-gradient(circle, rgba(${c2rgb.r},${c2rgb.g},${c2rgb.b},0.08) 0%, transparent 70%)`;
+    document.getElementById('orb3').style.background = `radial-gradient(circle, rgba(${c1rgb.r},${c1rgb.g},${c1rgb.b},0.06) 0%, transparent 70%)`;
+
+    document.getElementById('nav-logo').src = logoUrl || '';
+    document.getElementById('nav-name').textContent = brand.brandName || '';
+    document.getElementById('nav-tagline').textContent = brand.tagline || '';
+
+    if (fbUrl) document.getElementById('hero-cover').style.backgroundImage = `url('${fbUrl}')`;
+    document.getElementById('hero-name').textContent = brand.brandName || '';
+    document.getElementById('hero-tagline').textContent = brand.tagline || '';
+    document.title = `${brand.brandName} — Brand Kit`;
+
+    document.getElementById('colors-grid').innerHTML =
+      buildColorCard(c1, 'Primary', false) + buildColorCard(c2, 'Secondary', true);
+
+    ['logo-img', 'logo-mini-dark', 'logo-mini-light'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && logoUrl) el.src = logoUrl;
+    });
+
+    document.getElementById('social-assets').innerHTML =
+      buildSocialAsset(fbUrl, 'Facebook Cover', '820 × 312', 'Facebook', '#1877F2', false) +
+      buildSocialAsset(liUrl, 'LinkedIn Cover', '1584 × 396', 'LinkedIn', '#0A66C2', true);
+
+    document.getElementById('voice-tagline').textContent = brand.tagline || '';
+    document.getElementById('brand-description').textContent = brand.description || '';
+    document.getElementById('brand-niche').textContent = brand.niche || '';
+
+    if (brand.personality) {
+      const tags = brand.personality.split(/[,.]/).map(t => t.trim()).filter(Boolean);
+      document.getElementById('personality-tags').innerHTML = tags.map(t => `<span class="personality-tag">${t}</span>`).join('');
+    }
+
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hidden');
+      initReveal();
+    }, 400);
+
+  } catch (_) {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('error-state').classList.add('show');
+  }
+}
+
+function initReveal() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
+
+loadKit();
+</script>
+</body>
+</html>

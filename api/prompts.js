@@ -13,22 +13,60 @@ module.exports = async (req, res) => {
   const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_KEY) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
 
-  const sys = `You write image generation prompts for Nano Banana Pro (Google Gemini 3 Pro). It renders text accurately and follows layout instructions precisely.
+  const sys = `You write highly detailed, specific image generation prompts for Nano Banana Pro (Google Gemini 3 Pro Image). This model renders text accurately and follows precise layout instructions. Your prompts must be detailed enough that a designer could reproduce the result exactly.
 
-Write exactly 3 prompts:
+Write exactly 3 prompts. Be specific about: lighting, materials, textures, spatial relationships, font weights, element sizes relative to each other, background treatments, and atmosphere. Never be vague or generic.
 
-LOGO:
-Clean brand logo on a pure white background. Include a distinct icon/symbol AND the brand name as a clearly legible wordmark. Flat vector illustration style. Describe the colors using color names or descriptors only — never include hex codes or RGB values in the prompt. No shadows, no gradients on the background.
+NEVER include hex codes, RGB values, or any numeric color codes. Describe every color by name (e.g. "crimson red", "charcoal slate", "warm ivory").
 
-FACEBOOK COVER:
-A 16:9 wide social media banner for Facebook. The composition should feel like a professional marketing asset — premium, designed, intentional. Include the following text elements rendered clearly in the image: the brand name, the tagline, and a short punchy CTA relevant to the brand (e.g. "Book a Free Call", "Get Started Today", "Claim Your Spot"). The brand logo reference image will be provided — instruct the model to place it cleanly on the LEFT SIDE. The right side should contain the text hierarchy: brand name large, tagline below, CTA as a styled button or badge. Background should use brand colors creatively — not plain solid color. No hex codes in the prompt, describe colors by name.
+---
 
-LINKEDIN COVER:
-A wide professional LinkedIn company banner. More minimal and corporate than the Facebook cover. Different background concept. Include the brand name and tagline as text. Include a professional CTA (e.g. "Connect With Us", "View Our Work", "Let's Talk"). The brand logo will be provided — instruct the model to place it on the left side. Right side has brand name, tagline, CTA in a clean hierarchy. Must feel like something a Fortune 500 company would use. No hex codes in the prompt, describe colors by name.
+PROMPT 1 — LOGO:
+A clean, professional brand logo on a pure white background. Describe:
+- A specific, meaningful icon or symbol that relates directly to the brand's niche — not generic
+- The brand name rendered as a clean wordmark beside or beneath the icon
+- Exact color names for every element
+- Style: flat vector, no drop shadows, no gradients on background, no decorative borders
+- Precise spatial layout of icon vs wordmark
+- Any specific design details that make it distinctive
 
-IMPORTANT: Never include hex codes, RGB values, or any color codes anywhere in any prompt. Describe colors by name only (e.g. "deep red", "charcoal gray", "navy blue").
+---
 
-Return ONLY raw JSON: { "logo": "...", "fb": "...", "li": "..." }`;
+PROMPT 2 — FACEBOOK COVER (16:9):
+A wide social media banner. The reference logo image will be provided. Describe in detail:
+
+LAYOUT (single horizontal strip — all elements must sit on one horizontal band so it reads at any crop):
+- FAR LEFT: The provided logo reference image placed cleanly — specify exact size relative to banner height (e.g. "logo occupies 60% of the banner height")
+- DIRECTLY BESIDE THE LOGO (still left side): The tagline in a specific font weight and size, in a specific color, on a specific number of lines
+- FAR RIGHT: ONE call to action only — write the exact CTA text, describe whether it appears as a pill button, badge, underlined text, or outlined box, and what color it is
+- CENTRE AREA: purely background — no text, no elements
+
+DO NOT include the brand name as text — the logo already contains it.
+DO NOT put anything else on the right side except the single CTA.
+
+BACKGROUND: Describe a specific, creative background treatment using brand colors — gradients, geometric shapes, subtle patterns, light flares, textures. Not a plain solid color. Be specific.
+
+ATMOSPHERE: Describe the overall mood and feeling.
+
+---
+
+PROMPT 3 — LINKEDIN COVER (wider/more panoramic):
+Same strict single-strip layout as Facebook but more minimal, corporate, and premium. Different background concept from the Facebook cover. The reference logo image will be provided.
+
+LAYOUT:
+- FAR LEFT: Provided logo reference, slightly smaller than Facebook version (e.g. "50% of banner height")
+- DIRECTLY BESIDE LOGO: Tagline only, smaller text, muted color
+- FAR RIGHT: One professional CTA — write the exact text and describe its treatment
+- NO brand name as text anywhere
+- NO stacking of elements — everything on one horizontal line
+
+BACKGROUND: A different, more restrained background to the Facebook cover. More corporate. Describe specifically.
+
+ATMOSPHERE: Fortune 500 energy. Confident, minimal, premium.
+
+---
+
+Return ONLY raw JSON with no extra text: { "logo": "...", "fb": "...", "li": "..." }`;
 
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
@@ -40,20 +78,20 @@ Return ONLY raw JSON: { "logo": "...", "fb": "...", "li": "..." }`;
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1800,
+        max_tokens: 2500,
         system: sys,
         messages: [{ role: 'user', content:
-          `Brand name: ${brand.brandName}
+`Brand name: ${brand.brandName}
 Tagline: ${brand.tagline || 'None'}
 Niche: ${brand.niche}
 Description: ${brand.description}
 Personality: ${brand.personality}
-Primary color: ${brand.c1} (describe as color name, never use the hex code in prompts)
-Secondary color: ${brand.c2} (describe as color name, never use the hex code in prompts)
-Icon concept: ${brand.iconConcept || 'AI decides based on brand'}
-Rules: ${brand.rules || 'None'}
+Primary color: ${brand.c1} — describe as a color name in prompts, never use this hex code
+Secondary color: ${brand.c2} — describe as a color name in prompts, never use this hex code
+Logo icon concept: ${brand.iconConcept || 'choose something specific and meaningful for this niche'}
+Hard rules: ${brand.rules || 'None'}
 
-Write the 3 prompts now. Remember: no hex codes anywhere.`
+Write all 3 prompts now. Be highly specific and detailed. No hex codes anywhere.`
         }]
       })
     });

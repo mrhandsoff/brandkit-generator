@@ -7,9 +7,7 @@
     "api/kit.js":      { "maxDuration": 10 },
     "api/pdf.js":      { "maxDuration": 60 }
   },
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/kit",      "dest": "/kit.html" },
-    { "src": "/(.*)",     "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/kit", "destination": "/kit.html" }
   ]
 }

@@ -1,34 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>TAO — Brand Kit Generator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#080c18;--bg2:#0c1024;--card:#111631;--card-border:rgba(255,255,255,0.07);--card-border-hi:rgba(255,255,255,0.12);--accent:#2d7aff;--accent-end:#00c6ff;--accent-glow:rgba(45,122,255,0.25);--text:#e8ecf4;--text2:#8a94a8;--text3:#4a5168;--input-bg:#0d1228;--input-border:rgba(255,255,255,0.08);--success:#10b981;--error:#f43f5e;--r:12px;--rs:8px;--sans:'DM Sans',system-ui,sans-serif}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+:root{--bg:#080c18;--bg2:#0c1024;--card:#111631;--card-border:rgba(255,255,255,0.07);--card-hi:rgba(255,255,255,0.12);--accent:#2d7aff;--accent-end:#00c6ff;--glow:rgba(45,122,255,0.25);--text:#e8ecf4;--text2:#8a94a8;--text3:#4a5168;--input-bg:#0d1228;--input-border:rgba(255,255,255,0.08);--success:#10b981;--error:#f43f5e;--r:12px;--rs:8px;--sans:'DM Sans',system-ui,sans-serif}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 .layout{display:flex;min-height:100vh}
 .sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--card-border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:50}
 .sb-brand{padding:24px 20px 20px;display:flex;align-items:center;gap:12px}
-.sb-logo{width:36px;height:36px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent-end));display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px var(--accent-glow)}
-.sb-title{font-size:18px;font-weight:800;letter-spacing:-0.02em}
-.sb-subtitle{font-size:11px;color:var(--text3);font-weight:500;margin-top:1px}
+.sb-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-end));display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px var(--glow)}
+.sb-title{font-size:18px;font-weight:800}.sb-subtitle{font-size:11px;color:var(--text3);margin-top:1px}
 .sb-nav{padding:8px 12px;flex:1;display:flex;flex-direction:column;gap:4px}
-.sb-btn{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--rs);font-size:13px;font-weight:500;color:var(--text2);border:none;background:none;cursor:pointer;font-family:var(--sans);width:100%;text-align:left;transition:all .15s}
+.sb-btn{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--rs);font-size:13px;font-weight:500;color:var(--text2);border:none;background:none;cursor:pointer;font-family:var(--sans);width:100%;text-align:left;transition:.15s}
 .sb-btn:hover{background:rgba(255,255,255,0.04);color:var(--text)}
-.sb-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent-end));color:#fff;font-weight:600;box-shadow:0 4px 16px var(--accent-glow)}
-.sb-btn svg{width:16px;height:16px;flex-shrink:0}
-.sb-spacer{flex:1}.sb-dim{opacity:.35;cursor:not-allowed}
+.sb-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent-end));color:#fff;font-weight:600}
+.sb-btn svg{width:16px;height:16px}.sb-spacer{flex:1}.sb-dim{opacity:.35;cursor:not-allowed}
 .main{margin-left:220px;flex:1;display:flex;flex-direction:column}
-.topbar{height:56px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--card-border);background:var(--bg);position:sticky;top:0;z-index:40}
+.topbar{height:56px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--card-border);position:sticky;top:0;z-index:40;background:var(--bg)}
 .topbar-title{font-size:18px;font-weight:700}
-.topbar-right{display:flex;align-items:center;gap:12px}
-.topbar-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)}
-.topbar-dot{width:6px;height:6px;border-radius:50%;background:var(--success)}
 .content{padding:28px 32px;flex:1}
 .card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--r);padding:24px}
 .card-label{font-size:15px;font-weight:700;margin-bottom:20px}
@@ -37,343 +30,270 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .form-full{grid-column:1/-1}
 .field{display:flex;flex-direction:column;gap:6px}
 .field label{font-size:12px;font-weight:600;color:var(--text2)}
-input[type=text],textarea{font-family:var(--sans);font-size:13px;padding:10px 14px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--rs);color:var(--text);width:100%;transition:all .15s}
+input[type=text],textarea{font-family:var(--sans);font-size:13px;padding:10px 14px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--rs);color:var(--text);width:100%}
 input:focus,textarea:focus{outline:none;border-color:rgba(45,122,255,0.4);box-shadow:0 0 0 3px rgba(45,122,255,0.08)}
 textarea{resize:vertical;line-height:1.6;min-height:68px}
-textarea.prompt-area{min-height:90px;font-size:12px}
+textarea.pa{min-height:90px;font-size:12px}
 input::placeholder,textarea::placeholder{color:var(--text3)}
 .color-row{display:flex;gap:8px;align-items:center}
-.color-row input[type=color]{width:40px;height:38px;padding:3px;border:1px solid var(--input-border);border-radius:var(--rs);cursor:pointer;background:var(--input-bg);flex-shrink:0}
+.color-row input[type=color]{width:40px;height:38px;padding:3px;border:1px solid var(--input-border);border-radius:var(--rs);cursor:pointer;background:var(--input-bg)}
 .color-row input[type=text]{flex:1}
-.btn-cta{width:100%;padding:14px;border:none;border-radius:var(--rs);font-family:var(--sans);font-size:15px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(90deg,var(--accent),var(--accent-end));box-shadow:0 4px 20px var(--accent-glow),inset 0 1px 0 rgba(255,255,255,0.15);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-cta:hover{box-shadow:0 6px 28px rgba(45,122,255,0.4);transform:translateY(-1px)}
-.btn-cta:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.btn-secondary{padding:10px 18px;border-radius:var(--rs);font-family:var(--sans);font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-.btn-secondary:hover{border-color:var(--card-border-hi);color:var(--text)}
-.btn-secondary:disabled{opacity:.4;cursor:not-allowed}
-.stats{display:flex;flex-direction:column;gap:12px}
+.btn-cta{width:100%;padding:14px;border:none;border-radius:var(--rs);font-family:var(--sans);font-size:15px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(90deg,var(--accent),var(--accent-end));box-shadow:0 4px 20px var(--glow);transition:.2s}
+.btn-cta:hover{transform:translateY(-1px)}.btn-cta:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn2{padding:10px 18px;border-radius:var(--rs);font-family:var(--sans);font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:.15s}
+.btn2:hover{border-color:var(--card-hi);color:var(--text)}.btn2:disabled{opacity:.4;cursor:not-allowed}
+.bx{font-size:10px;font-weight:600;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:var(--sans);border:1px solid var(--card-border);background:transparent;color:var(--text2);transition:.15s;white-space:nowrap}
+.bx:hover{border-color:var(--card-hi);color:var(--text)}
+.bx.dl{border-color:rgba(45,122,255,0.3);color:var(--accent)}
+.bx.dl:hover{background:var(--accent);color:#fff}
 .stat-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--rs);padding:16px 18px}
 .stat-label{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px}
-.stat-value{font-size:28px;font-weight:800;letter-spacing:-0.02em}
+.stat-value{font-size:28px;font-weight:800}
 .status{display:none;margin-top:16px;padding:10px 14px;border-radius:var(--rs);font-size:12px;line-height:1.5}
 .status.info{background:rgba(45,122,255,0.08);color:#7ab4ff;border:1px solid rgba(45,122,255,0.15);display:block}
 .status.error{background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.15);display:block}
 .status.success{background:rgba(16,185,129,0.08);color:#6ee7b7;border:1px solid rgba(16,185,129,0.15);display:block}
-.prompt-panel{display:none;margin-top:16px}.prompt-panel.visible{display:block}
-.prompt-card{background:var(--card);border:1px solid rgba(45,122,255,0.15);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
-.prompt-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,var(--accent),var(--accent-end))}
-.prompt-card-title{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:2px;padding-left:12px}
-.prompt-card-sub{font-size:11px;color:var(--text3);margin-bottom:16px;padding-left:12px}
-.prompt-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:5px}
-.prompt-fields{display:flex;flex-direction:column;gap:14px;padding-left:12px}
-
+.pp{display:none;margin-top:16px}.pp.visible{display:block}
+.pc{background:var(--card);border:1px solid rgba(45,122,255,0.15);border-radius:var(--r);padding:20px;position:relative}
+.pc::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,var(--accent),var(--accent-end))}
+.pc-t{font-size:13px;font-weight:700;color:var(--accent);padding-left:12px;margin-bottom:14px}
+.pf{display:flex;flex-direction:column;gap:14px;padding-left:12px}
+.pl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:5px}
 /* Logo picker */
-.logo-picker{display:none;margin-top:16px}.logo-picker.visible{display:block}
-.logo-picker-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px}
-.logo-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.logo-option{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
-.logo-option:hover{border-color:var(--card-border-hi)}
-.logo-option.selected{border-color:var(--accent);box-shadow:0 0 20px var(--accent-glow)}
-.logo-option-head{padding:8px 12px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.15);border-bottom:1px solid var(--card-border)}
-.logo-option-model{font-size:10px;font-weight:600;color:var(--text3)}
-.logo-option-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--card-border);display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent;transition:all .15s}
-.logo-option.selected .logo-option-check{border-color:var(--accent);background:var(--accent);color:#fff}
-.logo-option-body{min-height:180px;display:flex;align-items:center;justify-content:center;padding:20px;background:#0a0a0f}
-.logo-option-body img{max-width:80%;max-height:160px;object-fit:contain}
-.logo-option-actions{padding:8px 12px;display:flex;gap:6px;justify-content:flex-end}
-
-/* Cover preview with overlay */
-.cover-preview{display:none;margin-top:16px}.cover-preview.visible{display:block}
-.cover-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
-.cover-card-head{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.15);border-bottom:1px solid var(--card-border)}
-.cover-card-name{font-size:12px;font-weight:600;color:var(--text2)}
-.cover-card-body{position:relative;overflow:hidden}
-.cover-bg{width:100%;display:block}
-.cover-overlay{position:absolute;inset:0;display:flex;align-items:center;padding:0 5%}
-.cover-overlay-logo{height:45%;max-height:60px;object-fit:contain;margin-right:3%}
-.cover-overlay-text{flex:1}
-.cover-overlay-tagline{font-size:clamp(10px,1.5vw,16px);font-weight:500;color:rgba(255,255,255,0.9);text-shadow:0 1px 4px rgba(0,0,0,0.5)}
-.cover-overlay-cta{margin-left:auto;font-size:clamp(9px,1.2vw,13px);font-weight:600;color:rgba(255,255,255,0.8);padding:6px 16px;border:1px solid rgba(255,255,255,0.3);border-radius:6px;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,0.5)}
-
-.btn-xs{font-size:10px;font-weight:600;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:var(--sans);transition:all .15s;white-space:nowrap;border:1px solid var(--card-border);background:transparent;color:var(--text2)}
-.btn-xs:hover{border-color:var(--card-border-hi);color:var(--text)}
-.btn-xs.dl{border-color:rgba(45,122,255,0.3);color:var(--accent)}
-.btn-xs.dl:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.lp{display:none;margin-top:16px}.lp.v{display:block}
+.lp-t{font-size:14px;font-weight:700;margin-bottom:12px}
+.lg2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.lo{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.2s}
+.lo:hover{border-color:var(--card-hi)}
+.lo.sel{border-color:var(--accent);box-shadow:0 0 20px var(--glow)}
+.lo-h{padding:8px 12px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.15);border-bottom:1px solid var(--card-border)}
+.lo-m{font-size:11px;font-weight:600;color:var(--text3)}
+.lo-chk{width:18px;height:18px;border-radius:50%;border:2px solid var(--card-border);display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent}
+.lo.sel .lo-chk{border-color:var(--accent);background:var(--accent);color:#fff}
+.lo-b{min-height:200px;display:flex;align-items:center;justify-content:center;padding:24px;background:#0a0a0f}
+.lo-b img{max-width:85%;max-height:180px;object-fit:contain}
+.lo-a{padding:8px 12px;display:flex;gap:6px;justify-content:flex-end}
 .spinner{width:26px;height:26px;border:2px solid var(--card-border);border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-.export-section{display:none;margin-top:16px}.export-section.visible{display:block}
-.export-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.export-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:var(--rs);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--card-border);background:var(--card);color:var(--text)}
-.export-btn:hover{border-color:rgba(45,122,255,0.3);background:rgba(45,122,255,0.06)}
-.export-btn:disabled{opacity:.4;cursor:not-allowed}
-.export-btn svg{width:15px;height:15px}
-.share-result{display:none;margin-top:12px;padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:var(--rs)}
-.share-result.visible{display:block}
-.share-label{font-size:11px;font-weight:700;color:#6ee7b7;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em}
-.share-row{display:flex;gap:8px;align-items:center}
-.share-row input{flex:1;font-size:12px;background:rgba(0,0,0,0.25);border-color:rgba(16,185,129,0.15);color:#6ee7b7;cursor:pointer}
+/* Cover preview — FIXED overlay */
+.cp{display:none;margin-top:16px}.cp.v{display:block}
+.cc{background:var(--card);border:1px solid var(--card-border);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+.cc-h{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.15);border-bottom:1px solid var(--card-border)}
+.cc-n{font-size:12px;font-weight:600;color:var(--text2)}
+.cc-body{position:relative;overflow:hidden}
+.cc-bg{width:100%;display:block}
+/* Dark gradient scrim on left so text is always readable */
+.cc-overlay{position:absolute;inset:0;display:flex;align-items:center;padding:0 4% 0 3%;background:linear-gradient(90deg,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.3) 35%,transparent 60%)}
+.cc-logo{height:50%;max-height:80px;object-fit:contain;margin-right:2.5%;flex-shrink:0;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5))}
+.cc-text{flex:1;min-width:0}
+.cc-tagline{font-size:clamp(13px,2vw,20px);font-weight:600;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,0.6);line-height:1.3}
+.cc-cta{margin-left:auto;font-size:clamp(10px,1.3vw,14px);font-weight:600;color:#fff;padding:8px 20px;border:1.5px solid rgba(255,255,255,0.5);border-radius:8px;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,0.5);flex-shrink:0;backdrop-filter:blur(4px);background:rgba(255,255,255,0.08)}
 
+.exp{display:none;margin-top:16px}.exp.v{display:block}
+.exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.exp-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:var(--rs);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--card-border);background:var(--card);color:var(--text);transition:.2s}
+.exp-btn:hover{border-color:rgba(45,122,255,0.3);background:rgba(45,122,255,0.06)}
+.exp-btn:disabled{opacity:.4;cursor:not-allowed}
+.sr{display:none;margin-top:12px;padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:var(--rs)}
+.sr.v{display:block}
+.sr-l{font-size:11px;font-weight:700;color:#6ee7b7;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em}
+.sr-r{display:flex;gap:8px;align-items:center}
+.sr-r input{flex:1;font-size:12px;background:rgba(0,0,0,0.25);border-color:rgba(16,185,129,0.15);color:#6ee7b7;cursor:pointer}
 .section-label{font-size:16px;font-weight:700;margin-bottom:16px}
-.kits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-.kit-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--r);overflow:hidden;transition:border-color .2s,transform .2s}
-.kit-card:hover{border-color:var(--card-border-hi);transform:translateY(-2px)}
-.kit-thumb{width:100%;height:130px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.2);overflow:hidden}
-.kit-thumb img{max-width:70%;max-height:80px;object-fit:contain}
-.kit-thumb.cover img{width:100%;height:100%;max-width:100%;max-height:none;object-fit:cover}
-.kit-info{padding:14px}
-.kit-name{font-size:13px;font-weight:700;margin-bottom:2px}
-.kit-date{font-size:10px;color:var(--text3);margin-bottom:10px}
-.kit-colors{display:flex;gap:4px;margin-bottom:8px}
-.kit-swatch{height:8px;border-radius:3px}
-.kit-actions{display:flex;gap:6px}
-.history-empty{text-align:center;padding:48px;color:var(--text3);font-size:13px}
-.tab-content{display:none}.tab-content.active{display:block}
-@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.top-grid,.logo-grid-3,.export-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.content{padding:20px 16px}}
+.kg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.kc{background:var(--card);border:1px solid var(--card-border);border-radius:var(--r);overflow:hidden;transition:.2s}
+.kc:hover{border-color:var(--card-hi);transform:translateY(-2px)}
+.kt{width:100%;height:130px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.2);overflow:hidden}
+.kt img{max-width:70%;max-height:80px;object-fit:contain}
+.kt.c img{width:100%;height:100%;max-width:100%;max-height:none;object-fit:cover}
+.ki{padding:14px}.kn{font-size:13px;font-weight:700;margin-bottom:2px}.kd{font-size:10px;color:var(--text3);margin-bottom:8px}
+.ks{display:flex;gap:4px;margin-bottom:8px}.ksw{height:8px;border-radius:3px}
+.ka{display:flex;gap:6px}
+.he{text-align:center;padding:48px;color:var(--text3);font-size:13px}
+.tab{display:none}.tab.a{display:block}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.top-grid,.lg2,.exp-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.content{padding:20px 16px}}
 </style>
 </head>
 <body>
-<div id="login-gate" style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;">
-  <div style="width:100%;max-width:380px;padding:24px;">
-    <div style="text-align:center;margin-bottom:32px;">
-      <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent-end));display:inline-flex;align-items:center;justify-content:center;box-shadow:0 8px 32px var(--accent-glow);margin-bottom:16px;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+<div id="gate" style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center"><div style="width:100%;max-width:380px;padding:24px"><div style="text-align:center;margin-bottom:32px"><div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent-end));display:inline-flex;align-items:center;justify-content:center;box-shadow:0 8px 32px var(--glow);margin-bottom:16px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div><div style="font-size:22px;font-weight:800">TAO</div><div style="font-size:12px;color:var(--text3);margin-top:4px">Brand Kit Generator — Team Access</div></div><div style="background:var(--card);border:1px solid var(--card-border);border-radius:var(--r);padding:24px"><label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:8px">Team Password</label><input type="password" id="pw" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()" style="font-family:var(--sans);font-size:13px;padding:12px 14px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--rs);color:var(--text);width:100%;margin-bottom:14px"/><button onclick="doLogin()" style="width:100%;padding:13px;border:none;border-radius:var(--rs);font-family:var(--sans);font-size:14px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(90deg,var(--accent),var(--accent-end))">Sign In</button><div id="pw-err" style="display:none;margin-top:12px;font-size:12px;color:var(--error);text-align:center">Incorrect password</div></div></div></div>
+
+<div class="layout" id="app" style="display:none">
+<aside class="sidebar"><div class="sb-brand"><div class="sb-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div><div><div class="sb-title">TAO</div><div class="sb-subtitle">Brand Kit Generator</div></div></div><nav class="sb-nav"><button class="sb-btn active" id="n-gen" onclick="tab('gen')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>New Brand Kit</button><button class="sb-btn" id="n-hist" onclick="tab('hist')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>My Brand Kits</button><div class="sb-spacer"></div><button class="sb-btn sb-dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Settings</button></nav></aside>
+<main class="main"><div class="topbar"><div class="topbar-title">Dashboard</div><div style="display:flex;align-items:center;gap:12px"><span style="font-size:12px;color:var(--text3)">Gemini + Ideogram</span><button class="btn2" onclick="doLogout()" style="padding:6px 14px;font-size:11px">Sign Out</button></div></div>
+<div class="content">
+<div class="tab a" id="t-gen">
+  <div class="top-grid">
+    <div class="card"><div class="card-label">AI Brand Kit Generation</div>
+      <div class="form-grid">
+        <div class="field"><label>Business Name</label><input type="text" id="f-name" placeholder="Business Name"/></div>
+        <div class="field"><label>Industry</label><input type="text" id="f-niche" placeholder="e.g. AI Marketing, SaaS"/></div>
+        <div class="field"><label>Brand Personality</label><input type="text" id="f-pers" placeholder="e.g. Bold, cutting-edge"/></div>
+        <div class="field"><label>Tagline</label><input type="text" id="f-tag" placeholder="e.g. Start Your Own AI Agency"/></div>
+        <div class="field"><label>Primary Color</label><div class="color-row"><input type="color" id="c1p" value="#2D7AFF"/><input type="text" id="c1t" value="#2D7AFF" maxlength="7"/></div></div>
+        <div class="field"><label>Secondary Color</label><div class="color-row"><input type="color" id="c2p" value="#1a1a2e"/><input type="text" id="c2t" value="#1a1a2e" maxlength="7"/></div></div>
+        <div class="field form-full"><label>Description</label><textarea id="f-desc" placeholder="1-2 sentences"></textarea></div>
+        <div class="field"><label>Logo Icon Concept</label><input type="text" id="f-icon" placeholder="e.g. Abstract geometric A"/></div>
+        <div class="field"><label>Hard Rules</label><input type="text" id="f-rules" placeholder="e.g. Dark background"/></div>
+        <div class="form-full" style="display:flex;gap:10px;margin-top:4px"><button class="btn2" id="pbtn" onclick="writePrompts()">Write Prompts</button></div>
+        <div class="form-full"><button class="btn-cta" id="gbtn" onclick="generateAll()" disabled>Generate Brand Kit</button></div>
       </div>
-      <div style="font-size:22px;font-weight:800;">TAO</div>
-      <div style="font-size:12px;color:var(--text3);margin-top:4px;">Brand Kit Generator — Team Access</div>
     </div>
-    <div style="background:var(--card);border:1px solid var(--card-border);border-radius:var(--r);padding:24px;">
-      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:8px;">Team Password</label>
-      <input type="password" id="login-pw" placeholder="Enter team password" onkeydown="if(event.key==='Enter')doLogin()" style="font-family:var(--sans);font-size:13px;padding:12px 14px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--rs);color:var(--text);width:100%;margin-bottom:14px;" />
-      <button onclick="doLogin()" style="width:100%;padding:13px;border:none;border-radius:var(--rs);font-family:var(--sans);font-size:14px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(90deg,var(--accent),var(--accent-end));box-shadow:0 4px 20px var(--accent-glow);">Sign In</button>
-      <div id="login-err" style="display:none;margin-top:12px;font-size:12px;color:var(--error);text-align:center;">Incorrect password</div>
-    </div>
+    <div style="display:flex;flex-direction:column;gap:12px"><div class="card-label" style="margin-bottom:0">Quick Stats</div><div class="stat-card"><div class="stat-label">Kits Generated</div><div class="stat-value" id="s-k">0</div></div><div class="stat-card"><div class="stat-label">Assets Saved</div><div class="stat-value" id="s-a">0</div></div><div class="stat-card"><div class="stat-label">Clients</div><div class="stat-value" id="s-c">0</div></div></div>
   </div>
+  <div class="status" id="status"></div>
+  <div class="pp" id="pp"><div class="pc"><div class="pc-t">Review & Edit Prompts</div><div class="pf"><div class="field"><div class="pl">Logo (2 models)</div><textarea class="pa" id="p-logo"></textarea></div><div class="field"><div class="pl">Facebook Background (art only)</div><textarea class="pa" id="p-fb"></textarea></div><div class="field"><div class="pl">LinkedIn Background (art only)</div><textarea class="pa" id="p-li"></textarea></div></div></div></div>
+  <div class="lp" id="lp"><div class="lp-t">Pick Your Logo — click to select, then covers update</div><div class="lg2" id="lg"></div></div>
+  <div class="cp" id="cp">
+    <div class="cc"><div class="cc-h"><span class="cc-n">Facebook Cover Preview</span><div><button class="bx" onclick="regenCover('fb')">Regen</button> <button class="bx dl" onclick="dl(S.fbUrl,'fb-bg')">BG</button></div></div><div class="cc-body"><img class="cc-bg" id="fb-bg"/><div class="cc-overlay"><img class="cc-logo" id="fb-logo"/><div class="cc-text"><div class="cc-tagline" id="fb-tag"></div></div><div class="cc-cta" id="fb-cta">Learn More</div></div></div></div>
+    <div class="cc"><div class="cc-h"><span class="cc-n">LinkedIn Cover Preview</span><div><button class="bx" onclick="regenCover('li')">Regen</button> <button class="bx dl" onclick="dl(S.liUrl,'li-bg')">BG</button></div></div><div class="cc-body"><img class="cc-bg" id="li-bg"/><div class="cc-overlay"><img class="cc-logo" id="li-logo"/><div class="cc-text"><div class="cc-tagline" id="li-tag"></div></div><div class="cc-cta" id="li-cta">Get Started</div></div></div></div>
+  </div>
+  <div class="exp" id="exp">
+    <div class="exp-grid">
+      <button class="exp-btn" id="shbtn" onclick="shareKit()">Client Share Link</button>
+      <button class="exp-btn" id="pdfbtn" onclick="exportPDF()">Export PDF</button>
+    </div>
+    <div class="sr" id="sr"><div class="sr-l">Client Link Ready</div><div class="sr-r"><input type="text" id="surl" readonly onclick="this.select()"/><button class="bx dl" onclick="cpUrl()">Copy</button><button class="bx dl" onclick="window.open(E('surl').value,'_blank')">Open</button></div></div>
+  </div>
+  <div style="margin-top:28px" id="recent"></div>
 </div>
-
-<div class="layout" id="app-layout" style="display:none;">
-<aside class="sidebar">
-  <div class="sb-brand"><div class="sb-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div><div><div class="sb-title">TAO</div><div class="sb-subtitle">Brand Kit Generator</div></div></div>
-  <nav class="sb-nav">
-    <button class="sb-btn active" id="nav-generate" onclick="switchTab('generate')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>New Brand Kit</button>
-    <button class="sb-btn" id="nav-history" onclick="switchTab('history')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>My Brand Kits</button>
-    <button class="sb-btn sb-dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Brand Assets</button>
-    <div class="sb-spacer"></div>
-    <button class="sb-btn sb-dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</button>
-  </nav>
-</aside>
-<main class="main">
-  <div class="topbar"><div class="topbar-title">Dashboard</div><div class="topbar-right"><div class="topbar-status"><div class="topbar-dot"></div>3 AI Models</div><button class="btn-secondary" onclick="doLogout()" style="padding:6px 14px;font-size:11px;">Sign Out</button></div></div>
-  <div class="content">
-    <div class="tab-content active" id="tab-generate">
-      <div class="top-grid">
-        <div class="card">
-          <div class="card-label">AI Brand Kit Generation</div>
-          <div class="form-grid">
-            <div class="field"><label>Business Name</label><input type="text" id="brand" placeholder="Business Name" /></div>
-            <div class="field"><label>Industry</label><input type="text" id="niche" placeholder="e.g. AI Marketing, SaaS, Real Estate" /></div>
-            <div class="field"><label>Brand Personality</label><input type="text" id="personality" placeholder="e.g. Bold, cutting-edge, trustworthy" /></div>
-            <div class="field"><label>Tagline</label><input type="text" id="tagline" placeholder="e.g. Start Your Own AI Marketing Agency" /></div>
-            <div class="field"><label>Primary Color</label><div class="color-row"><input type="color" id="c1p" value="#2D7AFF" /><input type="text" id="c1t" value="#2D7AFF" maxlength="7" /></div></div>
-            <div class="field"><label>Secondary Color</label><div class="color-row"><input type="color" id="c2p" value="#1a1a2e" /><input type="text" id="c2t" value="#1a1a2e" maxlength="7" /></div></div>
-            <div class="field form-full"><label>Description</label><textarea id="description" placeholder="What does the brand do? 1-2 sentences."></textarea></div>
-            <div class="field"><label>Logo Icon Concept <span style="font-weight:400;color:var(--text3)">(optional)</span></label><input type="text" id="icon-concept" placeholder="e.g. Abstract geometric A with diagonal cutout" /></div>
-            <div class="field"><label>Hard Rules <span style="font-weight:400;color:var(--text3)">(optional)</span></label><input type="text" id="rules" placeholder="e.g. Dark background, no gradients on icon" /></div>
-            <div class="form-full" style="display:flex;gap:10px;margin-top:4px"><button class="btn-secondary" id="promptbtn" onclick="writePrompts()">Write Prompts</button></div>
-            <div class="form-full"><button class="btn-cta" id="genbtn" onclick="generateAll()" disabled>Generate Brand Kit</button></div>
-          </div>
-        </div>
-        <div class="stats">
-          <div class="card-label" style="margin-bottom:12px">Quick Stats</div>
-          <div class="stat-card"><div class="stat-label">Kits Generated</div><div class="stat-value" id="stat-kits">0</div></div>
-          <div class="stat-card"><div class="stat-label">Assets Saved</div><div class="stat-value" id="stat-assets">0</div></div>
-          <div class="stat-card"><div class="stat-label">Clients</div><div class="stat-value" id="stat-clients">0</div></div>
-        </div>
-      </div>
-      <div class="status" id="status"></div>
-      <div class="prompt-panel" id="prompt-panel"><div class="prompt-card"><div class="prompt-card-title">Review &amp; Edit Prompts</div><div class="prompt-card-sub">Claude wrote these. Edit before generating.</div><div class="prompt-fields"><div class="field"><div class="prompt-label">Logo (3 models will generate this)</div><textarea class="prompt-area" id="prompt-logo"></textarea></div><div class="field"><div class="prompt-label">Facebook Background (art only, no text)</div><textarea class="prompt-area" id="prompt-fb"></textarea></div><div class="field"><div class="prompt-label">LinkedIn Background (art only, no text)</div><textarea class="prompt-area" id="prompt-li"></textarea></div></div></div></div>
-
-      <!-- Logo picker -->
-      <div class="logo-picker" id="logo-picker"><div class="logo-picker-title">Pick Your Logo — 3 models, click to select</div><div class="logo-grid-3" id="logo-grid"></div></div>
-
-      <!-- Cover previews -->
-      <div class="cover-preview" id="cover-preview">
-        <div class="cover-card" id="fb-card"><div class="cover-card-head"><span class="cover-card-name">Facebook Cover — 16:9</span><div><button class="btn-xs" onclick="regenCover('fb')">Regen</button> <button class="btn-xs dl" onclick="dlAsset(S.fbUrl,'fb-background')">Background</button></div></div><div class="cover-card-body"><img class="cover-bg" id="fb-bg" src="" /><div class="cover-overlay"><img class="cover-overlay-logo" id="fb-logo" src="" /><div class="cover-overlay-text"><div class="cover-overlay-tagline" id="fb-tagline"></div></div><div class="cover-overlay-cta" id="fb-cta">Learn More</div></div></div></div>
-        <div class="cover-card" id="li-card"><div class="cover-card-head"><span class="cover-card-name">LinkedIn Cover — 21:9</span><div><button class="btn-xs" onclick="regenCover('li')">Regen</button> <button class="btn-xs dl" onclick="dlAsset(S.liUrl,'li-background')">Background</button></div></div><div class="cover-card-body"><img class="cover-bg" id="li-bg" src="" /><div class="cover-overlay"><img class="cover-overlay-logo" id="li-logo" src="" /><div class="cover-overlay-text"><div class="cover-overlay-tagline" id="li-tagline"></div></div><div class="cover-overlay-cta" id="li-cta">Learn More</div></div></div></div>
-      </div>
-
-      <div class="export-section" id="pdf-section">
-        <div class="export-grid">
-          <button class="export-btn" id="share-btn" onclick="shareKit()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Client Share Link</button>
-          <button class="export-btn" id="pdf-btn" onclick="exportPDF()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Export PDF</button>
-        </div>
-        <div class="share-result" id="share-result"><div class="share-label">Client Link Ready</div><div class="share-row"><input type="text" id="share-url" readonly onclick="this.select()" /><button class="btn-xs dl" onclick="copyShareUrl()">Copy</button><button class="btn-xs dl" onclick="openShareUrl()">Open</button></div></div>
-      </div>
-      <div style="margin-top:28px" id="recent-section"></div>
-    </div>
-    <div class="tab-content" id="tab-history"><div class="section-label">All Brand Kits</div><div id="history-list"></div><div style="text-align:right;margin-top:12px"><button class="btn-secondary" onclick="clearHistory()">Clear History</button></div></div>
-  </div>
+<div class="tab" id="t-hist"><div class="section-label">All Brand Kits</div><div id="hlist"></div><div style="text-align:right;margin-top:12px"><button class="btn2" onclick="clearH()">Clear History</button></div></div>
+</div>
 </main>
 </div>
 
 <script>
-const TEAM_PASSWORD='tao2025';
-function doLogin(){const pw=document.getElementById('login-pw').value;if(pw===TEAM_PASSWORD){localStorage.setItem('tao_auth','true');document.getElementById('login-gate').style.display='none';document.getElementById('app-layout').style.display='flex'}else{document.getElementById('login-err').style.display='block';document.getElementById('login-pw').value=''}}
-function doLogout(){localStorage.removeItem('tao_auth');location.reload()}
-if(localStorage.getItem('tao_auth')==='true'){document.getElementById('login-gate').style.display='none';document.getElementById('app-layout').style.display='flex'}
+const PW='tao2025';
+function doLogin(){if(E('pw').value===PW){localStorage.setItem('ta','1');E('gate').style.display='none';E('app').style.display='flex'}else{E('pw-err').style.display='block';E('pw').value=''}}
+function doLogout(){localStorage.removeItem('ta');location.reload()}
+if(localStorage.getItem('ta')==='1'){E('gate').style.display='none';E('app').style.display='flex'}
+function E(id){return document.getElementById(id)}
 
-const $=id=>document.getElementById(id);
-const S={logoUrl:null,logoOptions:[],fbUrl:null,liUrl:null,brand:{},jsonUrl:null};
+const S={logoUrl:null,logoUrlClean:null,logos:[],fbUrl:null,liUrl:null,brand:{},jsonUrl:null};
 
-function switchTab(n){['generate','history'].forEach(t=>{$('tab-'+t)?.classList.toggle('active',t===n);$('nav-'+t)?.classList.toggle('active',t===n)});if(n==='history')renderHistory()}
-function syncColor(p,t){const pi=$(p),ti=$(t);pi.addEventListener('input',()=>ti.value=pi.value);ti.addEventListener('input',()=>{if(/^#[0-9A-Fa-f]{6}$/.test(ti.value))pi.value=ti.value})}
-syncColor('c1p','c1t');syncColor('c2p','c2t');
-function setStatus(m,t){const s=$('status');s.textContent=m;s.className='status '+t}
-function getBrand(){return{brandName:$('brand').value.trim(),tagline:$('tagline').value.trim(),niche:$('niche').value.trim(),personality:$('personality').value.trim(),description:$('description').value.trim(),iconConcept:$('icon-concept').value.trim(),rules:$('rules').value.trim(),c1:$('c1t').value.trim(),c2:$('c2t').value.trim()}}
-function dlAsset(url,id){if(!url)return;const a=document.createElement('a');a.href=url;a.download=id+'.png';a.target='_blank';a.click()}
-async function post(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await r.json();if(!r.ok)throw new Error(data.error||r.statusText);return data}
-function imgToB64(url){return new Promise(resolve=>{if(!url)return resolve(null);const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{try{const c=document.createElement('canvas');const s=Math.min(1,1200/img.naturalWidth);c.width=Math.round(img.naturalWidth*s);c.height=Math.round(img.naturalHeight*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',0.85))}catch(e){resolve(null)}};img.onerror=()=>resolve(null);img.src=url})}
+function tab(n){['gen','hist'].forEach(t=>{E('t-'+t)?.classList.toggle('a',t===n);E('n-'+t)?.classList.toggle('active',t===n)});if(n==='hist')renderH()}
+function sC(p,t){const a=E(p),b=E(t);a.addEventListener('input',()=>b.value=a.value);b.addEventListener('input',()=>{if(/^#[0-9A-Fa-f]{6}$/.test(b.value))a.value=b.value})}
+sC('c1p','c1t');sC('c2p','c2t');
+function ss(m,t){const s=E('status');s.textContent=m;s.className='status '+t}
+function brand(){return{brandName:E('f-name').value.trim(),tagline:E('f-tag').value.trim(),niche:E('f-niche').value.trim(),personality:E('f-pers').value.trim(),description:E('f-desc').value.trim(),iconConcept:E('f-icon').value.trim(),rules:E('f-rules').value.trim(),c1:E('c1t').value.trim(),c2:E('c2t').value.trim()}}
+function dl(url,name){if(!url)return;const a=document.createElement('a');a.href=url;a.download=name+'.png';a.target='_blank';a.click()}
+async function post(p,b){const r=await fetch(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});const d=await r.json();if(!r.ok)throw new Error(d.error||r.statusText);return d}
+function b64(url){return new Promise(res=>{if(!url)return res(null);const i=new Image();i.crossOrigin='anonymous';i.onload=()=>{try{const c=document.createElement('canvas');const s=Math.min(1,1200/i.naturalWidth);c.width=Math.round(i.naturalWidth*s);c.height=Math.round(i.naturalHeight*s);c.getContext('2d').drawImage(i,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.85))}catch(e){res(null)}};i.onerror=()=>res(null);i.src=url})}
 
-// ── Shared history ────────────────────────────────────────────────────
-let _hCache=[];
-async function fetchH(){try{const r=await fetch('/api/history');const d=await r.json();_hCache=d.history||[]}catch(_){_hCache=[]}return _hCache}
-async function updateStats(){const h=await fetchH();$('stat-kits').textContent=h.length;$('stat-assets').textContent=h.length*3;$('stat-clients').textContent=new Set(h.map(i=>i.brand).filter(Boolean)).size}
-updateStats().then(()=>renderRecent());
+// History
+let _h=[];
+async function fH(){try{const r=await fetch('/api/history');const d=await r.json();_h=d.history||[]}catch(_){_h=[]}return _h}
+async function uS(){const h=await fH();E('s-k').textContent=h.length;E('s-a').textContent=h.length*3;E('s-c').textContent=new Set(h.map(i=>i.brand).filter(Boolean)).size}
+uS().then(()=>rR());
 
-async function renderRecent(){const h=_hCache.slice(0,6);const el=$('recent-section');if(!h.length){el.innerHTML='';return}let html='<div class="section-label">Recent Brand Kits</div><div class="kits-grid">';h.forEach(item=>{const d=item.date?new Date(item.date).toLocaleString():'';html+=`<div class="kit-card"><div class="kit-thumb${item.fbUrl?' cover':''}"><img src="${item.fbUrl||item.logoUrl||''}" alt="" /></div><div class="kit-info"><div class="kit-name">${item.brand||'Untitled'}</div><div class="kit-date">${d}</div><div class="kit-colors">${item.c1?`<div class="kit-swatch" style="background:${item.c1};width:40px"></div>`:''}${item.c2?`<div class="kit-swatch" style="background:${item.c2};width:40px"></div>`:''}</div><div class="kit-actions">${item.logoUrl?`<button class="btn-xs dl" onclick="window.open('${item.logoUrl}','_blank')">Logo</button>`:''}${item.jsonUrl?`<button class="btn-xs dl" onclick="window.open('/kit?jsonUrl='+encodeURIComponent('${item.jsonUrl}'),'_blank')">Kit</button>`:''}</div></div></div>`});html+='</div>';el.innerHTML=html}
+async function rR(){const h=_h.slice(0,6);const el=E('recent');if(!h.length){el.innerHTML='';return}let html='<div class="section-label">Recent Brand Kits</div><div class="kg">';h.forEach(i=>{const d=i.date?new Date(i.date).toLocaleString():'';html+=`<div class="kc"><div class="kt${i.fbUrl?' c':''}"><img src="${i.fbUrl||i.logoUrl||''}"/></div><div class="ki"><div class="kn">${i.brand||'Untitled'}</div><div class="kd">${d}</div><div class="ks">${i.c1?`<div class="ksw" style="background:${i.c1};width:40px"></div>`:''}${i.c2?`<div class="ksw" style="background:${i.c2};width:40px"></div>`:''}</div><div class="ka">${i.logoUrl?`<button class="bx dl" onclick="window.open('${i.logoUrl}','_blank')">Logo</button>`:''}${i.jsonUrl?`<button class="bx dl" onclick="window.open('/kit?jsonUrl='+encodeURIComponent('${i.jsonUrl}'),'_blank')">Kit</button>`:''}</div></div></div>`});html+='</div>';el.innerHTML=html}
 
-// ── Logo picker ───────────────────────────────────────────────────────
-function selectLogo(idx){
-  S.logoUrl=S.logoOptions[idx]?.url;
-  document.querySelectorAll('.logo-option').forEach((el,i)=>el.classList.toggle('selected',i===idx));
+// Logo picker
+async function selectLogo(idx){
+  const l=S.logos[idx];if(!l||!l.url)return;
+  S.logoUrl=l.url;
+  document.querySelectorAll('.lo').forEach((el,i)=>el.classList.toggle('sel',i===idx));
+  // Remove background
+  ss('Removing logo background...','info');
+  try{
+    const{url}=await post('/api/generate',{type:'remove-bg',imageUrl:l.url});
+    S.logoUrlClean=url;
+  }catch(e){S.logoUrlClean=l.url;console.warn('BG removal failed:',e.message)}
   // Update cover overlays
-  $('fb-logo').src=S.logoUrl||'';
-  $('li-logo').src=S.logoUrl||'';
+  E('fb-logo').src=S.logoUrlClean||S.logoUrl;
+  E('li-logo').src=S.logoUrlClean||S.logoUrl;
+  ss('Logo selected and background removed.','success');
 }
 
 function renderLogos(logos){
-  const grid=$('logo-grid');
-  grid.innerHTML='';
-  S.logoOptions=logos;
+  S.logos=logos;
+  const g=E('lg');g.innerHTML='';
   logos.forEach((l,i)=>{
-    const div=document.createElement('div');
-    div.className='logo-option'+(i===0&&l.url?' selected':'');
-    div.onclick=()=>{if(l.url)selectLogo(i)};
-    div.innerHTML=`<div class="logo-option-head"><span class="logo-option-model">${l.name}</span><div class="logo-option-check">✓</div></div><div class="logo-option-body">${l.url?`<img src="${l.url}" />`:`<span style="color:var(--error);font-size:11px">${l.error||'Failed'}</span>`}</div><div class="logo-option-actions">${l.url?`<button class="btn-xs dl" onclick="event.stopPropagation();dlAsset('${l.url}','logo-${l.id}')">Download</button>`:''}</div>`;
-    grid.appendChild(div);
+    const d=document.createElement('div');
+    d.className='lo'+(i===0&&l.url?' sel':'');
+    d.innerHTML=`<div class="lo-h"><span class="lo-m">${l.name}</span><div class="lo-chk">✓</div></div><div class="lo-b">${l.url?`<img src="${l.url}"/>`:`<span style="color:var(--error);font-size:11px">${l.error||'Failed'}</span>`}</div><div class="lo-a">${l.url?`<button class="bx" onclick="event.stopPropagation();regenLogo('${l.id}',${i})">Regen</button><button class="bx dl" onclick="event.stopPropagation();dl('${l.url}','logo-${l.id}')">Download</button>`:''}</div>`;
+    d.onclick=()=>{if(l.url)selectLogo(i)};
+    g.appendChild(d);
   });
-  // Default select first successful
+  E('lp').className='lp v';
+  // Auto-select first
   const first=logos.findIndex(l=>l.url);
   if(first>=0)selectLogo(first);
-  $('logo-picker').className='logo-picker visible';
 }
 
-// ── Cover regen ───────────────────────────────────────────────────────
+async function regenLogo(modelId,idx){
+  const prompt=E('p-logo').value.trim();if(!prompt)return;
+  const card=E('lg').children[idx];if(!card)return;
+  card.querySelector('.lo-b').innerHTML='<div class="spinner"></div>';
+  try{
+    const{url}=await post('/api/generate',{type:'logo-single',prompt,modelId});
+    S.logos[idx].url=url;S.logos[idx].error=null;
+    renderLogos(S.logos);
+  }catch(e){ss('Regen failed: '+e.message,'error')}
+}
+
 async function regenCover(type){
-  const promptId=type==='fb'?'prompt-fb':'prompt-li';
-  const prompt=$(promptId).value.trim();
-  if(!prompt)return;
+  const pid=type==='fb'?'p-fb':'p-li';
+  const prompt=E(pid).value.trim();if(!prompt)return;
+  ss('Regenerating '+type+' background...','info');
   try{
     const{url}=await post('/api/generate',{type:type==='fb'?'cover-fb':'cover-li',prompt});
-    if(type==='fb'){S.fbUrl=url;$('fb-bg').src=url}
-    if(type==='li'){S.liUrl=url;$('li-bg').src=url}
-  }catch(e){setStatus('Regen failed: '+e.message,'error')}
+    if(type==='fb'){S.fbUrl=url;E('fb-bg').src=url}else{S.liUrl=url;E('li-bg').src=url}
+    ss('Cover regenerated.','success');
+  }catch(e){ss('Failed: '+e.message,'error')}
 }
 
-// ── Prompts ───────────────────────────────────────────────────────────
 async function writePrompts(){
-  const brand=getBrand();
-  if(!brand.brandName||!brand.niche){setStatus('Business name and industry required.','error');return}
-  S.brand=brand;
-  const btn=$('promptbtn');btn.disabled=true;btn.textContent='Writing...';
-  setStatus('Claude is writing prompts...','info');
-  try{
-    const{prompts}=await post('/api/prompts',{brand});
-    $('prompt-logo').value=prompts.logo||'';
-    $('prompt-fb').value=prompts.fb||'';
-    $('prompt-li').value=prompts.li||'';
-    $('prompt-panel').className='prompt-panel visible';
-    $('genbtn').disabled=false;
-    setStatus('Prompts ready. Review then hit Generate.','info');
-  }catch(e){setStatus('Error: '+e.message,'error')}
+  const b=brand();if(!b.brandName||!b.niche){ss('Name and industry required.','error');return}
+  S.brand=b;const btn=E('pbtn');btn.disabled=true;btn.textContent='Writing...';
+  ss('Claude writing prompts...','info');
+  try{const{prompts}=await post('/api/prompts',{brand:b});E('p-logo').value=prompts.logo||'';E('p-fb').value=prompts.fb||'';E('p-li').value=prompts.li||'';E('pp').className='pp visible';E('gbtn').disabled=false;ss('Prompts ready. Edit then Generate.','info')}catch(e){ss('Error: '+e.message,'error')}
   btn.disabled=false;btn.textContent='Re-write Prompts';
 }
 
-// ── Generate all ──────────────────────────────────────────────────────
 async function generateAll(){
-  const logoPrompt=$('prompt-logo').value.trim();
-  const fbPrompt=$('prompt-fb').value.trim();
-  const liPrompt=$('prompt-li').value.trim();
-  if(!logoPrompt||!fbPrompt||!liPrompt){setStatus('All 3 prompts required.','error');return}
+  const lp=E('p-logo').value.trim(),fp=E('p-fb').value.trim(),lip=E('p-li').value.trim();
+  if(!lp||!fp||!lip){ss('All 3 prompts required.','error');return}
+  S.brand=brand();S.logoUrl=null;S.logoUrlClean=null;S.logos=[];S.fbUrl=null;S.liUrl=null;S.jsonUrl=null;
+  const btn=E('gbtn');btn.disabled=true;btn.textContent='Generating...';
+  E('lp').className='lp';E('cp').className='cp';E('exp').className='exp';
+  E('fb-tag').textContent=S.brand.tagline||'';E('li-tag').textContent=S.brand.tagline||'';
+  ss('Generating 2 logo options + 2 cover backgrounds in parallel...','info');
 
-  S.brand=getBrand();S.logoUrl=null;S.logoOptions=[];S.fbUrl=null;S.liUrl=null;S.jsonUrl=null;
-  const btn=$('genbtn');btn.disabled=true;btn.textContent='Generating...';
-  $('logo-picker').className='logo-picker';
-  $('cover-preview').className='cover-preview';
-  $('pdf-section').className='export-section';
-
-  // Set up cover overlay text
-  $('fb-tagline').textContent=S.brand.tagline||'';
-  $('li-tagline').textContent=S.brand.tagline||'';
-  $('fb-cta').textContent='Learn More';
-  $('li-cta').textContent='Get Started';
-
-  setStatus('Generating 3 logo options + 2 cover backgrounds...','info');
-
-  // Generate everything in parallel
-  const [logosResult, fbResult, liResult] = await Promise.allSettled([
-    post('/api/generate',{type:'logos',prompt:logoPrompt}),
-    post('/api/generate',{type:'cover-fb',prompt:fbPrompt}),
-    post('/api/generate',{type:'cover-li',prompt:liPrompt})
+  const[lr,fr,lir]=await Promise.allSettled([
+    post('/api/generate',{type:'logos',prompt:lp}),
+    post('/api/generate',{type:'cover-fb',prompt:fp}),
+    post('/api/generate',{type:'cover-li',prompt:lip})
   ]);
 
-  // Handle logos
-  if(logosResult.status==='fulfilled'){
-    renderLogos(logosResult.value.logos);
-  }else{
-    setStatus('Logo generation failed: '+logosResult.reason.message,'error');
-    btn.disabled=false;btn.textContent='Generate Brand Kit';return;
-  }
+  if(lr.status==='fulfilled')renderLogos(lr.value.logos);
+  else{ss('Logo generation failed.','error');btn.disabled=false;btn.textContent='Generate Brand Kit';return}
 
-  // Handle FB cover
-  if(fbResult.status==='fulfilled'){
-    S.fbUrl=fbResult.value.url;
-    $('fb-bg').src=S.fbUrl;
-  }
-
-  // Handle LI cover
-  if(liResult.status==='fulfilled'){
-    S.liUrl=liResult.value.url;
-    $('li-bg').src=S.liUrl;
-  }
-
-  $('cover-preview').className='cover-preview visible';
+  if(fr.status==='fulfilled'){S.fbUrl=fr.value.url;E('fb-bg').src=S.fbUrl}
+  if(lir.status==='fulfilled'){S.liUrl=lir.value.url;E('li-bg').src=S.liUrl}
+  E('cp').className='cp v';
 
   // Auto-save
-  setStatus('Saving assets...','info');
+  ss('Saving...','info');
   try{
-    const[lb,fb,li]=await Promise.all([imgToB64(S.logoUrl),imgToB64(S.fbUrl),imgToB64(S.liUrl)]);
-    const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||S.logoUrl,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl});
-    S.jsonUrl=saved.jsonUrl;
-    if(saved.logoUrl)S.logoUrl=saved.logoUrl;
-    if(saved.fbUrl)S.fbUrl=saved.fbUrl;
-    if(saved.liUrl)S.liUrl=saved.liUrl;
-  }catch(e){console.warn('Save failed:',e.message)}
+    const logoToSave=S.logoUrlClean||S.logoUrl;
+    const[lb,fb,li]=await Promise.all([b64(logoToSave),b64(S.fbUrl),b64(S.liUrl)]);
+    const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||logoToSave,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl});
+    S.jsonUrl=saved.jsonUrl;if(saved.logoUrl)S.logoUrl=saved.logoUrl;if(saved.fbUrl)S.fbUrl=saved.fbUrl;if(saved.liUrl)S.liUrl=saved.liUrl;
+  }catch(e){console.warn('Save:',e.message)}
 
   btn.disabled=false;btn.textContent='Generate Brand Kit';
-  $('pdf-section').className='export-section visible';
-  await post('/api/history',{action:'add',entry:{brand:S.brand.brandName,tagline:S.brand.tagline,c1:S.brand.c1,c2:S.brand.c2,logoUrl:S.logoUrl,fbUrl:S.fbUrl,liUrl:S.liUrl,jsonUrl:S.jsonUrl}}).catch(()=>{});
-  await updateStats();await renderRecent();
-  setStatus('Brand kit ready. Pick your favourite logo, then share or export.','success');
+  E('exp').className='exp v';
+  await post('/api/history',{action:'add',entry:{brand:S.brand.brandName,tagline:S.brand.tagline,c1:S.brand.c1,c2:S.brand.c2,logoUrl:S.logoUrlClean||S.logoUrl,fbUrl:S.fbUrl,liUrl:S.liUrl,jsonUrl:S.jsonUrl}}).catch(()=>{});
+  await uS();await rR();
+  ss('Brand kit ready. Pick logo, regen anything, then share.','success');
 }
 
-// ── Share + PDF ───────────────────────────────────────────────────────
-async function shareKit(){const btn=$('share-btn');btn.disabled=true;btn.textContent='Generating...';try{if(!S.jsonUrl){const[lb,fb,li]=await Promise.all([imgToB64(S.logoUrl),imgToB64(S.fbUrl),imgToB64(S.liUrl)]);const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||S.logoUrl,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl});S.jsonUrl=saved.jsonUrl}const u=`${location.origin}/kit?jsonUrl=${encodeURIComponent(S.jsonUrl)}`;$('share-url').value=u;$('share-result').className='share-result visible'}catch(e){alert('Error: '+e.message)}btn.disabled=false;btn.textContent='Client Share Link'}
-async function exportPDF(){const btn=$('pdf-btn');btn.disabled=true;btn.textContent='Building...';try{const r=await fetch('/api/pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({brand:S.brand,logoUrl:S.logoUrl})});if(!r.ok){const t=await r.text();throw new Error(t.slice(0,200))}const blob=await r.blob();const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=`${(S.brand.brandName||'brand').replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`;a.click();URL.revokeObjectURL(u)}catch(e){alert('PDF error: '+e.message)}btn.disabled=false;btn.textContent='Export PDF'}
-function copyShareUrl(){$('share-url').select();navigator.clipboard.writeText($('share-url').value).then(()=>{const b=event.target;b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',2000)})}
-function openShareUrl(){window.open($('share-url').value,'_blank')}
-async function renderHistory(){const list=$('history-list');await fetchH();if(!_hCache.length){list.innerHTML='<div class="history-empty">No brand kits yet.</div>';return}let html='<div class="kits-grid">';_hCache.forEach(item=>{const d=item.date?new Date(item.date).toLocaleString():'';html+=`<div class="kit-card"><div class="kit-thumb${item.fbUrl?' cover':''}"><img src="${item.fbUrl||item.logoUrl||''}" alt="" /></div><div class="kit-info"><div class="kit-name">${item.brand||'Untitled'}</div><div class="kit-date">${d}</div><div class="kit-colors">${item.c1?`<div class="kit-swatch" style="background:${item.c1};width:40px"></div>`:''}${item.c2?`<div class="kit-swatch" style="background:${item.c2};width:40px"></div>`:''}</div><div class="kit-actions">${item.logoUrl?`<button class="btn-xs dl" onclick="window.open('${item.logoUrl}','_blank')">Logo</button>`:''}${item.jsonUrl?`<button class="btn-xs dl" onclick="window.open('/kit?jsonUrl='+encodeURIComponent('${item.jsonUrl}'),'_blank')">Kit</button>`:''}</div></div></div>`});html+='</div>';list.innerHTML=html}
-async function clearHistory(){if(confirm('Clear all history?')){await post('/api/history',{action:'clear'});await renderHistory();await updateStats();await renderRecent()}}
+async function shareKit(){const btn=E('shbtn');btn.disabled=true;btn.textContent='...';try{if(!S.jsonUrl){const logoToSave=S.logoUrlClean||S.logoUrl;const[lb,fb,li]=await Promise.all([b64(logoToSave),b64(S.fbUrl),b64(S.liUrl)]);const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||logoToSave,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl});S.jsonUrl=saved.jsonUrl}E('surl').value=`${location.origin}/kit?jsonUrl=${encodeURIComponent(S.jsonUrl)}`;E('sr').className='sr v'}catch(e){alert(e.message)}btn.disabled=false;btn.textContent='Client Share Link'}
+async function exportPDF(){const btn=E('pdfbtn');btn.disabled=true;btn.textContent='...';try{const r=await fetch('/api/pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({brand:S.brand,logoUrl:S.logoUrlClean||S.logoUrl})});if(!r.ok)throw new Error((await r.text()).slice(0,200));const blob=await r.blob();const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=`${(S.brand.brandName||'brand').replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`;a.click();URL.revokeObjectURL(u)}catch(e){alert(e.message)}btn.disabled=false;btn.textContent='Export PDF'}
+function cpUrl(){E('surl').select();navigator.clipboard.writeText(E('surl').value).then(()=>{const b=event.target;b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',2000)})}
+async function renderH(){const l=E('hlist');await fH();if(!_h.length){l.innerHTML='<div class="he">No brand kits yet.</div>';return}let html='<div class="kg">';_h.forEach(i=>{const d=i.date?new Date(i.date).toLocaleString():'';html+=`<div class="kc"><div class="kt${i.fbUrl?' c':''}"><img src="${i.fbUrl||i.logoUrl||''}"/></div><div class="ki"><div class="kn">${i.brand||'Untitled'}</div><div class="kd">${d}</div><div class="ks">${i.c1?`<div class="ksw" style="background:${i.c1};width:40px"></div>`:''}${i.c2?`<div class="ksw" style="background:${i.c2};width:40px"></div>`:''}</div><div class="ka">${i.logoUrl?`<button class="bx dl" onclick="window.open('${i.logoUrl}','_blank')">Logo</button>`:''}${i.jsonUrl?`<button class="bx dl" onclick="window.open('/kit?jsonUrl='+encodeURIComponent('${i.jsonUrl}'),'_blank')">Kit</button>`:''}</div></div></div>`});html+='</div>';l.innerHTML=html}
+async function clearH(){if(confirm('Clear all history?')){await post('/api/history',{action:'clear'});await renderH();await uS();await rR()}}
 </script>
 </body>
 </html>

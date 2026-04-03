@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { brand, logoUrl, fbUrl, liUrl } = req.body;
+  const { brand, logoUrl, logoCleanUrl, fbUrl, liUrl, fonts } = req.body;
   if (!brand || !brand.brandName) return res.status(400).json({ error: 'Missing brand data' });
   if (!logoUrl) return res.status(400).json({ error: 'Logo URL is required' });
 
@@ -56,8 +56,9 @@ module.exports = async (req, res) => {
     }
 
     // Upload all assets in parallel
-    const [storedLogo, storedFb, storedLi] = await Promise.all([
+    const [storedLogo, storedLogoClean, storedFb, storedLi] = await Promise.all([
       uploadAsset(logoUrl, 'logo.png'),
+      uploadAsset(logoCleanUrl, 'logo-transparent.png'),
       uploadAsset(fbUrl, 'facebook-cover.jpg'),
       uploadAsset(liUrl, 'linkedin-cover.jpg')
     ]);
@@ -66,7 +67,9 @@ module.exports = async (req, res) => {
     const kitData = {
       slug,
       brand,
+      fonts: fonts || null,
       logoUrl: storedLogo || logoUrl,
+      logoCleanUrl: storedLogoClean || logoCleanUrl || null,
       fbUrl: storedFb || fbUrl || null,
       liUrl: storedLi || liUrl || null,
       createdAt: new Date().toISOString()

@@ -169,7 +169,7 @@ function doLogout(){localStorage.removeItem('ta');location.reload()}
 if(localStorage.getItem('ta')==='1'){E('gate').style.display='none';E('app').style.display='flex'}
 function E(id){return document.getElementById(id)}
 
-const S={logoUrl:null,logoUrlClean:null,logos:[],fbUrl:null,liUrl:null,brand:{},jsonUrl:null};
+const S={logoUrl:null,logoUrlClean:null,logos:[],fbUrl:null,liUrl:null,brand:{},jsonUrl:null,fonts:null};
 
 function tab(n){['gen','hist'].forEach(t=>{E('t-'+t)?.classList.toggle('a',t===n);E('n-'+t)?.classList.toggle('active',t===n)});if(n==='hist')renderH()}
 function sC(p,t){const a=E(p),b=E(t);a.addEventListener('input',()=>b.value=a.value);b.addEventListener('input',()=>{if(/^#[0-9A-Fa-f]{6}$/.test(b.value))a.value=b.value})}
@@ -256,7 +256,7 @@ async function writePrompts(){
   const b=brand();if(!b.brandName||!b.niche){ss('Name and industry required.','error');return}
   S.brand=b;const btn=E('pbtn');btn.disabled=true;btn.textContent='Writing...';
   ss('Claude writing prompts...','info');
-  try{const{prompts}=await post('/api/prompts',{brand:b});E('p-logo').value=prompts.logo||'';E('p-fb').value=prompts.fb||'';E('p-li').value=prompts.li||'';E('pp').className='pp visible';E('gbtn').disabled=false;ss('Prompts ready. Edit then Generate.','info')}catch(e){ss('Error: '+e.message,'error')}
+  try{const{prompts}=await post('/api/prompts',{brand:b});E('p-logo').value=prompts.logo||'';E('p-fb').value=prompts.fb||'';E('p-li').value=prompts.li||'';S.fonts=prompts.fonts||null;E('pp').className='pp visible';E('gbtn').disabled=false;ss('Prompts ready. Edit then Generate.','info')}catch(e){ss('Error: '+e.message,'error')}
   btn.disabled=false;btn.textContent='Re-write Prompts';
 }
 
@@ -285,8 +285,8 @@ async function generateAll(){
   ss('Saving...','info');
   try{
     const logoToSave=S.logoUrlClean||S.logoUrl;
-    const[lb,fb,li]=await Promise.all([b64(logoToSave),b64(S.fbUrl),b64(S.liUrl)]);
-    const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||logoToSave,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl});
+    const[lb,lbc,fb,li]=await Promise.all([b64(S.logoUrl),b64(S.logoUrlClean),b64(S.fbUrl),b64(S.liUrl)]);
+    const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||S.logoUrl,logoCleanUrl:lbc||S.logoUrlClean,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl,fonts:S.fonts});
     S.jsonUrl=saved.jsonUrl;if(saved.logoUrl)S.logoUrl=saved.logoUrl;if(saved.fbUrl)S.fbUrl=saved.fbUrl;if(saved.liUrl)S.liUrl=saved.liUrl;
   }catch(e){console.warn('Save:',e.message)}
 
@@ -297,7 +297,7 @@ async function generateAll(){
   ss('Brand kit ready. Pick logo, regen anything, then share.','success');
 }
 
-async function shareKit(){const btn=E('shbtn');btn.disabled=true;btn.textContent='...';try{if(!S.jsonUrl){const logoToSave=S.logoUrlClean||S.logoUrl;const[lb,fb,li]=await Promise.all([b64(logoToSave),b64(S.fbUrl),b64(S.liUrl)]);const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||logoToSave,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl});S.jsonUrl=saved.jsonUrl}E('surl').value=`${location.origin}/kit?jsonUrl=${encodeURIComponent(S.jsonUrl)}`;E('sr').className='sr v'}catch(e){alert(e.message)}btn.disabled=false;btn.textContent='Client Share Link'}
+async function shareKit(){const btn=E('shbtn');btn.disabled=true;btn.textContent='...';try{if(!S.jsonUrl){const[lb,lbc,fb,li]=await Promise.all([b64(S.logoUrl),b64(S.logoUrlClean),b64(S.fbUrl),b64(S.liUrl)]);const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||S.logoUrl,logoCleanUrl:lbc||S.logoUrlClean,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl,fonts:S.fonts});S.jsonUrl=saved.jsonUrl}E('surl').value=`${location.origin}/kit?jsonUrl=${encodeURIComponent(S.jsonUrl)}`;E('sr').className='sr v'}catch(e){alert(e.message)}btn.disabled=false;btn.textContent='Client Share Link'}
 async function exportPDF(){const btn=E('pdfbtn');btn.disabled=true;btn.textContent='...';try{const r=await fetch('/api/pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({brand:S.brand,logoUrl:S.logoUrlClean||S.logoUrl})});if(!r.ok)throw new Error((await r.text()).slice(0,200));const blob=await r.blob();const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=`${(S.brand.brandName||'brand').replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`;a.click();URL.revokeObjectURL(u)}catch(e){alert(e.message)}btn.disabled=false;btn.textContent='Export PDF'}
 function cpUrl(){E('surl').select();navigator.clipboard.writeText(E('surl').value).then(()=>{const b=event.target;b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',2000)})}
 async function renderH(){const l=E('hlist');await fH();if(!_h.length){l.innerHTML='<div class="he">No brand kits yet.</div>';return}let html='<div class="kg">';_h.forEach(i=>{const d=i.date?new Date(i.date).toLocaleString():'';html+=`<div class="kc"><div class="kt${i.fbUrl?' c':''}"><img src="${i.fbUrl||i.logoUrl||''}"/></div><div class="ki"><div class="kn">${i.brand||'Untitled'}</div><div class="kd">${d}</div><div class="ks">${i.c1?`<div class="ksw" style="background:${i.c1};width:40px"></div>`:''}${i.c2?`<div class="ksw" style="background:${i.c2};width:40px"></div>`:''}</div><div class="ka">${i.logoUrl?`<button class="bx dl" onclick="window.open('${i.logoUrl}','_blank')">Logo</button>`:''}${i.jsonUrl?`<button class="bx dl" onclick="window.open('/kit?jsonUrl='+encodeURIComponent('${i.jsonUrl}'),'_blank')">Kit</button>`:''}</div></div></div>`});html+='</div>';l.innerHTML=html}

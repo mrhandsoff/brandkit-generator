@@ -31,10 +31,9 @@
 
 body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
-/* Mesh bg */
 .bg-mesh { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .orb { position: absolute; border-radius: 50%; filter: blur(110px); animation: drift 10s ease-in-out infinite; }
-.orb:nth-child(1) { width:700px;height:700px;background:radial-gradient(circle,rgba(59,130,246,0.13) 0%,transparent 70%);top:-250px;left:-150px;animation-delay:0s; }
+.orb:nth-child(1) { width:700px;height:700px;background:radial-gradient(circle,rgba(59,130,246,0.13) 0%,transparent 70%);top:-250px;left:-150px; }
 .orb:nth-child(2) { width:500px;height:500px;background:radial-gradient(circle,rgba(139,92,246,0.10) 0%,transparent 70%);top:150px;right:-150px;animation-delay:-4s; }
 .orb:nth-child(3) { width:400px;height:400px;background:radial-gradient(circle,rgba(6,182,212,0.08) 0%,transparent 70%);bottom:-80px;left:35%;animation-delay:-7s; }
 @keyframes drift { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-30px) scale(1.04)} }
@@ -52,7 +51,6 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 }
 
 .sb-top { padding:22px 18px 18px;border-bottom:1px solid var(--glass-border); }
-
 .wordmark { display:flex;align-items:center;gap:10px; }
 .wm-icon {
   width:34px;height:34px;flex-shrink:0;border-radius:9px;
@@ -121,7 +119,6 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 .full { grid-column:1/-1; }
 .field { display:flex;flex-direction:column;gap:6px; }
 .field label { font-size:12px;font-weight:600;color:var(--text2); }
-.field .sub { font-size:10px;color:var(--text3); }
 
 input[type=text], textarea {
   font-family:'Inter',sans-serif;font-size:13px;padding:9px 12px;
@@ -137,7 +134,6 @@ input::placeholder, textarea::placeholder { color:var(--text3); }
 .color-row input[type=color] { width:40px;height:36px;padding:2px;border:1px solid var(--glass-border);border-radius:var(--rs);cursor:pointer;background:rgba(0,0,0,0.3);flex-shrink:0; }
 .color-row input[type=text] { flex:1; }
 
-/* Buttons */
 .btn-row { display:flex;gap:10px;margin-top:4px; }
 
 .btn { padding:11px 20px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;border:none;white-space:nowrap;display:inline-flex;align-items:center;gap:7px; }
@@ -159,13 +155,11 @@ input::placeholder, textarea::placeholder { color:var(--text3); }
 .btn-export:hover { background:linear-gradient(135deg,rgba(59,130,246,0.13),rgba(139,92,246,0.12));border-color:rgba(59,130,246,0.35);color:white; }
 .btn-export:disabled { opacity:0.38;cursor:not-allowed; }
 
-/* Status */
 .status { display:none;margin-top:12px;padding:10px 14px;border-radius:var(--rs);font-size:12px;line-height:1.5; }
 .status.info { background:rgba(59,130,246,0.08);color:#93c5fd;border:1px solid rgba(59,130,246,0.18);display:block; }
 .status.error { background:rgba(244,63,94,0.08);color:#fda4af;border:1px solid rgba(244,63,94,0.18);display:block; }
 .status.success { background:rgba(16,185,129,0.08);color:#6ee7b7;border:1px solid rgba(16,185,129,0.18);display:block; }
 
-/* Pipeline */
 .pipeline { display:none;align-items:center;margin-top:14px;padding:12px 16px;background:rgba(0,0,0,0.28);border-radius:var(--rs);border:1px solid var(--glass-border);gap:6px;flex-wrap:wrap; }
 .pipeline.visible { display:flex; }
 .pipe-step { display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--text3);flex:1;min-width:55px; }
@@ -178,7 +172,6 @@ input::placeholder, textarea::placeholder { color:var(--text3); }
 .pipe-step.error .pipe-dot { background:rgba(244,63,94,0.14);border-color:var(--error);color:var(--error); }
 .pipe-arrow { color:var(--text3);font-size:11px;flex-shrink:0; }
 
-/* Prompt panel */
 .prompt-panel { display:none;margin-top:14px; }
 .prompt-panel.visible { display:block; }
 .prompt-card {
@@ -191,7 +184,6 @@ input::placeholder, textarea::placeholder { color:var(--text3); }
 .prompt-label { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent2);margin-bottom:5px; }
 .prompt-fields { display:flex;flex-direction:column;gap:14px;padding-left:10px; }
 
-/* Assets */
 .assets-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px; }
 .asset-card { background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--r);overflow:hidden;transition:border-color 0.2s; }
 .asset-card:hover { border-color:var(--glass-border-hi); }
@@ -215,7 +207,6 @@ input::placeholder, textarea::placeholder { color:var(--text3); }
 .pdf-section.visible { display:block; }
 .pdf-hint { font-size:10px;color:var(--text3);text-align:center;margin-top:6px; }
 
-/* History */
 .history-empty { text-align:center;padding:4rem;color:var(--text3);font-size:13px; }
 .history-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px; }
 .history-card { background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--r);overflow:hidden;transition:border-color 0.2s,transform 0.2s; }
@@ -240,9 +231,7 @@ input::placeholder, textarea::placeholder { color:var(--text3); }
 </head>
 <body>
 
-<div class="bg-mesh">
-  <div class="orb"></div><div class="orb"></div><div class="orb"></div>
-</div>
+<div class="bg-mesh"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 
 <div class="layout">
 
@@ -279,7 +268,7 @@ input::placeholder, textarea::placeholder { color:var(--text3); }
     <div class="sb-bottom">
       <div class="sb-label">Engine</div>
       <div class="sb-engine"><span class="status-pulse"></span>Claude + Nano Banana Pro</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:3px">2K · Separate FB / LinkedIn prompts</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:3px">v3.0 — 2K resolution</div>
     </div>
   </aside>
 
@@ -289,12 +278,11 @@ input::placeholder, textarea::placeholder { color:var(--text3); }
         <div class="tb-title">Brand Kit Generator</div>
         <div class="tb-sub">AI-powered brand identity — logo, covers, PDF brand kit</div>
       </div>
-      <div class="tb-badge">v2.2</div>
+      <div class="tb-badge">v3.0</div>
     </div>
 
     <div class="content">
 
-      <!-- GENERATE TAB -->
       <div class="tab-content active" id="tab-generate">
 
         <div class="card">
@@ -332,18 +320,18 @@ input::placeholder, textarea::placeholder { color:var(--text3); }
         <div class="prompt-panel" id="prompt-panel">
           <div class="prompt-card">
             <div class="prompt-card-title">Review &amp; Edit Prompts</div>
-            <div class="prompt-card-sub">Claude wrote these. Edit anything before generating — all 3 prompts are separate.</div>
+            <div class="prompt-card-sub">Claude wrote these. Edit anything before generating — all 3 prompts are independent.</div>
             <div class="prompt-fields">
               <div class="field">
-                <div class="prompt-label">Logo prompt</div>
+                <div class="prompt-label">Logo prompt (1:1)</div>
                 <textarea class="prompt-area" id="prompt-logo"></textarea>
               </div>
               <div class="field">
-                <div class="prompt-label">Facebook Cover prompt (16:9 — logo reference + CTA)</div>
+                <div class="prompt-label">Facebook Cover prompt (16:9 — logo provided as reference)</div>
                 <textarea class="prompt-area" id="prompt-fb"></textarea>
               </div>
               <div class="field">
-                <div class="prompt-label">LinkedIn Cover prompt (21:9 — describe logo in prompt + professional CTA)</div>
+                <div class="prompt-label">LinkedIn Cover prompt (21:9 — logo provided as reference)</div>
                 <textarea class="prompt-area" id="prompt-li"></textarea>
               </div>
             </div>
@@ -352,29 +340,41 @@ input::placeholder, textarea::placeholder { color:var(--text3); }
 
         <div class="pipeline" id="pipeline">
           <div class="pipe-step" id="step-1"><div class="pipe-dot">1</div>Logo</div>
-          <div class="pipe-arrow">→</div>
+          <div class="pipe-arrow">&rarr;</div>
           <div class="pipe-step" id="step-2"><div class="pipe-dot">2</div>Upload</div>
-          <div class="pipe-arrow">→</div>
+          <div class="pipe-arrow">&rarr;</div>
           <div class="pipe-step" id="step-3"><div class="pipe-dot">3</div>FB Cover</div>
-          <div class="pipe-arrow">→</div>
+          <div class="pipe-arrow">&rarr;</div>
           <div class="pipe-step" id="step-4"><div class="pipe-dot">4</div>LI Cover</div>
-          <div class="pipe-arrow">→</div>
+          <div class="pipe-arrow">&rarr;</div>
           <div class="pipe-step" id="step-5"><div class="pipe-dot">5</div>Done</div>
         </div>
 
         <div class="assets-grid" id="assets"></div>
 
         <div class="pdf-section" id="pdf-section">
-          <button class="btn btn-export" id="pdf-btn" onclick="exportPDF()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <button class="btn btn-export" id="share-btn" onclick="shareKit()" style="background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(139,92,246,0.15));border-color:rgba(59,130,246,0.3);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Generate Client Share Link
+          </button>
+          <div class="pdf-hint">Sends your client a world-class interactive brand kit page</div>
+          <div id="share-result" style="display:none;margin-top:12px;padding:14px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:var(--rs);">
+            <div style="font-size:11px;font-weight:700;color:#6ee7b7;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">Client Link Ready</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="text" id="share-url" readonly style="flex:1;font-size:12px;background:rgba(0,0,0,0.3);border-color:rgba(16,185,129,0.2);color:#6ee7b7;cursor:pointer;" onclick="this.select()" />
+              <button class="btn-xs dl" onclick="copyShareUrl()">Copy</button>
+              <button class="btn-xs dl" onclick="openShareUrl()">Open</button>
+            </div>
+          </div>
+
+          <button class="btn btn-export" id="pdf-btn" onclick="exportPDF()" style="margin-top:10px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             Export Brand Kit PDF
           </button>
-          <div class="pdf-hint">5-page PDF — prepared by The AI Owners · cover · colors · logo · social assets · typography</div>
         </div>
 
       </div>
 
-      <!-- HISTORY TAB -->
       <div class="tab-content" id="tab-history">
         <div class="card">
           <div class="card-title" style="justify-content:space-between">
@@ -391,196 +391,196 @@ input::placeholder, textarea::placeholder { color:var(--text3); }
 
 <script>
 const $ = id => document.getElementById(id);
-const S = { logoUrl:null, logoFalUrl:null, fbUrl:null, liUrl:null, brand:{} };
+const S = { logoUrl: null, logoFalUrl: null, fbUrl: null, liUrl: null, brand: {}, jsonUrl: null };
 
 function switchTab(name) {
-  ['generate','history'].forEach(t => {
-    $('tab-'+t)?.classList.toggle('active', t===name);
-    $('nav-'+t)?.classList.toggle('active', t===name);
+  ['generate', 'history'].forEach(t => {
+    $('tab-' + t)?.classList.toggle('active', t === name);
+    $('nav-' + t)?.classList.toggle('active', t === name);
   });
-  if (name==='history') renderHistory();
+  if (name === 'history') renderHistory();
 }
 
-function syncColor(p,t){
-  const pi=$(p),ti=$(t);
-  pi.addEventListener('input',()=>ti.value=pi.value);
-  ti.addEventListener('input',()=>{if(/^#[0-9A-Fa-f]{6}$/.test(ti.value))pi.value=ti.value;});
+function syncColor(p, t) {
+  const pi = $(p), ti = $(t);
+  pi.addEventListener('input', () => ti.value = pi.value);
+  ti.addEventListener('input', () => { if (/^#[0-9A-Fa-f]{6}$/.test(ti.value)) pi.value = ti.value; });
 }
-syncColor('c1p','c1t'); syncColor('c2p','c2t');
+syncColor('c1p', 'c1t'); syncColor('c2p', 'c2t');
 
-function setStatus(m,t){const s=$('status');s.textContent=m;s.className='status '+t;}
-function setStep(n,st){const e=$('step-'+n);if(e)e.className='pipe-step '+st;}
+function setStatus(m, t) { const s = $('status'); s.textContent = m; s.className = 'status ' + t; }
+function setStep(n, st) { const e = $('step-' + n); if (e) e.className = 'pipe-step ' + st; }
 
-function getBrand(){
+function getBrand() {
   return {
-    brandName:$('brand').value.trim(), tagline:$('tagline').value.trim(),
-    niche:$('niche').value.trim(), personality:$('personality').value.trim(),
-    description:$('description').value.trim(), iconConcept:$('icon-concept').value.trim(),
-    rules:$('rules').value.trim(), c1:$('c1t').value.trim(), c2:$('c2t').value.trim()
+    brandName: $('brand').value.trim(), tagline: $('tagline').value.trim(),
+    niche: $('niche').value.trim(), personality: $('personality').value.trim(),
+    description: $('description').value.trim(), iconConcept: $('icon-concept').value.trim(),
+    rules: $('rules').value.trim(), c1: $('c1t').value.trim(), c2: $('c2t').value.trim()
   };
 }
 
-function mkCard(id,label,isBanner){
-  const ex=$('card-'+id);if(ex)ex.remove();
-  const d=document.createElement('div');
-  d.className='asset-card'+(isBanner?' banner':'');
-  d.id='card-'+id;
-  d.innerHTML=`<div class="asset-head"><span class="asset-name">${label}</span><div class="asset-actions" id="act-${id}"></div></div><div class="asset-body${id==='logo'?' square':''}" id="body-${id}"><div class="spinner"></div></div>`;
+function mkCard(id, label, isBanner) {
+  const ex = $('card-' + id); if (ex) ex.remove();
+  const d = document.createElement('div');
+  d.className = 'asset-card' + (isBanner ? ' banner' : '');
+  d.id = 'card-' + id;
+  d.innerHTML = `<div class="asset-head"><span class="asset-name">${label}</span><div class="asset-actions" id="act-${id}"></div></div><div class="asset-body${id === 'logo' ? ' square' : ''}" id="body-${id}"><div class="spinner"></div></div>`;
   $('assets').appendChild(d);
 }
 
-function setBodyImg(id,url){
-  const b=$('body-'+id);if(!b)return;
-  b.innerHTML='';const img=document.createElement('img');
-  img.src=url;img.style.maxWidth='100%';img.style.display='block';
+function setBodyImg(id, url) {
+  const b = $('body-' + id); if (!b) return;
+  b.innerHTML = '';
+  const img = document.createElement('img');
+  img.src = url; img.style.maxWidth = '100%'; img.style.display = 'block';
   b.appendChild(img);
 }
-function setSpinner(id){const b=$('body-'+id);if(b)b.innerHTML='<div class="spinner"></div>';}
-function setFail(id,m){const b=$('body-'+id);if(b)b.innerHTML=`<div class="fail-msg">${m}</div>`;}
+function setSpinner(id) { const b = $('body-' + id); if (b) b.innerHTML = '<div class="spinner"></div>'; }
+function setFail(id, m) { const b = $('body-' + id); if (b) b.innerHTML = `<div class="fail-msg">${m}</div>`; }
 
-function setActions(id,btns){
-  const el=$('act-'+id);if(!el)return;el.innerHTML='';
-  btns.forEach(({label,cls,fn})=>{
-    const b=document.createElement('button');
-    b.className='btn-xs'+(cls?' '+cls:'');b.textContent=label;b.onclick=fn;el.appendChild(b);
+function setActions(id, btns) {
+  const el = $('act-' + id); if (!el) return; el.innerHTML = '';
+  btns.forEach(({ label, cls, fn }) => {
+    const b = document.createElement('button');
+    b.className = 'btn-xs' + (cls ? ' ' + cls : ''); b.textContent = label; b.onclick = fn; el.appendChild(b);
   });
 }
 
-// Simple download — open in new tab, user saves from there
-function dlAsset(url, id){
+function dlAsset(url, id) {
   const a = document.createElement('a');
-  a.href = url;
-  a.download = id + '.png';
-  a.target = '_blank';
-  a.click();
+  a.href = url; a.download = id + '.png'; a.target = '_blank'; a.click();
 }
 
-async function post(path,body){
-  const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  const data=await r.json();
-  if(!r.ok)throw new Error(data.error||r.statusText);
+async function post(path, body) {
+  const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || r.statusText);
   return data;
 }
 
-async function writePrompts(){
-  const brand=getBrand();
-  if(!brand.brandName||!brand.niche){setStatus('Brand name and niche required.','error');return;}
-  S.brand=brand;
-  const btn=$('promptbtn');btn.disabled=true;btn.textContent='Writing...';
-  setStatus('Claude is writing 3 separate prompts...','info');
-  try{
-    const {prompts}=await post('/api/prompts',{brand});
-    $('prompt-logo').value=prompts.logo||'';
-    $('prompt-fb').value=prompts.fb||'';
-    $('prompt-li').value=prompts.li||'';
-    $('prompt-panel').className='prompt-panel visible';
-    $('genbtn').disabled=false;
-    setStatus('Prompts ready. Review and edit all three, then Generate Kit.','info');
-  }catch(e){setStatus('Error: '+e.message,'error');}
-  btn.disabled=false;btn.textContent='Re-write Prompts';
+async function writePrompts() {
+  const brand = getBrand();
+  if (!brand.brandName || !brand.niche) { setStatus('Brand name and niche required.', 'error'); return; }
+  S.brand = brand;
+  const btn = $('promptbtn'); btn.disabled = true; btn.textContent = 'Writing...';
+  setStatus('Claude is writing 3 prompts...', 'info');
+  try {
+    const { prompts } = await post('/api/prompts', { brand });
+    $('prompt-logo').value = prompts.logo || '';
+    $('prompt-fb').value = prompts.fb || '';
+    $('prompt-li').value = prompts.li || '';
+    $('prompt-panel').className = 'prompt-panel visible';
+    $('genbtn').disabled = false;
+    setStatus('Prompts ready. Review all three, then hit Generate Kit.', 'info');
+  } catch (e) { setStatus('Error: ' + e.message, 'error'); }
+  btn.disabled = false; btn.textContent = 'Re-write Prompts';
 }
 
-async function regenAsset(id){
-  const promptId={logo:'prompt-logo',fb:'prompt-fb',li:'prompt-li'}[id]||'prompt-logo';
-  const prompt=$( promptId ).value.trim();
-  if(!prompt) return;
-  setSpinner(id);setActions(id,[]);
+async function regenAsset(id) {
+  const promptId = { logo: 'prompt-logo', fb: 'prompt-fb', li: 'prompt-li' }[id] || 'prompt-logo';
+  const prompt = $(promptId).value.trim();
+  if (!prompt) return;
+  setSpinner(id); setActions(id, []);
 
-  const typeMap={logo:'logo','fb':'cover-fb','li':'cover-li'};
-  const extraPayload = id === 'li' ? { logoFalUrl:S.logoFalUrl, fbUrl:S.fbUrl } : { logoFalUrl:S.logoFalUrl };
-  try{
-    const {url,falUrl}=await post('/api/generate',{type:typeMap[id],prompt,...extraPayload});
-    if(id==='logo'){S.logoUrl=url;if(falUrl)S.logoFalUrl=falUrl;}
-    if(id==='fb')S.fbUrl=url;
-    if(id==='li')S.liUrl=url;
-    setBodyImg(id,url);
-    setActions(id,[
-      {label:'↺ Regen',fn:()=>regenAsset(id)},
-      {label:'Download',cls:'dl',fn:()=>dlAsset(url,id)}
+  const typeMap = { logo: 'logo', fb: 'cover-fb', li: 'cover-li' };
+  try {
+    const { url, falUrl } = await post('/api/generate', {
+      type: typeMap[id],
+      prompt,
+      logoFalUrl: S.logoFalUrl
+    });
+    if (id === 'logo') { S.logoUrl = url; if (falUrl) S.logoFalUrl = falUrl; }
+    if (id === 'fb') S.fbUrl = url;
+    if (id === 'li') S.liUrl = url;
+    setBodyImg(id, url);
+    setActions(id, [
+      { label: '↺ Regen', fn: () => regenAsset(id) },
+      { label: 'Download', cls: 'dl', fn: () => dlAsset(url, id) }
     ]);
-  }catch(e){
-    setFail(id,e.message);
-    setActions(id,[{label:'↺ Try again',fn:()=>regenAsset(id)}]);
+  } catch (e) {
+    setFail(id, e.message);
+    setActions(id, [{ label: '↺ Try again', fn: () => regenAsset(id) }]);
   }
 }
 
-async function generateAll(){
-  const logoPrompt=$('prompt-logo').value.trim();
-  const fbPrompt=$('prompt-fb').value.trim();
-  const liPrompt=$('prompt-li').value.trim();
-  if(!logoPrompt||!fbPrompt||!liPrompt){setStatus('All 3 prompts required. Write prompts first.','error');return;}
+async function generateAll() {
+  const logoPrompt = $('prompt-logo').value.trim();
+  const fbPrompt = $('prompt-fb').value.trim();
+  const liPrompt = $('prompt-li').value.trim();
+  if (!logoPrompt || !fbPrompt || !liPrompt) { setStatus('All 3 prompts required.', 'error'); return; }
 
-  S.brand=getBrand();S.logoUrl=null;S.logoFalUrl=null;S.fbUrl=null;S.liUrl=null;
+  S.brand = getBrand(); S.logoUrl = null; S.logoFalUrl = null; S.fbUrl = null; S.liUrl = null; S.jsonUrl = null;
 
-  const btn=$('genbtn');btn.disabled=true;btn.textContent='Generating...';
-  $('pipeline').className='pipeline visible';
-  $('pdf-section').className='pdf-section';
-  $('assets').innerHTML='';
-  [1,2,3,4,5].forEach(n=>setStep(n,''));
+  const btn = $('genbtn'); btn.disabled = true; btn.textContent = 'Generating...';
+  $('pipeline').className = 'pipeline visible';
+  $('pdf-section').className = 'pdf-section';
+  $('assets').innerHTML = '';
+  [1, 2, 3, 4, 5].forEach(n => setStep(n, ''));
 
-  mkCard('logo','Logo',false);
-  mkCard('fb','Facebook Cover',true);
-  mkCard('li','LinkedIn Cover',true);
+  mkCard('logo', 'Logo', false);
+  mkCard('fb', 'Facebook Cover', true);
+  mkCard('li', 'LinkedIn Cover', true);
 
-  // Logo
-  setStep(1,'active');
-  setStatus('Generating logo at 2K...','info');
-  try{
-    const {url,falUrl}=await post('/api/generate',{type:'logo',prompt:logoPrompt});
-    S.logoUrl=url;S.logoFalUrl=falUrl;
-    setBodyImg('logo',url);
-    setActions('logo',[
-      {label:'↺ Regen',fn:()=>regenAsset('logo')},
-      {label:'Download',cls:'dl',fn:()=>dlAsset(url,'logo')}
+  // Step 1+2: Logo + upload
+  setStep(1, 'active');
+  setStatus('Generating logo at 2K...', 'info');
+  try {
+    const { url, falUrl } = await post('/api/generate', { type: 'logo', prompt: logoPrompt });
+    S.logoUrl = url; S.logoFalUrl = falUrl;
+    setBodyImg('logo', url);
+    setActions('logo', [
+      { label: '↺ Regen', fn: () => regenAsset('logo') },
+      { label: 'Download', cls: 'dl', fn: () => dlAsset(url, 'logo') }
     ]);
-    setStep(1,'done');setStep(2,'done');
-  }catch(e){
-    setStep(1,'error');
-    ['logo','fb','li'].forEach(id=>setFail(id,'Logo failed — '+e.message));
-    setStatus('Logo failed: '+e.message,'error');
-    btn.disabled=false;btn.textContent='2. Generate Kit';return;
+    setStep(1, 'done'); setStep(2, 'done');
+  } catch (e) {
+    setStep(1, 'error');
+    ['logo', 'fb', 'li'].forEach(id => setFail(id, 'Logo failed — ' + e.message));
+    setStatus('Logo failed: ' + e.message, 'error');
+    btn.disabled = false; btn.textContent = '2. Generate Kit'; return;
   }
 
-  // FB cover
-  setStep(3,'active');
-  setStatus('Generating Facebook cover with logo reference...','info');
-  try{
-    const {url}=await post('/api/generate',{type:'cover-fb',prompt:fbPrompt,logoFalUrl:S.logoFalUrl});
-    S.fbUrl=url;setBodyImg('fb',url);
-    setActions('fb',[
-      {label:'↺ Regen',fn:()=>regenAsset('fb')},
-      {label:'Download',cls:'dl',fn:()=>dlAsset(url,'fb')}
+  // Step 3: FB cover (uses logo as reference)
+  setStep(3, 'active');
+  setStatus('Generating Facebook cover...', 'info');
+  try {
+    const { url } = await post('/api/generate', { type: 'cover-fb', prompt: fbPrompt, logoFalUrl: S.logoFalUrl });
+    S.fbUrl = url; setBodyImg('fb', url);
+    setActions('fb', [
+      { label: '↺ Regen', fn: () => regenAsset('fb') },
+      { label: 'Download', cls: 'dl', fn: () => dlAsset(url, 'fb') }
     ]);
-    setStep(3,'done');
-  }catch(e){
-    setStep(3,'error');setFail('fb',e.message);
-    setActions('fb',[{label:'↺ Try again',fn:()=>regenAsset('fb')}]);
+    setStep(3, 'done');
+  } catch (e) {
+    setStep(3, 'error'); setFail('fb', e.message);
+    setActions('fb', [{ label: '↺ Try again', fn: () => regenAsset('fb') }]);
   }
 
-  // LinkedIn cover
-  setStep(4,'active');
-  setStatus('Generating LinkedIn cover at 21:9...','info');
-  try{
-    const {url}=await post('/api/generate',{type:'cover-li',prompt:liPrompt,logoFalUrl:S.logoFalUrl,fbUrl:S.fbUrl});
-    S.liUrl=url;setBodyImg('li',url);
-    setActions('li',[
-      {label:'↺ Regen',fn:()=>regenAsset('li')},
-      {label:'Download',cls:'dl',fn:()=>dlAsset(url,'li')}
+  // Step 4: LinkedIn cover (uses logo as reference — NOT FB outpainting)
+  setStep(4, 'active');
+  setStatus('Generating LinkedIn cover...', 'info');
+  try {
+    const { url } = await post('/api/generate', { type: 'cover-li', prompt: liPrompt, logoFalUrl: S.logoFalUrl });
+    S.liUrl = url; setBodyImg('li', url);
+    setActions('li', [
+      { label: '↺ Regen', fn: () => regenAsset('li') },
+      { label: 'Download', cls: 'dl', fn: () => dlAsset(url, 'li') }
     ]);
-    setStep(4,'done');
-  }catch(e){
-    setStep(4,'error');setFail('li',e.message);
-    setActions('li',[{label:'↺ Try again',fn:()=>regenAsset('li')}]);
+    setStep(4, 'done');
+  } catch (e) {
+    setStep(4, 'error'); setFail('li', e.message);
+    setActions('li', [{ label: '↺ Try again', fn: () => regenAsset('li') }]);
   }
 
-  setStep(5,'done');
-  btn.disabled=false;btn.textContent='2. Generate Kit';
-  $('pdf-section').className='pdf-section visible';
-  saveToHistory(S.brand,S.logoUrl,S.fbUrl,S.liUrl);
-  setStatus('Brand kit ready. Download each asset or export the full PDF below.','success');
+  setStep(5, 'done');
+  btn.disabled = false; btn.textContent = '2. Generate Kit';
+  $('pdf-section').className = 'pdf-section visible';
+  saveToHistory(S.brand, S.logoUrl, S.fbUrl, S.liUrl);
+  setStatus('Brand kit ready. Download assets or share below.', 'success');
 }
 
-// Encode image as compressed JPEG base64 — keeps payload small enough for Vercel
+// Compress image for upload
 function imgToBase64(url) {
   return new Promise(resolve => {
     if (!url) return resolve(null);
@@ -595,45 +595,83 @@ function imgToBase64(url) {
         c.height = Math.round(img.naturalHeight * scale);
         c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
         resolve(c.toDataURL('image/jpeg', 0.70));
-      } catch(e) { resolve(null); }
+      } catch (_) { resolve(null); }
     };
     img.onerror = () => resolve(null);
     img.src = url;
   });
 }
 
-async function exportPDF(){
-  const btn=$('pdf-btn');
-  btn.disabled=true; btn.textContent='Preparing images...';
-  try{
+async function shareKit() {
+  const btn = $('share-btn');
+  btn.disabled = true; btn.textContent = 'Generating link...';
+  try {
     const [logoB64, fbB64, liB64] = await Promise.all([
-      imgToBase64(S.logoUrl),
-      imgToBase64(S.fbUrl),
-      imgToBase64(S.liUrl)
+      imgToBase64(S.logoUrl), imgToBase64(S.fbUrl), imgToBase64(S.liUrl)
     ]);
-
-    btn.textContent='Building PDF...';
-
-    const payload = JSON.stringify({
+    const data = await post('/api/save', {
       brand: S.brand,
       logoUrl: logoB64 || S.logoUrl,
       fbUrl: fbB64 || S.fbUrl,
       liUrl: liB64 || S.liUrl
     });
+    S.jsonUrl = data.jsonUrl;
+    const fullUrl = `${window.location.origin}/kit?jsonUrl=${encodeURIComponent(data.jsonUrl)}`;
+    $('share-url').value = fullUrl;
+    $('share-result').style.display = 'block';
+    $('share-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (e) {
+    alert('Error generating link: ' + e.message);
+  }
+  btn.disabled = false; btn.textContent = 'Generate Client Share Link';
+}
 
+async function exportPDF() {
+  const btn = $('pdf-btn');
+  btn.disabled = true;
+  let logoUrl = S.logoUrl, fbUrl = S.fbUrl, liUrl = S.liUrl;
+
+  try {
+    if (S.jsonUrl) {
+      // Already saved — use permanent Blob URLs
+      btn.textContent = 'Fetching saved assets...';
+      const kitResp = await fetch(`/api/kit?jsonUrl=${encodeURIComponent(S.jsonUrl)}`);
+      if (kitResp.ok) {
+        const kit = await kitResp.json();
+        logoUrl = kit.logoUrl || logoUrl;
+        fbUrl = kit.fbUrl || fbUrl;
+        liUrl = kit.liUrl || liUrl;
+      }
+    } else {
+      // Save first to get permanent URLs
+      btn.textContent = 'Uploading images...';
+      const [logoB64, fbB64, liB64] = await Promise.all([
+        imgToBase64(S.logoUrl), imgToBase64(S.fbUrl), imgToBase64(S.liUrl)
+      ]);
+      const saved = await post('/api/save', {
+        brand: S.brand,
+        logoUrl: logoB64 || S.logoUrl,
+        fbUrl: fbB64 || S.fbUrl,
+        liUrl: liB64 || S.liUrl
+      });
+      S.jsonUrl = saved.jsonUrl;
+      logoUrl = saved.logoUrl || logoUrl;
+      fbUrl = saved.fbUrl || fbUrl;
+      liUrl = saved.liUrl || liUrl;
+    }
+
+    btn.textContent = 'Building PDF...';
     const r = await fetch('/api/pdf', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: payload
+      body: JSON.stringify({ brand: S.brand, logoUrl, fbUrl, liUrl })
     });
 
-    // Check content type before parsing — if it's not PDF, something went wrong
     const ct = r.headers.get('content-type') || '';
     if (!r.ok || !ct.includes('pdf')) {
-      // Try to read error as text first, not JSON, to avoid parse errors
       const errText = await r.text();
       let errMsg = errText;
-      try { errMsg = JSON.parse(errText).error || errText; } catch(e) {}
+      try { errMsg = JSON.parse(errText).error || errText; } catch (_) {}
       throw new Error(errMsg.slice(0, 200));
     }
 
@@ -641,40 +679,51 @@ async function exportPDF(){
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${(S.brand.brandName||'brand').replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`;
+    a.download = `${(S.brand.brandName || 'brand').replace(/\s+/g, '-').toLowerCase()}-brand-kit.pdf`;
     a.click();
     URL.revokeObjectURL(url);
-  } catch(e) {
+  } catch (e) {
     alert('PDF error: ' + e.message);
-    console.error(e);
   }
-  btn.disabled=false; btn.textContent='Export Brand Kit PDF';
+  btn.disabled = false; btn.textContent = 'Export Brand Kit PDF';
 }
 
-function saveToHistory(brand,logoUrl,fbUrl,liUrl){
-  const h=JSON.parse(localStorage.getItem('bkg_h')||'[]');
-  h.unshift({id:Date.now(),brand:brand.brandName,tagline:brand.tagline,date:new Date().toLocaleString(),logoUrl,fbUrl,liUrl});
-  localStorage.setItem('bkg_h',JSON.stringify(h.slice(0,20)));
+function copyShareUrl() {
+  const input = $('share-url');
+  input.select();
+  navigator.clipboard.writeText(input.value).then(() => {
+    const btn = event.target;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
 }
 
-function renderHistory(){
-  const list=$('history-list');
-  const h=JSON.parse(localStorage.getItem('bkg_h')||'[]');
-  if(!h.length){list.innerHTML='<div class="history-empty">No generations yet.</div>';return;}
-  list.innerHTML='';
-  const grid=document.createElement('div');grid.className='history-grid';
-  h.forEach(item=>{
-    const c=document.createElement('div');c.className='history-card';
-    c.innerHTML=`
-      ${item.fbUrl?`<img class="history-thumb" src="${item.fbUrl}" />`:'<div class="history-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">No cover</div>'}
+function openShareUrl() { window.open($('share-url').value, '_blank'); }
+
+function saveToHistory(brand, logoUrl, fbUrl, liUrl) {
+  const h = JSON.parse(localStorage.getItem('bkg_h') || '[]');
+  h.unshift({ id: Date.now(), brand: brand.brandName, tagline: brand.tagline, date: new Date().toLocaleString(), logoUrl, fbUrl, liUrl });
+  localStorage.setItem('bkg_h', JSON.stringify(h.slice(0, 20)));
+}
+
+function renderHistory() {
+  const list = $('history-list');
+  const h = JSON.parse(localStorage.getItem('bkg_h') || '[]');
+  if (!h.length) { list.innerHTML = '<div class="history-empty">No generations yet.</div>'; return; }
+  list.innerHTML = '';
+  const grid = document.createElement('div'); grid.className = 'history-grid';
+  h.forEach(item => {
+    const c = document.createElement('div'); c.className = 'history-card';
+    c.innerHTML = `
+      ${item.fbUrl ? `<img class="history-thumb" src="${item.fbUrl}" />` : '<div class="history-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px">No cover</div>'}
       <div class="history-info">
-        <div class="history-brand">${item.brand||'—'}</div>
-        ${item.tagline?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${item.tagline}</div>`:''}
+        <div class="history-brand">${item.brand || '—'}</div>
+        ${item.tagline ? `<div style="font-size:11px;color:var(--text2);margin-top:2px">${item.tagline}</div>` : ''}
         <div class="history-date">${item.date}</div>
         <div class="history-actions">
-          ${item.logoUrl?`<button class="btn-xs dl" onclick="window.open('${item.logoUrl}','_blank')">Logo</button>`:''}
-          ${item.fbUrl?`<button class="btn-xs dl" onclick="window.open('${item.fbUrl}','_blank')">FB</button>`:''}
-          ${item.liUrl?`<button class="btn-xs dl" onclick="window.open('${item.liUrl}','_blank')">LinkedIn</button>`:''}
+          ${item.logoUrl ? `<button class="btn-xs dl" onclick="window.open('${item.logoUrl}','_blank')">Logo</button>` : ''}
+          ${item.fbUrl ? `<button class="btn-xs dl" onclick="window.open('${item.fbUrl}','_blank')">FB</button>` : ''}
+          ${item.liUrl ? `<button class="btn-xs dl" onclick="window.open('${item.liUrl}','_blank')">LinkedIn</button>` : ''}
         </div>
       </div>`;
     grid.appendChild(c);
@@ -682,7 +731,7 @@ function renderHistory(){
   list.appendChild(grid);
 }
 
-function clearHistory(){if(confirm('Clear all history?')){localStorage.removeItem('bkg_h');renderHistory();}}
+function clearHistory() { if (confirm('Clear all history?')) { localStorage.removeItem('bkg_h'); renderHistory(); } }
 </script>
 </body>
 </html>

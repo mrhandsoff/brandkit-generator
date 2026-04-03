@@ -5,7 +5,8 @@
     "api/prompts.js":  { "maxDuration": 30 },
     "api/save.js":     { "maxDuration": 60 },
     "api/kit.js":      { "maxDuration": 10 },
-    "api/pdf.js":      { "maxDuration": 60 }
+    "api/pdf.js":      { "maxDuration": 60 },
+    "api/history.js":  { "maxDuration": 15 }
   },
   "rewrites": [
     { "source": "/kit", "destination": "/kit.html" }

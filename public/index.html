@@ -347,7 +347,7 @@ input::placeholder, textarea::placeholder { color:var(--text3); }
           <div class="pipe-arrow">&rarr;</div>
           <div class="pipe-step" id="step-4"><div class="pipe-dot">4</div>LI Cover</div>
           <div class="pipe-arrow">&rarr;</div>
-          <div class="pipe-step" id="step-5"><div class="pipe-dot">5</div>Done</div>
+          <div class="pipe-step" id="step-5"><div class="pipe-dot">5</div>Save</div>
         </div>
 
         <div class="assets-grid" id="assets"></div>
@@ -573,50 +573,53 @@ async function generateAll() {
     setActions('li', [{ label: '↺ Try again', fn: () => regenAsset('li') }]);
   }
 
+  // Step 5: Auto-save to Blob so images are permanent immediately
+  setStep(5, 'active');
+  setStatus('Saving assets to permanent storage...', 'info');
+  try {
+    const saved = await post('/api/save', {
+      brand: S.brand,
+      logoUrl: S.logoUrl,
+      fbUrl: S.fbUrl,
+      liUrl: S.liUrl
+    });
+    S.jsonUrl = saved.jsonUrl;
+    // Update URLs to permanent Blob versions
+    if (saved.logoUrl) S.logoUrl = saved.logoUrl;
+    if (saved.fbUrl) S.fbUrl = saved.fbUrl;
+    if (saved.liUrl) S.liUrl = saved.liUrl;
+    // Update displayed images to use Blob URLs
+    if (saved.logoUrl) setBodyImg('logo', saved.logoUrl);
+    if (saved.fbUrl) setBodyImg('fb', saved.fbUrl);
+    if (saved.liUrl) setBodyImg('li', saved.liUrl);
+  } catch (e) {
+    console.warn('Auto-save failed:', e.message);
+    // Not fatal — user can still download from fal URLs while they're alive
+  }
+
   setStep(5, 'done');
   btn.disabled = false; btn.textContent = '2. Generate Kit';
   $('pdf-section').className = 'pdf-section visible';
   saveToHistory(S.brand, S.logoUrl, S.fbUrl, S.liUrl);
-  setStatus('Brand kit ready. Download assets or share below.', 'success');
-}
-
-// Compress image for upload
-function imgToBase64(url) {
-  return new Promise(resolve => {
-    if (!url) return resolve(null);
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      try {
-        const c = document.createElement('canvas');
-        const maxW = 800;
-        const scale = Math.min(1, maxW / img.naturalWidth);
-        c.width = Math.round(img.naturalWidth * scale);
-        c.height = Math.round(img.naturalHeight * scale);
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-        resolve(c.toDataURL('image/jpeg', 0.70));
-      } catch (_) { resolve(null); }
-    };
-    img.onerror = () => resolve(null);
-    img.src = url;
-  });
+  setStatus('Brand kit ready. Assets saved permanently.', 'success');
 }
 
 async function shareKit() {
   const btn = $('share-btn');
   btn.disabled = true; btn.textContent = 'Generating link...';
   try {
-    const [logoB64, fbB64, liB64] = await Promise.all([
-      imgToBase64(S.logoUrl), imgToBase64(S.fbUrl), imgToBase64(S.liUrl)
-    ]);
-    const data = await post('/api/save', {
-      brand: S.brand,
-      logoUrl: logoB64 || S.logoUrl,
-      fbUrl: fbB64 || S.fbUrl,
-      liUrl: liB64 || S.liUrl
-    });
-    S.jsonUrl = data.jsonUrl;
-    const fullUrl = `${window.location.origin}/kit?jsonUrl=${encodeURIComponent(data.jsonUrl)}`;
+    // If already saved during generation, just build the URL
+    if (!S.jsonUrl) {
+      // Fallback: save now if auto-save didn't happen
+      const saved = await post('/api/save', {
+        brand: S.brand,
+        logoUrl: S.logoUrl,
+        fbUrl: S.fbUrl,
+        liUrl: S.liUrl
+      });
+      S.jsonUrl = saved.jsonUrl;
+    }
+    const fullUrl = `${window.location.origin}/kit?jsonUrl=${encodeURIComponent(S.jsonUrl)}`;
     $('share-url').value = fullUrl;
     $('share-result').style.display = 'block';
     $('share-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -629,42 +632,19 @@ async function shareKit() {
 async function exportPDF() {
   const btn = $('pdf-btn');
   btn.disabled = true;
-  let logoUrl = S.logoUrl, fbUrl = S.fbUrl, liUrl = S.liUrl;
 
   try {
-    if (S.jsonUrl) {
-      // Already saved — use permanent Blob URLs
-      btn.textContent = 'Fetching saved assets...';
-      const kitResp = await fetch(`/api/kit?jsonUrl=${encodeURIComponent(S.jsonUrl)}`);
-      if (kitResp.ok) {
-        const kit = await kitResp.json();
-        logoUrl = kit.logoUrl || logoUrl;
-        fbUrl = kit.fbUrl || fbUrl;
-        liUrl = kit.liUrl || liUrl;
-      }
-    } else {
-      // Save first to get permanent URLs
-      btn.textContent = 'Uploading images...';
-      const [logoB64, fbB64, liB64] = await Promise.all([
-        imgToBase64(S.logoUrl), imgToBase64(S.fbUrl), imgToBase64(S.liUrl)
-      ]);
-      const saved = await post('/api/save', {
-        brand: S.brand,
-        logoUrl: logoB64 || S.logoUrl,
-        fbUrl: fbB64 || S.fbUrl,
-        liUrl: liB64 || S.liUrl
-      });
-      S.jsonUrl = saved.jsonUrl;
-      logoUrl = saved.logoUrl || logoUrl;
-      fbUrl = saved.fbUrl || fbUrl;
-      liUrl = saved.liUrl || liUrl;
-    }
-
+    // Images are already in Blob from auto-save — use permanent URLs directly
     btn.textContent = 'Building PDF...';
     const r = await fetch('/api/pdf', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ brand: S.brand, logoUrl, fbUrl, liUrl })
+      body: JSON.stringify({
+        brand: S.brand,
+        logoUrl: S.logoUrl,
+        fbUrl: S.fbUrl,
+        liUrl: S.liUrl
+      })
     });
 
     const ct = r.headers.get('content-type') || '';

@@ -200,30 +200,42 @@ module.exports = async (req, res) => {
     p3.drawRectangle({ x: 0, y: 0, width: 5, height: H, color: col1 });
 
     drawText(p3, '03', { x: 40, y: H - 32, font: B, size: 11, color: ink });
-    drawText(p3, 'Mark', { x: 40, y: H - 60, font: B, size: 32, color: ink });
-    drawText(p3, 'Construction', { x: 40, y: H - 95, font: B, size: 32, color: ink });
+    drawText(p3, 'Logo', { x: 40, y: H - 60, font: B, size: 32, color: ink });
+    drawText(p3, 'Usage', { x: 40, y: H - 95, font: B, size: 32, color: ink });
     p3.drawRectangle({ x: 40, y: H - 108, width: W - 80, height: 0.5, color: faint });
 
     const cardM = 40;
-    const cardW = (W - cardM * 2 - 24) / 2;
+    const cardGap = 16;
+    const cardW = (W - cardM * 2 - cardGap * 2) / 3;
     const cardH = H - 150;
     const cardY = 42;
 
     // Dark card
     p3.drawRectangle({ x: cardM, y: cardY, width: cardW, height: cardH, color: bgDark, borderRadius: 8 });
     if (logoImg) {
-      const ld = logoImg.scaleToFit(cardW - 80, cardH - 80);
+      const ld = logoImg.scaleToFit(cardW - 60, cardH - 60);
       p3.drawImage(logoImg, { x: cardM + (cardW - ld.width) / 2, y: cardY + (cardH - ld.height) / 2, width: ld.width, height: ld.height });
     }
+    drawText(p3, 'ON DARK', { x: cardM + cardW / 2 - 20, y: cardY + 12, font: B, size: 7, color: muted });
 
     // Light card
-    const c2X = cardM + cardW + 24;
+    const c2X = cardM + cardW + cardGap;
     p3.drawRectangle({ x: c2X, y: cardY, width: cardW, height: cardH, color: bgLight, borderRadius: 8 });
     p3.drawRectangle({ x: c2X, y: cardY, width: cardW, height: cardH, borderColor: faint, borderWidth: 0.5, borderRadius: 8 });
     if (logoImg) {
-      const ld = logoImg.scaleToFit(cardW - 80, cardH - 80);
+      const ld = logoImg.scaleToFit(cardW - 60, cardH - 60);
       p3.drawImage(logoImg, { x: c2X + (cardW - ld.width) / 2, y: cardY + (cardH - ld.height) / 2, width: ld.width, height: ld.height });
     }
+    drawText(p3, 'ON LIGHT', { x: c2X + cardW / 2 - 22, y: cardY + 12, font: B, size: 7, color: muted });
+
+    // Brand color card
+    const c3X = c2X + cardW + cardGap;
+    p3.drawRectangle({ x: c3X, y: cardY, width: cardW, height: cardH, color: col1, borderRadius: 8 });
+    if (logoImg) {
+      const ld = logoImg.scaleToFit(cardW - 60, cardH - 60);
+      p3.drawImage(logoImg, { x: c3X + (cardW - ld.width) / 2, y: cardY + (cardH - ld.height) / 2, width: ld.width, height: ld.height });
+    }
+    drawText(p3, 'ON BRAND', { x: c3X + cardW / 2 - 24, y: cardY + 12, font: B, size: 7, color: white });
 
     footer(p3, 3, 'Introduction');
 

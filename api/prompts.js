@@ -56,21 +56,21 @@ BACKGROUND: Solid pure white OR solid near-black (choose whichever makes the bra
 
 ---
 
-## PROMPT 2 — FACEBOOK COVER (16:9 wide banner)
+## PROMPT 2 — FACEBOOK COVER (16:9 wide banner, standalone — NO logo image provided)
 
-A premium social media banner. The logo will be provided as a reference image.
+A premium social media banner. This is generated from scratch — describe EVERYTHING including the brand name and icon.
 
 DESIGN APPROACH — think editorial, not template:
 - This should look like a header from a Y Combinator startup or a Dribbble Daily UI winner
 - Bold creative background that uses the brand's color palette in an unexpected, sophisticated way
 
 LAYOUT (single horizontal strip):
-- FAR LEFT: "The provided logo reference image, placed cleanly, occupying approximately 55-65% of the banner height"
-- LEFT-CENTRE: The tagline in a specific weight and named color, 1-2 lines maximum
+- FAR LEFT: The brand's icon mark (describe the same abstract geometric shape from the logo prompt) rendered small and clean, followed by the brand name as bold sans-serif text in white or the appropriate contrast color. The icon + name together should occupy the left 30-35% of the banner.
+- LEFT-CENTRE: The tagline in a lighter weight, smaller, more muted color — 1-2 lines max
 - FAR RIGHT: ONE call-to-action — write exact text, describe visual treatment (pill button, outlined box, or minimal underlined text)
 - CENTRE: Empty — background only
 
-BANNED: No brand name as text. No extra icons. No stacking.
+BANNED: No extra icons. No stock photo elements. No stacking elements vertically.
 
 BACKGROUND — be CREATIVE and SPECIFIC. Choose ONE:
 - Gradient mesh: describe exact color transitions, angles, and where the light falls
@@ -79,23 +79,23 @@ BACKGROUND — be CREATIVE and SPECIFIC. Choose ONE:
 - Architectural lines: clean angular lines radiating from a vanishing point, creating perspective depth
 - Organic flow: smooth flowing curves in brand colors, like liquid glass or silk
 
-Describe the EXACT background in detail — colors, angles, opacity, positioning. This is what separates a $50 Fiverr cover from a $5,000 agency cover.
+Describe the EXACT background in detail — colors, angles, opacity, positioning.
 
 ATMOSPHERE: One sentence. Make it visceral.
 
 ---
 
-## PROMPT 3 — LINKEDIN COVER (21:9 ultra-wide panoramic banner)
+## PROMPT 3 — LINKEDIN COVER (21:9 ultra-wide panoramic banner, standalone — NO logo image provided)
 
-Same quality bar as Facebook but more corporate and restrained.
+Same quality bar as Facebook but more corporate and restrained. Generated from scratch.
 
 LAYOUT:
-- FAR LEFT: Logo reference image, ~45-55% of banner height
+- FAR LEFT: Same icon mark + brand name as Facebook but slightly smaller (~25-30% of banner width)
 - LEFT-CENTRE: Tagline, smaller and more muted than FB version
 - FAR RIGHT: One professional CTA, minimal treatment
 - CENTRE: Empty
 
-BANNED: Same rules — no brand name text, no stacking, no extra elements.
+BANNED: No extra icons. No stock elements. No stacking.
 
 BACKGROUND: A COMPLETELY DIFFERENT creative concept from the Facebook cover. More restrained but equally intentional. Think: Fortune 500 annual report header. Describe specifically.
 
@@ -132,8 +132,9 @@ Hard rules: ${brand.rules || 'None'}
 
 CRITICAL REMINDERS:
 1. The logo icon must be an ABSTRACT GEOMETRIC SHAPE — like how Nike has a swoosh, not a picture of a shoe. If the concept above is too literal, ABSTRACT IT into pure geometry.
-2. In prompts 2 and 3, NEVER write "${brand.brandName}" as text. The logo reference already shows it.
-3. Cover backgrounds should be creative and specific — describe exact gradients, shapes, angles, and opacity levels. This is what makes a cover look like it cost $5,000.
+2. Covers are generated STANDALONE — no logo image is provided. Describe the icon mark and brand name AS TEXT in the cover prompts so the model renders them.
+3. The icon described in cover prompts must match the icon described in the logo prompt — same shape, same concept.
+4. Cover backgrounds should be creative and specific — describe exact gradients, shapes, angles, and opacity levels.
 
 Write all 3 prompts now. Think like Pentagram designing for a Series B startup. Return raw JSON only.`
         }]

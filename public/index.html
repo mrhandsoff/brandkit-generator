@@ -116,10 +116,10 @@ input::placeholder,textarea::placeholder{color:var(--text3)}
 </style>
 </head>
 <body>
-<div style="text-align:center;margin-bottom:32px"><img src="/logo-tao.png" style="max-width:200px;margin-bottom:16px"/><div style="font-size:12px;color:var(--text3)">Team Access</div></div>;border:1px solid var(--card-border);border-radius:var(--r);padding:24px"><label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:8px">Team Password</label><input type="password" id="pw" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()" style="font-family:var(--sans);font-size:13px;padding:12px 14px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--rs);color:var(--text);width:100%;margin-bottom:14px"/><button onclick="doLogin()" style="width:100%;padding:13px;border:none;border-radius:var(--rs);font-family:var(--sans);font-size:14px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(90deg,var(--accent),var(--accent-end))">Sign In</button><div id="pw-err" style="display:none;margin-top:12px;font-size:12px;color:var(--error);text-align:center">Incorrect password</div></div></div></div>
+<div id="gate" style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center"><div style="width:100%;max-width:380px;padding:24px"><div style="text-align:center;margin-bottom:32px"><div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent-end));display:inline-flex;align-items:center;justify-content:center;box-shadow:0 8px 32px var(--glow);margin-bottom:16px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div><div style="font-size:22px;font-weight:800">TAO</div><div style="font-size:12px;color:var(--text3);margin-top:4px">Brand Kit Generator — Team Access</div></div><div style="background:var(--card);border:1px solid var(--card-border);border-radius:var(--r);padding:24px"><label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:8px">Team Password</label><input type="password" id="pw" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()" style="font-family:var(--sans);font-size:13px;padding:12px 14px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--rs);color:var(--text);width:100%;margin-bottom:14px"/><button onclick="doLogin()" style="width:100%;padding:13px;border:none;border-radius:var(--rs);font-family:var(--sans);font-size:14px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(90deg,var(--accent),var(--accent-end))">Sign In</button><div id="pw-err" style="display:none;margin-top:12px;font-size:12px;color:var(--error);text-align:center">Incorrect password</div></div></div></div>
 
 <div class="layout" id="app" style="display:none">
-<aside class="sidebar"><div style="padding:20px 16px 16px"><img src="/logo-tao.png" style="width:100%;max-width:180px;display:block"/></div><nav class="sb-nav"><button class="sb-btn active" id="n-gen" onclick="tab('gen')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>New Brand Kit</button><button class="sb-btn" id="n-hist" onclick="tab('hist')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>My Brand Kits</button><div class="sb-spacer"></div><button class="sb-btn sb-dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Settings</button></nav></aside>
+<aside class="sidebar"><div class="sb-brand"><div class="sb-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div><div><div class="sb-title">TAO</div><div class="sb-subtitle">Brand Kit Generator</div></div></div><nav class="sb-nav"><button class="sb-btn active" id="n-gen" onclick="tab('gen')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>New Brand Kit</button><button class="sb-btn" id="n-hist" onclick="tab('hist')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>My Brand Kits</button><div class="sb-spacer"></div><button class="sb-btn sb-dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Settings</button></nav></aside>
 <main class="main"><div class="topbar"><div class="topbar-title">Dashboard</div><div style="display:flex;align-items:center;gap:12px"><span style="font-size:12px;color:var(--text3)">Gemini + Ideogram</span><button class="btn2" onclick="doLogout()" style="padding:6px 14px;font-size:11px">Sign Out</button></div></div>
 <div class="content">
 <div class="tab a" id="t-gen">
@@ -169,7 +169,7 @@ function doLogout(){localStorage.removeItem('ta');location.reload()}
 if(localStorage.getItem('ta')==='1'){E('gate').style.display='none';E('app').style.display='flex'}
 function E(id){return document.getElementById(id)}
 
-const S={logoUrl:null,logoUrlClean:null,logos:[],fbUrl:null,liUrl:null,brand:{},jsonUrl:null,fonts:null};
+const S={logoUrl:null,logos:[],fbUrl:null,liUrl:null,brand:{},jsonUrl:null,fonts:null};
 
 function tab(n){['gen','hist'].forEach(t=>{E('t-'+t)?.classList.toggle('a',t===n);E('n-'+t)?.classList.toggle('active',t===n)});if(n==='hist')renderH()}
 function sC(p,t){const a=E(p),b=E(t);a.addEventListener('input',()=>b.value=a.value);b.addEventListener('input',()=>{if(/^#[0-9A-Fa-f]{6}$/.test(b.value))a.value=b.value})}
@@ -192,23 +192,9 @@ async function rR(){const h=_h.slice(0,6);const el=E('recent');if(!h.length){el.
 async function selectLogo(idx){
   const l=S.logos[idx];if(!l||!l.url)return;
   S.logoUrl=l.url;
-  S.logoUrlClean=null; // reset - user can run Remove BG separately
-  S.jsonUrl=null; // force re-save on next share/PDF so it uses this logo
+  S.jsonUrl=null;
   document.querySelectorAll('.lo').forEach((el,i)=>el.classList.toggle('sel',i===idx));
-  ss('Logo '+l.name+' selected. Hit Share or PDF to use this one.','success');
-}
-
-async function removeBg(idx){
-  const l=S.logos[idx];if(!l||!l.url)return;
-  ss('Removing background...','info');
-  try{
-    const{url}=await post('/api/generate',{type:'remove-bg',imageUrl:l.url});
-    S.logos[idx].cleanUrl=url;
-    if(S.logoUrl===l.url)S.logoUrlClean=url;
-    S.jsonUrl=null; // force re-save so kit uses transparent logo
-    renderLogos(S.logos);
-    ss('Background removed. Hit Share or PDF to update the kit.','success');
-  }catch(e){ss('BG removal failed: '+e.message,'error')}
+  ss('Logo selected. Hit Share or PDF to use this one.','success');
 }
 
 function renderLogos(logos){
@@ -219,8 +205,7 @@ function renderLogos(logos){
     const isSel=(selIdx>=0?i===selIdx:i===0&&l.url);
     const d=document.createElement('div');
     d.className='lo'+(isSel?' sel':'');
-    const hasClean=l.cleanUrl;
-    d.innerHTML=`<div class="lo-h"><span class="lo-m">${l.name}</span><div class="lo-chk">✓</div></div><div class="lo-b">${l.url?`<img src="${l.url}"/>`:`<span style="color:var(--error);font-size:11px">${l.error||'Failed'}</span>`}</div><div class="lo-a" style="flex-wrap:wrap">${l.url?`<button class="bx" onclick="event.stopPropagation();regenLogo('${l.id}',${i})">Regen</button><button class="bx" onclick="event.stopPropagation();removeBg(${i})">Remove BG</button><button class="bx dl" onclick="event.stopPropagation();dl('${l.url}','logo-${l.id}')">Original</button>${hasClean?`<button class="bx dl" onclick="event.stopPropagation();dl('${l.cleanUrl}','logo-${l.id}-transparent')">Transparent</button>`:''}`:''}${hasClean?`<div style="font-size:9px;color:var(--success);width:100%;margin-top:4px">✓ BG removed</div>`:''}</div>`;
+    d.innerHTML=`<div class="lo-h"><span class="lo-m">${l.name}</span><div class="lo-chk">✓</div></div><div class="lo-b">${l.url?`<img src="${l.url}"/>`:`<span style="color:var(--error);font-size:11px">${l.error||'Failed'}</span>`}</div><div class="lo-a">${l.url?`<button class="bx" onclick="event.stopPropagation();regenLogo('${l.id}',${i})">Regen</button><button class="bx dl" onclick="event.stopPropagation();dl('${l.url}','logo-${l.id}')">Download</button>`:''}</div>`;
     d.onclick=()=>{if(l.url)selectLogo(i)};
     g.appendChild(d);
   });
@@ -262,7 +247,7 @@ async function writePrompts(){
 async function generateAll(){
   const lp=E('p-logo').value.trim(),fp=E('p-fb').value.trim(),lip=E('p-li').value.trim();
   if(!lp||!fp||!lip){ss('All 3 prompts required.','error');return}
-  S.brand=brand();S.logoUrl=null;S.logoUrlClean=null;S.logos=[];S.fbUrl=null;S.liUrl=null;S.jsonUrl=null;
+  S.brand=brand();S.logoUrl=null;S.logos=[];S.fbUrl=null;S.liUrl=null;S.jsonUrl=null;
   const btn=E('gbtn');btn.disabled=true;btn.textContent='Generating...';
   E('lp').className='lp';E('cp').className='cp';E('exp').className='exp';
   ss('Generating 2 logo options + 2 cover backgrounds in parallel...','info');
@@ -283,21 +268,20 @@ async function generateAll(){
   // Auto-save
   ss('Saving...','info');
   try{
-    const logoToSave=S.logoUrlClean||S.logoUrl;
-    const[lb,lbc,fb,li]=await Promise.all([b64(S.logoUrl),b64(S.logoUrlClean),b64(S.fbUrl),b64(S.liUrl)]);
-    const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||S.logoUrl,logoCleanUrl:lbc||S.logoUrlClean,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl,fonts:S.fonts});
+    const[lb,fb,li]=await Promise.all([b64(S.logoUrl),b64(S.fbUrl),b64(S.liUrl)]);
+    const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||S.logoUrl,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl,fonts:S.fonts});
     S.jsonUrl=saved.jsonUrl;if(saved.logoUrl)S.logoUrl=saved.logoUrl;if(saved.fbUrl)S.fbUrl=saved.fbUrl;if(saved.liUrl)S.liUrl=saved.liUrl;
   }catch(e){console.warn('Save:',e.message)}
 
   btn.disabled=false;btn.textContent='Generate Brand Kit';
   E('exp').className='exp v';
-  await post('/api/history',{action:'add',entry:{brand:S.brand.brandName,tagline:S.brand.tagline,c1:S.brand.c1,c2:S.brand.c2,logoUrl:S.logoUrlClean||S.logoUrl,fbUrl:S.fbUrl,liUrl:S.liUrl,jsonUrl:S.jsonUrl}}).catch(()=>{});
+  await post('/api/history',{action:'add',entry:{brand:S.brand.brandName,tagline:S.brand.tagline,c1:S.brand.c1,c2:S.brand.c2,logoUrl:S.logoUrl,fbUrl:S.fbUrl,liUrl:S.liUrl,jsonUrl:S.jsonUrl}}).catch(()=>{});
   await uS();await rR();
   ss('Brand kit ready. Pick logo, regen anything, then share.','success');
 }
 
-async function shareKit(){const btn=E('shbtn');btn.disabled=true;btn.textContent='...';try{if(!S.jsonUrl){const[lb,lbc,fb,li]=await Promise.all([b64(S.logoUrl),b64(S.logoUrlClean),b64(S.fbUrl),b64(S.liUrl)]);const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||S.logoUrl,logoCleanUrl:lbc||S.logoUrlClean,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl,fonts:S.fonts});S.jsonUrl=saved.jsonUrl}E('surl').value=`${location.origin}/kit?jsonUrl=${encodeURIComponent(S.jsonUrl)}`;E('sr').className='sr v'}catch(e){alert(e.message)}btn.disabled=false;btn.textContent='Client Share Link'}
-async function exportPDF(){const btn=E('pdfbtn');btn.disabled=true;btn.textContent='Building...';try{const logoSrc=S.logoUrlClean||S.logoUrl;const lb=await b64(logoSrc);const r=await fetch('/api/pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({brand:S.brand,logoUrl:lb||logoSrc})});if(!r.ok)throw new Error((await r.text()).slice(0,200));const blob=await r.blob();const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=`${(S.brand.brandName||'brand').replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`;a.click();URL.revokeObjectURL(u)}catch(e){alert(e.message)}btn.disabled=false;btn.textContent='Export PDF'}
+async function shareKit(){const btn=E('shbtn');btn.disabled=true;btn.textContent='...';try{if(!S.jsonUrl){const[lb,fb,li]=await Promise.all([b64(S.logoUrl),b64(S.fbUrl),b64(S.liUrl)]);const saved=await post('/api/save',{brand:S.brand,logoUrl:lb||S.logoUrl,fbUrl:fb||S.fbUrl,liUrl:li||S.liUrl,fonts:S.fonts});S.jsonUrl=saved.jsonUrl}E('surl').value=`${location.origin}/kit?jsonUrl=${encodeURIComponent(S.jsonUrl)}`;E('sr').className='sr v'}catch(e){alert(e.message)}btn.disabled=false;btn.textContent='Client Share Link'}
+async function exportPDF(){const btn=E('pdfbtn');btn.disabled=true;btn.textContent='Building...';try{const lb=await b64(S.logoUrl);const r=await fetch('/api/pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({brand:S.brand,logoUrl:lb||S.logoUrl})});if(!r.ok)throw new Error((await r.text()).slice(0,200));const blob=await r.blob();const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=`${(S.brand.brandName||'brand').replace(/\s+/g,'-').toLowerCase()}-brand-kit.pdf`;a.click();URL.revokeObjectURL(u)}catch(e){alert(e.message)}btn.disabled=false;btn.textContent='Export PDF'}
 function cpUrl(){E('surl').select();navigator.clipboard.writeText(E('surl').value).then(()=>{const b=event.target;b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',2000)})}
 async function renderH(){const l=E('hlist');await fH();if(!_h.length){l.innerHTML='<div class="he">No brand kits yet.</div>';return}let html='<div class="kg">';_h.forEach(i=>{const d=i.date?new Date(i.date).toLocaleString():'';html+=`<div class="kc"><div class="kt${i.fbUrl?' c':''}"><img src="${i.fbUrl||i.logoUrl||''}"/></div><div class="ki"><div class="kn">${i.brand||'Untitled'}</div><div class="kd">${d}</div><div class="ks">${i.c1?`<div class="ksw" style="background:${i.c1};width:40px"></div>`:''}${i.c2?`<div class="ksw" style="background:${i.c2};width:40px"></div>`:''}</div><div class="ka">${i.logoUrl?`<button class="bx dl" onclick="window.open('${i.logoUrl}','_blank')">Logo</button>`:''}${i.jsonUrl?`<button class="bx dl" onclick="window.open('/kit?jsonUrl='+encodeURIComponent('${i.jsonUrl}'),'_blank')">Kit</button>`:''}</div></div></div>`});html+='</div>';l.innerHTML=html}
 async function clearH(){if(confirm('Clear all history?')){await post('/api/history',{action:'clear'});await renderH();await uS();await rR()}}

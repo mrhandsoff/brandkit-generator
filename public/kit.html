@@ -583,11 +583,6 @@ footer {
       <h2 class="section-title">Logo Usage</h2>
     </div>
     <div class="reveal">
-      <div class="logo-toggle">
-        <button class="logo-toggle-btn active" onclick="setLogoBg('dark',this)">Dark</button>
-        <button class="logo-toggle-btn" onclick="setLogoBg('light',this)">Light</button>
-        <button class="logo-toggle-btn" onclick="setLogoBg('brand',this)">Brand</button>
-      </div>
       <div class="logo-display dark" id="logo-display">
         <img id="logo-img" src="" alt="Logo" />
       </div>
@@ -726,13 +721,6 @@ function downloadAll() {
     showToast('Downloading all assets...');
   }
 }
-
-function setLogoBg(bg, btn) {
-  document.getElementById('logo-display').className = 'logo-display ' + bg;
-  document.querySelectorAll('.logo-toggle-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
 function buildColorCard(hex, label, delay) {
   const rgb = hexToRgb(hex);
   const cmyk = toCmyk(rgb.r, rgb.g, rgb.b);
@@ -818,10 +806,7 @@ async function loadKit() {
     document.getElementById('colors-grid').innerHTML =
       buildColorCard(c1, 'Primary', false) + buildColorCard(c2, 'Secondary', true);
 
-    ['logo-img', 'logo-mini-dark', 'logo-mini-light'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el && logoUrl) el.src = logoUrl;
-    });
+    document.getElementById('logo-img').src = logoUrl || '';
 
     document.getElementById('social-assets').innerHTML =
       buildSocialAsset(fbUrl, 'Facebook Cover', '820 × 312', 'Facebook', '#1877F2', false) +
